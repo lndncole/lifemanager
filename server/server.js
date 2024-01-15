@@ -1,10 +1,15 @@
 require('dotenv').config();
+
+const authRoutes = require('./routes/authRoutes');
+
 const express = require('express');
-const { Pool } = require('pg');
 const bodyParser = require('body-parser');
+const { Pool } = require('pg');
+
 const app = express();
 
 app.use(bodyParser.json());
+app.use(authRoutes);
 
 
 const port = process.env.PORT || 3000;
