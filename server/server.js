@@ -5,6 +5,7 @@ const pool = require('../db/db.js');
 
 const express = require('express');
 const bodyParser = require('body-parser');
+const { Pool } = require('pg');
 
 const app = express();
 
@@ -19,13 +20,13 @@ app.listen(port, () => {
 });
 
 app.get('/', (req, res) => {
-    res.send('Hello World!');
+res.send('Hello World!');
 });
 
   
 const query = (text, params, callback) => {
     return pool.query(text, params, callback);
-};  
+};
 
 app.get('/testdb', async (req, res) => {
     try {
