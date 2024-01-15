@@ -1,3 +1,5 @@
 node_modules/
-.env
 documentation/
+npm-debug.log
+.DS_Store
+/*.env
