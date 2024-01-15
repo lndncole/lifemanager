@@ -15,6 +15,11 @@ app.use(bodyParser.json());
 
 const port = process.env.PORT || 3000;
 
+//Add this in for Heroku specifically because Heroku listens on port 8000
+if (port == null || port == "") {
+    port = 8000;
+}
+
 app.listen(port, () => {
  console.log(`Server running on port ${port}`);
 });
