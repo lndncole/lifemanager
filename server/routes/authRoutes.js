@@ -17,8 +17,8 @@ router.get('/home', (req, res) => {
 });
 
 // Home Route - After Successful Sign In
-router.get('/jon', (req, res) => {
-  res.send('Chick Fil A tomorrow?');
+router.get('/chick', (req, res) => {
+  res.send('Chick Fil A breakfast tomorrow?');
 });
 
 module.exports = router;
