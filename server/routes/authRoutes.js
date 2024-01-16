@@ -22,13 +22,13 @@ For any questions or concerns regarding our Privacy Policy or practices, users c
 
 const termsOfSericeVerbiage = `Terms of Service
 Introduction
-Welcome to [Your Website Name]. By accessing our website, you agree to these Terms of Service. These terms govern your use of our website and services.
+Welcome to lifeManager. By accessing our website, you agree to these Terms of Service. These terms govern your use of our website and services.
 
 Use of Service
 Our service includes [brief description of services]. Users are expected to use our services responsibly and must not use them for any unlawful activities.
 
 Intellectual Property Rights
-All content on this website, including text, graphics, logos, and software, is the property of [Your Website Name] or its content suppliers and protected by intellectual property laws. Users may not use any content without permission.
+All content on this website, including text, graphics, logos, and software, is the property of lifeManager or its content suppliers and protected by intellectual property laws. Users may not use any content without permission.
 
 Account Information
 Users may be required to create an account and are responsible for maintaining the confidentiality of their account information. The user is responsible for all activities that occur under their account.
@@ -37,19 +37,16 @@ Termination of Use
 We reserve the right to terminate or suspend access to our service immediately, without prior notice, for any breach of these Terms.
 
 Disclaimer of Warranties and Liability
-The service is provided on an "as is" and "as available" basis. [Your Website Name] makes no warranties, expressed or implied. We do not warrant that the service will be uninterrupted or error-free.
+The service is provided on an "as is" and "as available" basis. lifeManager makes no warranties, expressed or implied. We do not warrant that the service will be uninterrupted or error-free.
 
 Indemnification
-Users agree to indemnify and hold harmless [Your Website Name] from any claims, damages, or expenses arising from their use of the site.
+Users agree to indemnify and hold harmless lifeManager from any claims, damages, or expenses arising from their use of the site.
 
 Amendment of Terms
 We reserve the right to amend these terms at any time. Continued use of the website after such changes will constitute acknowledgment and agreement of the modified terms.
 
-Governing Law and Jurisdiction
-These terms shall be governed by [Applicable Law]. Disputes arising will be subject to the exclusive jurisdiction of the courts of [Jurisdiction].
-
 Contact Information
-For any questions regarding these Terms of Service, please contact us at [Contact Information].`
+For any questions regarding these Terms of Service, please contact us at landon.metcalfweb@gmail.com.`
 
 // Sign Up Route
 router.get('/signup', (req, res) => {
