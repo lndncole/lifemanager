@@ -3,3 +3,5 @@ documentation/
 npm-debug.log
 .DS_Store
 /*.env
+token.json
+credentials.json

@@ -93,6 +93,4 @@ async function listEvents(auth) {
   return eventsList;
 }
 
-const hello = "hello";
-
 module.exports = {authorize, listEvents}
