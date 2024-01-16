@@ -80,17 +80,16 @@ async function listEvents(auth) {
   });
   const events = res.data.items;
   if (!events || events.length === 0) {
-    console.log('No upcoming events found.');    
-    return 'No upcoming events found.';
+    console.log('No upcoming events found.');
+    return;
   }
   console.log('Upcoming 10 events:');
-  let eventsList = [];
   events.map((event, i) => {
     const start = event.start.dateTime || event.start.date;
     console.log(`${start} - ${event.summary}`);
-    eventsList.push(`${start} - ${event.summary}`);
   });
-  return eventsList;
 }
 
-module.exports = {authorize, listEvents}
+// authorize().then(listEvents).catch(console.error);
+
+module.exports = {authorize, listEvents};

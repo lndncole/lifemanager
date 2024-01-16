@@ -80,6 +80,7 @@ router.get('/calendar', async (req, res) => {
   try {
     const authClient = await api.authorize();
     const events = await api.listEvents(authClient);
+    console.log(events);
     res.json(events);
   } catch (error) {
     console.error('Error during calendar API call:', error);
