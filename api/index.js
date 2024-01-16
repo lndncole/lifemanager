@@ -9,9 +9,19 @@ const SCOPES = ['https://www.googleapis.com/auth/calendar.readonly'];
 // The file token.json stores the user's access and refresh tokens, and is
 // created automatically when the authorization flow completes for the first
 // time.
-const TOKEN_PATH = path.join(process.cwd(), 'token.json');
-const CREDENTIALS_PATH = path.join(process.cwd(), 'credentials.json');
 
+let TOKEN_PATH;
+let CREDENTIALS_PATH;
+
+// Check if running in a development environment
+if (process.env.DEVELOPMENT === 'true') {
+  TOKEN_PATH = path.join(process.cwd(), 'token.json');
+  CREDENTIALS_PATH = path.join(process.cwd(), 'credentials.json');
+} else {
+  // In production, set the values directly from environment variables
+  TOKEN_PATH = process.env.TOKEN_DATA;
+  CREDENTIALS_PATH = process.env.CREDENTIALS_DATA;
+}
 /**
  * Reads previously authorized credentials from the save file.
  *
@@ -56,10 +66,18 @@ async function authorize() {
   if (client) {
     return client;
   }
-  client = await authenticate({
-    scopes: SCOPES,
-    keyfilePath: CREDENTIALS_PATH,
-  });
+  if (process.env.DEVELOPMENT === 'true') {
+    client = await authenticate({
+      scopes: SCOPES,
+      keyfilePath: CREDENTIALS_PATH
+    });
+  } else {
+    client = await authenticate({
+      scopes: SCOPES,
+      credentials: JSON.parse(process.env.CREDENTIALS_DATA)
+    });
+  }
+  
   if (client.credentials) {
     await saveCredentials(client);
   }
