@@ -81,7 +81,7 @@ async function listEvents(auth) {
   const events = res.data.items;
   if (!events || events.length === 0) {
     console.log('No upcoming events found.');    
-    return;
+    return 'No upcoming events found.';
   }
   console.log('Upcoming 10 events:');
   let eventsList = [];
@@ -92,5 +92,7 @@ async function listEvents(auth) {
   });
   return eventsList;
 }
+
+const hello = "hello";
 
 module.exports = {authorize, listEvents}

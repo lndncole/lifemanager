@@ -76,8 +76,16 @@ router.get('/authorize', (req, res) => {
   res.send(res);
 });
 
-router.get('/calendar', (req, res) => {
-  res.send(api.authorize().then(api.listEvents).catch(console.error));
+router.get('/calendar', async (req, res) => {
+  try {
+    const authClient = await api.authorize();
+    const events = await api.listEvents(authClient);
+    res.json(events);
+  } catch (error) {
+    console.error('Error during calendar API call:', error);
+    res.status(500).send('Error retrieving calendar data');
+  }
 });
+
 
 module.exports = router;
