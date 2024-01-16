@@ -62,6 +62,8 @@ async function saveCredentials(client) {
  *
  */
 async function authorize() {
+  console.log("credentials path:", process.env.CREDENTIALS_PATH);
+
   let client = await loadSavedCredentialsIfExist();
   if (client) {
     return client;
