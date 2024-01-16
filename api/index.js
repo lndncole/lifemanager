@@ -23,6 +23,7 @@ async function loadSavedCredentialsIfExist() {
     const credentials = JSON.parse(content);
     return google.auth.fromJSON(credentials);
   } catch (err) {
+    console.log(err);
     return null;
   }
 }
@@ -74,22 +75,23 @@ async function listEvents(auth) {
   const res = await calendar.events.list({
     calendarId: 'primary',
     timeMin: new Date().toISOString(),
-    maxResults: 10,
+    maxResults: 20,
     singleEvents: true,
     orderBy: 'startTime',
   });
   const events = res.data.items;
   if (!events || events.length === 0) {
     console.log('No upcoming events found.');
-    return;
+    return [];
   }
-  console.log('Upcoming 10 events:');
+  console.log('Upcoming 20 events:');
+  let eventList = [];
   events.map((event, i) => {
     const start = event.start.dateTime || event.start.date;
     console.log(`${start} - ${event.summary}`);
+    eventList.push(`${start} - ${event.summary}`);
   });
+  return eventList;
 }
-
-// authorize().then(listEvents).catch(console.error);
 
 module.exports = {authorize, listEvents};

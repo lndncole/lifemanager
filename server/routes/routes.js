@@ -80,8 +80,12 @@ router.get('/calendar', async (req, res) => {
   try {
     const authClient = await api.authorize();
     const events = await api.listEvents(authClient);
-    console.log(events);
-    res.json(events);
+    console.log("events", events);
+    if(events.length) {
+      res.json(events);
+    } else {
+      res.send("No events currently listed in this calendar.");
+    }
   } catch (error) {
     console.error('Error during calendar API call:', error);
     res.status(500).send('Error retrieving calendar data');
