@@ -63,20 +63,16 @@ router.get('/home', (req, res) => {
   res.send('Welcome to the Home Page');
 });
 
-router.get('/chick', (req, res) => {
-  res.send('Chick Fil A breakfast tomorrow?');
-});
-
-router.get('/ana', (req, res) => {
-  res.send(res);
-});
-
 router.get('/privacy-policy', (req, res) => {
   res.send(privacyPolicyVerbiage);
 });
 
 router.get('/terms-of-service', (req, res) => {
   res.send(termsOfSericeVerbiage);
+});
+
+router.get('/authorize', (req, res) => {
+  res.send(res);
 });
 
 module.exports = router;
