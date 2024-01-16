@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const api = require('../../api/index.js');
 
 const privacyPolicyVerbiage = `Privacy Policy 
 Introduction
@@ -73,6 +74,10 @@ router.get('/terms-of-service', (req, res) => {
 
 router.get('/authorize', (req, res) => {
   res.send(res);
+});
+
+router.get('/calendar', (req, res) => {
+  res.send(api.authorize().then(api.listEvents).catch(console.error));
 });
 
 module.exports = router;

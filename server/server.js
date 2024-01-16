@@ -1,6 +1,6 @@
 require('dotenv').config();
 
-const authRoutes = require('./routes/authRoutes');
+const routes = require('./routes/routes.js');
 const pool = require('../db/db.js');
 
 const express = require('express');
@@ -9,7 +9,7 @@ const { Pool } = require('pg');
 
 const app = express();
 
-app.use(authRoutes);
+app.use(routes);
 app.use(bodyParser.json());
 
 
@@ -25,7 +25,7 @@ app.listen(port, () => {
 });
 
 app.get('/', (req, res) => {
-res.send('Hello World!');
+    res.send('Hello World!');
 });
 
   
