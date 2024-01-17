@@ -20,7 +20,7 @@ if (process.env.DEVELOPMENT === 'true') {
 } else {
   // In production, set the values directly from environment variables
   TOKEN_PATH = process.env.TOKEN_DATA;
-  CREDENTIALS_PATH = process.env.CREDENTIALS_DATA;
+  CREDENTIALS_PATH = process.env.GOOGLE_APPLICATION_CREDENTIALS;
 }
 /**
  * Reads previously authorized credentials from the save file.
@@ -68,20 +68,17 @@ async function authorize() {
   if (client) {
     return client;
   }
-  if (process.env.DEVELOPMENT === 'true') {
-    client = await authenticate({
-      scopes: SCOPES,
-      keyfilePath: CREDENTIALS_PATH
-    });
-  } else {
-    client = await authenticate({
-      scopes: SCOPES,
-      credentials: JSON.stringify(process.env.CREDENTIALS_PATH)
-    });
-  }
+
+  client = await authenticate({
+    scopes: SCOPES,
+    keyfilePath: CREDENTIALS_PATH
+  });
+
   
   if (client.credentials) {
     await saveCredentials(client);
+  } else {
+    console.log("Client credentials error: ", client);
   }
   return client;
 }
