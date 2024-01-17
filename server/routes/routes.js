@@ -72,7 +72,7 @@ router.get('/terms-of-service', (req, res) => {
   res.send(termsOfSericeVerbiage);
 });
 
-router.get('/authorize', (req, res) => {
+router.get('/oauth2callback', (req, res) => {
   res.send(res);
 });
 

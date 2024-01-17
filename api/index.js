@@ -63,6 +63,32 @@ async function saveCredentials(client) {
  *
  */
 async function authorize() {
+
+
+  const oauth2Client = new google.auth.OAuth2(
+    process.env.CLIENT_ID,
+    process.env.CLIENT_SECRET,
+    "http://localhost:3000/oauth2callback"
+  );
+  
+  const scopes_test = [
+    'https://www.googleapis.com/auth/calendar'
+  ];
+  
+
+
+  const urlTest = oauth2Client.generateAuthUrl({
+    // 'online' (default) or 'offline' (gets refresh_token)
+    access_type: 'offline',
+  
+    // If you only need one scope you can pass it as a string
+    scope: scopes_test
+  });
+
+  console.log(urlTest);
+
+  return;
+
   console.log("Using environment variables for credentials");
 
   let client = await loadSavedCredentialsIfExist();
