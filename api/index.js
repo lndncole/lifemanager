@@ -10,17 +10,19 @@ const SCOPES = ['https://www.googleapis.com/auth/calendar.readonly'];
 // created automatically when the authorization flow completes for the first
 // time.
 // const TOKEN_PATH = path.join(process.cwd(), 'token.json');
-const CREDENTIALS_PATH = path.join(process.cwd(), 'credentials.json');
+const CREDENTIALS_PATH = process.env.NODE_ENV ? process.env.GOOGLE_CREDENTIALS : path.join(process.cwd(), 'credentials.json');
 
 /**
  * Load or request or authorization to call APIs.
  *
  */
 async function authorize() {
+  console.log("credentials path: ", CREDENTIALS_PATH);
   client = await authenticate({
     scopes: SCOPES,
     keyfilePath: CREDENTIALS_PATH,
   });
+  console.log("client: ", client);
   return client;
 }
 
@@ -47,5 +49,5 @@ async function listEvents(auth) {
     const start = event.start.dateTime || event.start.date;
     console.log(`${start} - ${event.summary}`);
   });
-  
+
 }module.exports = {authorize, listEvents};
