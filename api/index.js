@@ -127,8 +127,6 @@ async function listEvents(auth) {
   return eventList;
 }
 
-}
-
 
 async function getCalendar(auth) {
   try {
