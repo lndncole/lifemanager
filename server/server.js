@@ -13,7 +13,7 @@ app.use(routes);
 app.use(bodyParser.json());
 
 
-const port = process.env.PORT || 3001;
+const port = process.env.PORT || 3002;
 
 //Add this in for Heroku specifically because Heroku listens on port 8000
 if (port == null || port == "") {

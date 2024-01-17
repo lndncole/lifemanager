@@ -9,117 +9,19 @@ const SCOPES = ['https://www.googleapis.com/auth/calendar.readonly'];
 // The file token.json stores the user's access and refresh tokens, and is
 // created automatically when the authorization flow completes for the first
 // time.
-
-let TOKEN_PATH;
-let CREDENTIALS_PATH;
-let environment = process.env.NODE_ENV || 'development';
-
-// Check if running in a development environment
-if (environment === 'development') {
-  TOKEN_PATH = path.join(process.cwd(), 'token.json');
-  CREDENTIALS_PATH = path.join(process.cwd(), 'credentials.json');
-} else {
-  // In production, set the values directly from environment variables
-  TOKEN_PATH = process.env.TOKEN_DATA;
-  CREDENTIALS_PATH = process.env.GOOGLE_APPLICATION_CREDENTIALS;
-}
-/**
- * Reads previously authorized credentials from the save file.
- *
- * @return {Promise<OAuth2Client|null>}
- */
-async function loadSavedCredentialsIfExist() {
-  try {
-    const content = await fs.readFile(TOKEN_PATH);
-    const credentials = JSON.parse(content);
-    return google.auth.fromJSON(credentials);
-  } catch (err) {
-    console.log(err);
-    return null;
-  }
-}
-
-/**
- * Serializes credentials to a file compatible with GoogleAUth.fromJSON.
- *
- * @param {OAuth2Client} client
- * @return {Promise<void>}
- */
-async function saveCredentials(client) {
-  const content = await fs.readFile(CREDENTIALS_PATH);
-  const keys = JSON.parse(content);
-  const key = keys.installed || keys.web;
-  const payload = JSON.stringify({
-    type: 'authorized_user',
-    client_id: key.client_id,
-    client_secret: key.client_secret,
-    refresh_token: client.credentials.refresh_token,
-  });
-  await fs.writeFile(TOKEN_PATH, payload);
-}
+// const TOKEN_PATH = path.join(process.cwd(), 'token.json');
+const CREDENTIALS_PATH = path.join(process.cwd(), 'credentials.json');
 
 /**
  * Load or request or authorization to call APIs.
  *
  */
 async function authorize() {
-
-
-  const oauth2Client = new google.auth.OAuth2(
-    process.env.CLIENT_ID,
-    process.env.CLIENT_SECRET,
-    "http://localhost:3000/oauth2callback"
-  );
-  
-  const scopes_test = [
-    'https://www.googleapis.com/auth/calendar'
-  ];
-  
-
-
-  const urlTest = oauth2Client.generateAuthUrl({
-    // 'online' (default) or 'offline' (gets refresh_token)
-    access_type: 'offline',
-  
-    // If you only need one scope you can pass it as a string
-    scope: scopes_test
+  client = await authenticate({
+    scopes: SCOPES,
+    keyfilePath: CREDENTIALS_PATH,
   });
-
-  console.log(urlTest);
-
-  return;
-
-  console.log("Using environment variables for credentials");
-
-  let client = await loadSavedCredentialsIfExist();
-  if (client) {
-    return client;
-  }
-
-  const keysEnvVar = process.env['GOOGLE_CREDENTIALS'];
-  console.log("keysEnvVar: ", keysEnvVar);
-  if (!keysEnvVar) {
-    throw new Error('The GOOGLE_CREDENTIALS environment variable was not found!');
-  }
-  const keys = JSON.parse(keysEnvVar);
-  console.log("parsedKeys: ", keys);
-
-  client = google.auth.fromJSON(keys);
-  client.scopes = SCOPES;
-  const url = `https://dns.googleapis.com/dns/v1/projects/${keys.project_id}`;
-  const res = await client.request({url});
- 
-
-  if (res) {
-    if(environment == 'development') {
-      await saveCredentials(client);
-    } else {
-      console.log(res.data);
-    }
-  } else {
-    console.log("Client credentials error: ", client);
-  }
-  return res;
+  return client;
 }
 
 /**
@@ -131,23 +33,19 @@ async function listEvents(auth) {
   const res = await calendar.events.list({
     calendarId: 'primary',
     timeMin: new Date().toISOString(),
-    maxResults: 20,
+    maxResults: 10,
     singleEvents: true,
     orderBy: 'startTime',
   });
   const events = res.data.items;
   if (!events || events.length === 0) {
     console.log('No upcoming events found.');
-    return [];
+    return;
   }
-  console.log('Upcoming 20 events:');
-  let eventList = [];
+  console.log('Upcoming 10 events:');
   events.map((event, i) => {
     const start = event.start.dateTime || event.start.date;
     console.log(`${start} - ${event.summary}`);
-    eventList.push(`${start} - ${event.summary}`);
   });
-  return eventList;
-}
-
-module.exports = {authorize, listEvents};
+  
+}module.exports = {authorize, listEvents};
