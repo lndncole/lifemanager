@@ -125,6 +125,7 @@ async function listEvents(auth) {
   });
 
   return eventList;
+}
 
 }
 
