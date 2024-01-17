@@ -81,14 +81,18 @@ async function authorize() {
   client.scopes = SCOPES;
   const url = `https://dns.googleapis.com/dns/v1/projects/${keys.project_id}`;
   const res = await client.request({url});
-  console.log(res.data);
+ 
 
-  if (client.credentials) {
-    await saveCredentials(client);
+  if (res) {
+    if(environment == 'development') {
+      await saveCredentials(client);
+    } else {
+      console.log(res.data);
+    }
   } else {
     console.log("Client credentials error: ", client);
   }
-  return client;
+  return res;
 }
 
 /**
