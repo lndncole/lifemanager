@@ -37,13 +37,17 @@ async function authorize() {
   const scopesTest = [
     'https://www.googleapis.com/auth/contacts.readonly',
     'https://www.googleapis.com/auth/user.emails.read',
+    'https://www.googleapis.com/auth/calendar.readonly',
     'profile',
   ];
 
 
-  authenticate(scopesTest, oauth2Client)
-  .then(client => runSample(client))
-  .catch(console.error);
+  // authenticate(scopesTest, oauth2Client)
+  // .then(client => runSample(client))
+  // .catch(console.error);
+
+
+  getCalendar(await authenticate(['https://www.googleapis.com/auth/calendar.readonly'], oauth2Client));
 
 }
 
@@ -95,6 +99,10 @@ async function runSample() {
  */
 async function listEvents(auth) {
   const calendar = google.calendar({version: 'v3', auth});
+
+  console.log("calendar: ", calendar);
+
+  return calendar;
   const res = await calendar.events.list({
     calendarId: 'primary',
     timeMin: new Date().toISOString(),
@@ -118,4 +126,41 @@ async function listEvents(auth) {
 
   return eventList;
 
-}module.exports = {authorize, listEvents};
+}
+
+
+async function getCalendar(auth) {
+  try {
+    const calendar = google.calendar({ version: 'v3', auth });
+    const res = await calendar.events.list({
+      calendarId: 'primary',
+      timeMax: new Date().toISOString(),
+      maxResults: 10,
+      singleEvents: true,
+      orderBy: 'startTime',
+    });
+
+    const events = res.data.items;
+    if (!events || events.length === 0) {
+      console.log('No upcoming events found.');
+      return [];
+    }
+
+    console.log('Last 10 events:');
+    events.forEach((event, i) => {
+      const start = event.start.dateTime || event.start.date;
+      console.log(`${start} - ${event.summary}`);
+    });
+
+    return events;
+  } catch (error) {
+    console.error('Error retrieving calendar events:', error);
+    throw error;
+  }
+}
+
+
+
+
+
+module.exports = {authorize, listEvents};
