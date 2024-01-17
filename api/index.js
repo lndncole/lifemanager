@@ -42,12 +42,12 @@ async function authorize() {
   ];
 
 
-  // authenticate(scopesTest, oauth2Client)
-  // .then(client => runSample(client))
-  // .catch(console.error); 
+  authenticate(scopesTest, oauth2Client)
+  .then(client => runSample(client))
+  .catch(console.error); 
 
 
-  getCalendar(await authenticate(['https://www.googleapis.com/auth/calendar.readonly'], oauth2Client));
+  // getCalendar(await authenticate(['https://www.googleapis.com/auth/calendar.readonly'], oauth2Client));
 
 }
 
