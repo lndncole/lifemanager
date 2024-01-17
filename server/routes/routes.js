@@ -73,8 +73,8 @@ router.get('/terms-of-service', (req, res) => {
 });
 
 router.get('/oauth2callback', (req, res) => {
-  console.log(res);
-  res.send(res);
+  console.log("oauth2callback", res);
+  // res.send(res);
 });
 
 router.get('/calendar', async (req, res) => {

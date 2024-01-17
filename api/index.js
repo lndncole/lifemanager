@@ -56,5 +56,6 @@ async function listEvents(auth) {
   });
 
   return eventList;
+}
 
-}module.exports = {authorize, listEvents};
+module.exports = {authorize, listEvents};
