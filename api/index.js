@@ -63,19 +63,27 @@ async function saveCredentials(client) {
  *
  */
 async function authorize() {
-  console.log("credentials path:", CREDENTIALS_PATH);
+  console.log("Using environment variables for credentials");
 
   let client = await loadSavedCredentialsIfExist();
   if (client) {
     return client;
   }
 
-  client = await authenticate({
-    scopes: SCOPES,
-    keyfilePath: CREDENTIALS_PATH
-  });
+  // load the environment variable with our keys
+  const keysEnvVar = process.env['GOOGLE_CREDENTIALS'];
+  if (!keysEnvVar) {
+    throw new Error('The GOOGLE_CREDENTIALS environment variable was not found!');
+  }
+  const keys = JSON.parse(keysEnvVar);
 
-  
+  // load the JWT or UserRefreshClient from the keys
+  client = auth.fromJSON(keys);
+  client.scopes = SCOPES;
+
+  // No need for keyfilePath as we are using environment variables
+  await authenticate(client);
+
   if (client.credentials) {
     await saveCredentials(client);
   } else {
