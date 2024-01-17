@@ -75,6 +75,7 @@ async function authenticate(scopes, oauth2Client) {
         }
       })
       .listen(3000, () => {
+        console.log("listening on port 3000");
         // open the browser to the authorize url to start the workflow
         opn(authorizeUrl, {wait: false}).then(cp => cp.unref());
       });
