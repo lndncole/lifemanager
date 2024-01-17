@@ -76,7 +76,7 @@ async function authorize() {
   } else {
     client = await authenticate({
       scopes: SCOPES,
-      credentials: JSON.parse(process.env.CREDENTIALS_PATH)
+      credentials: JSON.stringify(process.env.CREDENTIALS_PATH)
     });
   }
   
