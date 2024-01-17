@@ -77,12 +77,11 @@ async function authorize() {
   }
   const keys = JSON.parse(keysEnvVar);
 
-  // load the JWT or UserRefreshClient from the keys
-  client = auth.fromJSON(keys);
+  client = authorize.fromJSON(keys);
   client.scopes = SCOPES;
-
-  // No need for keyfilePath as we are using environment variables
-  await authenticate(client);
+  const url = `https://dns.googleapis.com/dns/v1/projects/${keys.project_id}`;
+  const res = await client.request({url});
+  console.log(res.data);
 
   if (client.credentials) {
     await saveCredentials(client);
