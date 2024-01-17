@@ -83,7 +83,7 @@ router.get('/calendar', async (req, res) => {
     const events = await api.listEvents(authClient);
     console.log("events", events);
     if(events && events.length) {
-      res.json(events);
+      res.send(events);
     } else {
       res.send("No events currently listed in this calendar.");
     }

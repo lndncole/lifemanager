@@ -35,19 +35,24 @@ async function listEvents(auth) {
   const res = await calendar.events.list({
     calendarId: 'primary',
     timeMin: new Date().toISOString(),
-    maxResults: 10,
+    maxResults: 20,
     singleEvents: true,
     orderBy: 'startTime',
   });
+  let eventList = [];
+
   const events = res.data.items;
   if (!events || events.length === 0) {
     console.log('No upcoming events found.');
-    return;
+    return eventList;
   }
   console.log('Upcoming 10 events:');
   events.map((event, i) => {
     const start = event.start.dateTime || event.start.date;
     console.log(`${start} - ${event.summary}`);
+    eventList.push(`${start} - ${event.summary}`);
   });
+
+  return eventList;
 
 }module.exports = {authorize, listEvents};
