@@ -70,14 +70,15 @@ async function authorize() {
     return client;
   }
 
-  // load the environment variable with our keys
   const keysEnvVar = process.env['GOOGLE_CREDENTIALS'];
+  console.log("keysEnvVar: ", keysEnvVar);
   if (!keysEnvVar) {
     throw new Error('The GOOGLE_CREDENTIALS environment variable was not found!');
   }
   const keys = JSON.parse(keysEnvVar);
+  console.log("parsedKeys: ", keys);
 
-  client = authorize.fromJSON(keys);
+  client = google.auth.fromJSON(keys);
   client.scopes = SCOPES;
   const url = `https://dns.googleapis.com/dns/v1/projects/${keys.project_id}`;
   const res = await client.request({url});
