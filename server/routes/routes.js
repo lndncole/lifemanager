@@ -73,6 +73,7 @@ router.get('/terms-of-service', (req, res) => {
 });
 
 router.get('/oauth2callback', (req, res) => {
+  console.log(res);
   res.send(res);
 });
 
