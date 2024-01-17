@@ -19,7 +19,7 @@ const CREDENTIALS_PATH = process.env.NODE_ENV ? process.env.GOOGLE_APPLICATION_C
 async function authorize() {
   const content = await fs.readFile(CREDENTIALS_PATH);
   console.log("credentials path: ", CREDENTIALS_PATH);
-  console.log("content: ", content);
+  console.log("content: ", JSON.parse(content));
   client = await authenticate({
     scopes: SCOPES,
     keyfilePath: CREDENTIALS_PATH,
