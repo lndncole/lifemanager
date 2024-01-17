@@ -73,20 +73,22 @@ router.get('/terms-of-service', (req, res) => {
 });
 
 router.get('/oauth2callback', (req, res) => {
-  console.log(res);
+  console.log("RESPONSE: ", res);
   res.send(res);
 });
 
 router.get('/calendar', async (req, res) => {
   try {
     const authClient = await api.authorize();
-    const events = await api.listEvents(authClient);
-    console.log("events", events);
-    if(events && events.length) {
-      res.send(events);
-    } else {
-      res.send("No events currently listed in this calendar.");
-    }
+    res.send(authClient);
+    // console.log(authClient);
+    // const events = await api.listEvents(authClient);
+    // console.log("events", events);
+    // if(events && events.length) {
+    //   res.send(events);
+    // } else {
+    //   res.send("No events currently listed in this calendar.");
+    // }
   } catch (error) {
     console.error('Error during calendar API call:', error);
     res.status(500).send('Error retrieving calendar data');

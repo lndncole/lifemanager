@@ -1,14 +1,17 @@
 const fs = require('fs').promises;
 const path = require('path');
+const http = require('http');
+const url = require('url');
+const opn = require('open');
+const destroyer = require('server-destroy');
 const process = require('process');
 const {authenticate} = require('@google-cloud/local-auth');
 const {google} = require('googleapis');
+const people = google.people('v1');
 
 // If modifying these scopes, delete token.json.
 const SCOPES = ['https://www.googleapis.com/auth/calendar.readonly'];
-// The file token.json stores the user's access and refresh tokens, and is
-// created automatically when the authorization flow completes for the first
-// time.
+
 // const TOKEN_PATH = path.join(process.cwd(), 'token.json');
 const CREDENTIALS_PATH = process.env.NODE_ENV ? process.env.GOOGLE_APPLICATION_CREDENTIALS : path.join(process.cwd(), 'credentials.json');
 
@@ -17,15 +20,74 @@ const CREDENTIALS_PATH = process.env.NODE_ENV ? process.env.GOOGLE_APPLICATION_C
  *
  */
 async function authorize() {
-  const content = await fs.readFile(CREDENTIALS_PATH);
-  console.log("credentials path: ", CREDENTIALS_PATH);
-  console.log("content: ", JSON.parse(content));
-  client = await authenticate({
-    scopes: SCOPES,
-    keyfilePath: CREDENTIALS_PATH,
-  });
-  console.log("client: ", client);
-  return client;
+  const unparsedKeys = await fs.readFile(CREDENTIALS_PATH);
+
+  keys = JSON.parse(unparsedKeys)['web'];
+
+  const oauth2Client = new google.auth.OAuth2(
+    keys.client_id,
+    keys.client_secret,
+    keys.redirect_uris[0]
+  );
+
+
+  google.options({auth: oauth2Client});
+
+  async function authenticate(scopes) {
+    return new Promise((resolve, reject) => {
+      // grab the url that will be used for authorization
+      const authorizeUrl = oauth2Client.generateAuthUrl({
+        access_type: 'offline',
+        scope: scopes.join(' '),
+      });
+      const server = http
+        .createServer(async (req, res) => {
+          try {
+            if (req.url.indexOf('/oauth2callback') > -1) {
+              const qs = new url.URL(req.url, keys.javascript_origins)
+                .searchParams;
+              res.end('Authentication successful! Please return to the console.');
+              server.destroy();
+              const {tokens} = await oauth2Client.getToken(qs.get('code'));
+              oauth2Client.credentials = tokens; // eslint-disable-line require-atomic-updates
+              resolve(oauth2Client);
+            }
+          } catch (e) {
+            reject(e);
+          }
+        })
+        .listen(3000, () => {
+          // open the browser to the authorize url to start the workflow
+          opn(authorizeUrl, {wait: false}).then(cp => cp.unref());
+        });
+      destroyer(server);
+    });
+  }
+  
+  async function runSample() {
+    // retrieve user profile
+    const res = await people.people.get({
+      resourceName: 'people/me',
+      personFields: 'emailAddresses',
+    });
+    console.log(res.data);
+
+    return res.data;
+  }
+  
+  const scopesTest = [
+    'https://www.googleapis.com/auth/contacts.readonly',
+    'https://www.googleapis.com/auth/user.emails.read',
+    'profile',
+  ];
+
+
+  authenticate(scopesTest)
+  .then(client => runSample(client))
+  .catch(console.error);
+
+
+
 }
 
 /**
