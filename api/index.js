@@ -12,9 +12,10 @@ const SCOPES = ['https://www.googleapis.com/auth/calendar.readonly'];
 
 let TOKEN_PATH;
 let CREDENTIALS_PATH;
+let environment = process.env.NODE_ENV || 'development';
 
 // Check if running in a development environment
-if (process.env.DEVELOPMENT === 'true') {
+if (environment === 'development') {
   TOKEN_PATH = path.join(process.cwd(), 'token.json');
   CREDENTIALS_PATH = path.join(process.cwd(), 'credentials.json');
 } else {
@@ -62,7 +63,7 @@ async function saveCredentials(client) {
  *
  */
 async function authorize() {
-  console.log("credentials path:", process.env.CREDENTIALS_PATH);
+  console.log("credentials path:", CREDENTIALS_PATH);
 
   let client = await loadSavedCredentialsIfExist();
   if (client) {
