@@ -20,8 +20,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "webpack-dev-server --mode development --open --hot",
-    "start-dev": "nodemon server/server.js",
+    "start": "npm run build && node server/server.js",
+    "start-dev": "webpack-dev-server --mode development --open --hot && nodemon server/server.js",
+    "start-server": "nodemon server/server.js",
     "build": "webpack --mode production"
   },
   "keywords": [],

@@ -3,6 +3,7 @@ require('dotenv').config();
 const routes = require('./routes/routes.js');
 const pool = require('../db/db.js');
 const cors = require('cors');
+const path = require('path');
 
 const express = require('express');
 const session = require('express-session');
@@ -14,12 +15,13 @@ app.use(session({
     resave: false,
     saveUninitialized: true,
     cookie: { secure: false }
-  }));
+}));
 
-app.use((req, res, next) => {
-    console.log("SESSION: ", req.session);  // Check if the session is initialized
-    next();
-});
+app.use(express.static(path.join(__dirname, '../dist')));
+// app.get('*', (req, res) => {
+//     res.sendFile(path.join(__dirname, '../dist', 'index.html'));
+// });
+
 
 const corsOptions = {
     origin: 'http://localhost:8081',  // Frontend origin
@@ -42,16 +44,14 @@ app.listen(port, () => {
  console.log(`Server running on port ${port}`);
 });
 
-app.get('/', (req, res) => {
-    res.send('Hello World!');
-});
 
-  
+//Database basic query
 const query = (text, params, callback) => {
     return pool.query(text, params, callback);
 };
 
 app.get('/testdb', async (req, res) => {
+    console.log("sup");
     try {
         const { rows } = await query('SELECT NOW()');
         res.json(rows);
@@ -60,5 +60,3 @@ app.get('/testdb', async (req, res) => {
         res.status(500).send('Error while connecting to database');
     }
 });
-
-module.exports = { query };

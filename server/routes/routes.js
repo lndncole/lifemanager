@@ -2,8 +2,6 @@ const express = require('express');
 const router = express.Router();
 const api = require('../../api/index.js');
 const url = require('url');
-const session = require('express-session');
-// const oauth2ClientExport = require('./oauth2Client');
 
 
 const javascriptOrigins = process.env.NODE_ENV == 'production' ? 'https://lifemanager-c8d019eb99cb.herokuapp.com' : 'http://localhost:8080';
@@ -78,31 +76,37 @@ router.get('/terms-of-service', (req, res) => {
   res.send(termsOfSericeVerbiage);
 });
 
+//oAuth callback that get's hit when Google responds to user authentication request
 router.get('/oauth2callback', async (req, res) => {
   try {
+    //Get the authorization code that's passed back to us from Google 
     const qs = new url.URL(req.url, javascriptOrigins).searchParams;
     const code = qs.get('code');
 
+    //Check to see that the user is authorized
     if (!req.session.oauth2ClientConfig) {
-      return res.status(400).send('Session expired or invalid state');
+      return res.status(400).send('App session expired or invalid state');
     }
 
-    // Reconstruct the OAuth2 client using the stored config
+    //Check to see that the user was Authenticated through Google
+    if (!code) {
+      return res.status(401).send('Failed to authenticate with Google');
+    }
+
+    // Create another OAuth2 client using the stored config
     const oauth2Client = api.createOAuthClient(req.session.oauth2ClientConfig);
-    
+    //Get the tokens for the specific user's session and store them in the session
     const { tokens } = await oauth2Client.getToken(code);
-    req.session.tokens = tokens; // Update the tokens in the session
+    req.session.tokens = tokens;
+
+
     oauth2Client.setCredentials(req.session.tokens); //Set credentials using session tokens
-
-
 
     // Use oauth2Client to make a call to the Google Calendar API
     const events = await api.getCalendar(oauth2Client);
     
     res.json(events); // Send the events back to the client
 
-
-    // res.send('Authentication successful');
   } catch (error) {
     console.error('Error during OAuth callback:', error);
     res.status(500).send('Internal Server Error');
@@ -115,13 +119,13 @@ router.get('/calendar', async (req, res) => {
     // Create a new OAuth2 client
     const oauth2Client = api.createOAuthClient();
 
-    // Generate the authorization URL
+    // Generate the authorization URL using Calendar scope specifically
     const authorizeUrl = oauth2Client.generateAuthUrl({
       access_type: 'offline',
       scope: 'https://www.googleapis.com/auth/calendar.readonly'
     });
 
-    // Instead of storing the entire client, store only the client's config
+    // Store the client's config in session
     req.session.oauth2ClientConfig = {
       client_id: oauth2Client._clientId,
       client_secret: oauth2Client._clientSecret,
