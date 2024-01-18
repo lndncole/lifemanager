@@ -92,14 +92,17 @@ router.get('/oauth2callback', async (req, res) => {
     
     const { tokens } = await oauth2Client.getToken(code);
     req.session.tokens = tokens; // Update the tokens in the session
+    oauth2Client.setCredentials(req.session.tokens); //Set credentials using session tokens
 
 
 
-    //Use oauth2Client to make a call to the google calendar API
-    // api.getCalendar(oauth2Client)
+    // Use oauth2Client to make a call to the Google Calendar API
+    const events = await api.getCalendar(oauth2Client);
+    
+    res.json(events); // Send the events back to the client
 
 
-    res.send('Authentication successful');
+    // res.send('Authentication successful');
   } catch (error) {
     console.error('Error during OAuth callback:', error);
     res.status(500).send('Internal Server Error');

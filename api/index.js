@@ -142,13 +142,15 @@ async function getCalendar(auth) {
       return [];
     }
 
+    let eventList = [];
     console.log('Last 10 events:');
     events.forEach((event, i) => {
       const start = event.start.dateTime || event.start.date;
       console.log(`${start} - ${event.summary}`);
+      eventList.push(`${start} - ${event.summary}`);
     });
 
-    return events;
+    return JSON.stringify(eventList);
   } catch (error) {
     console.error('Error retrieving calendar events:', error);
     throw error;
