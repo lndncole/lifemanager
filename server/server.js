@@ -9,16 +9,26 @@ const session = require('express-session');
 const bodyParser = require('body-parser');
 
 const app = express();
-
-app.use(cors());
-app.use(routes);
-app.use(bodyParser.json());
 app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
     cookie: { secure: false }
   }));
+
+app.use((req, res, next) => {
+    console.log("SESSION: ", req.session);  // Check if the session is initialized
+    next();
+});
+
+const corsOptions = {
+    origin: 'http://localhost:8081',  // Frontend origin
+    optionsSuccessStatus: 200
+  };
+
+app.use(cors(corsOptions));
+app.use(routes);
+app.use(bodyParser.json());
 
 
 const port = process.env.PORT || 8080;

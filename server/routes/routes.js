@@ -3,6 +3,8 @@ const router = express.Router();
 const api = require('../../api/index.js');
 const url = require('url');
 const session = require('express-session');
+// const oauth2ClientExport = require('./oauth2Client');
+
 
 const javascriptOrigins = process.env.NODE_ENV == 'production' ? 'https://lifemanager-c8d019eb99cb.herokuapp.com' : 'http://localhost:8080';
 
@@ -77,35 +79,60 @@ router.get('/terms-of-service', (req, res) => {
 });
 
 router.get('/oauth2callback', async (req, res) => {
+  try {
     const qs = new url.URL(req.url, javascriptOrigins).searchParams;
+    const code = qs.get('code');
 
-    const {tokens} = await oauth2Client.getToken(qs.get('code'));
-    req.session.tokens = tokens;
-    // oauth2Client.credentials = tokens; // eslint-disable-line require-atomic-updates
+    if (!req.session.oauth2ClientConfig) {
+      return res.status(400).send('Session expired or invalid state');
+    }
 
-    // res.end('Authentication successful! Please return to the console.');
-  console.log(qs)
-  // res.json(qs);
+    // Reconstruct the OAuth2 client using the stored config
+    const oauth2Client = api.createOAuthClient(req.session.oauth2ClientConfig);
+    
+    const { tokens } = await oauth2Client.getToken(code);
+    req.session.tokens = tokens; // Update the tokens in the session
+
+
+
+    //Use oauth2Client to make a call to the google calendar API
+    // api.getCalendar(oauth2Client)
+
+
+    res.send('Authentication successful');
+  } catch (error) {
+    console.error('Error during OAuth callback:', error);
+    res.status(500).send('Internal Server Error');
+  }
 });
+
 
 router.get('/calendar', async (req, res) => {
   try {
-    const authClient = await api.authorize();
-    // console.log(authClient);
-    res.send(authClient);
-    // console.log(authClient);
-    // const events = await api.listEvents(authClient);
-    // console.log("events", events);
-    // if(events && events.length) {
-    //   res.send(events);
-    // } else {
-    //   res.send("No events currently listed in this calendar.");
-    // }
+    // Create a new OAuth2 client
+    const oauth2Client = api.createOAuthClient();
+
+    // Generate the authorization URL
+    const authorizeUrl = oauth2Client.generateAuthUrl({
+      access_type: 'offline',
+      scope: 'https://www.googleapis.com/auth/calendar.readonly'
+    });
+
+    // Instead of storing the entire client, store only the client's config
+    req.session.oauth2ClientConfig = {
+      client_id: oauth2Client._clientId,
+      client_secret: oauth2Client._clientSecret,
+      redirect_uris: oauth2Client.redirectUri
+    };
+
+    // Redirect to the authorization URL
+    res.redirect(authorizeUrl);
   } catch (error) {
     console.error('Error during calendar API call:', error);
     res.status(500).send('Error retrieving calendar data');
   }
 });
+
 
 
 module.exports = router;

@@ -12,7 +12,7 @@ const oauth2Client = new google.auth.OAuth2(
     keys.redirect_uris[0]
 );
 
-google.options({auth: oauth2Client});
+// google.options({auth: oauth2Client});
 
 
-module.exports = oauth2Client;
+// module.exports = oauth2Client;

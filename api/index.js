@@ -9,54 +9,35 @@ const oauth2ClientExport = require('./oauth2Client');
 const {google} = require('googleapis');
 const people = google.people('v1');
 
-
-// If modifying these scopes, delete token.json.
-const SCOPES = ['https://www.googleapis.com/auth/calendar.readonly'];
-
 // const TOKEN_PATH = path.join(process.cwd(), 'token.json');
 const CREDENTIALS_PATH = process.env.NODE_ENV == 'production' ? process.env.GOOGLE_APPLICATION_CREDENTIALS : path.join(process.cwd(), 'credentials.json');
-
+const CREDENTIALS = process.env.NODE_ENV == 'production' ? process.env.GOOGLE_CREDENTIALS : process.env.GOOGLE_CREDENTIALS;
 /**
  * Load or request or authorization to call APIs.
  *
  */
 async function authorize() {
 
-  const unparsedKeys = await fs.readFile(CREDENTIALS_PATH);
-
-  keys = JSON.parse(unparsedKeys)['web'];
-
-  const oauth2Client = new google.auth.OAuth2(
-    keys.client_id,
-    keys.client_secret,
-    keys.redirect_uris[0]
-  );
-
-  google.options({auth: oauth2Client});
-
-  const authorizeUrl = oauth2Client.generateAuthUrl({
+  const authorizeUrl2 = oauth2ClientExport.generateAuthUrl({
     access_type: 'offline',
     scope: 'https://www.googleapis.com/auth/calendar.readonly'
   });
 
-  return authorizeUrl;
+  return authorizeUrl2;
+}
 
-  
-  const scopesTest = [
-    'https://www.googleapis.com/auth/contacts.readonly',
-    'https://www.googleapis.com/auth/user.emails.read',
-    'https://www.googleapis.com/auth/calendar.readonly',
-    'profile',
-  ];
+function createOAuthClient() {
+  // Load your credentials
+  const credentials = JSON.parse(CREDENTIALS);
+  const { client_id, client_secret, redirect_uris } = credentials.web;
 
+  const oauth2Client = new google.auth.OAuth2(
+    client_id,
+    client_secret,
+    redirect_uris[0]
+  );
 
-  // authenticate(scopesTest, oauth2Client)
-  // .then(client => runSample(client))
-  // .catch(console.error); 
-
-
-  // getCalendar(await authenticate(['https://www.googleapis.com/auth/calendar.readonly'], oauth2Client));
-
+  return oauth2Client;
 }
 
 async function authenticate(scopes, oauth2Client) {
@@ -90,6 +71,13 @@ async function authenticate(scopes, oauth2Client) {
     destroyer(server);
   });
 }
+
+  // authenticate(scopesTest, oauth2Client)
+  // .then(client => runSample(client))
+  // .catch(console.error); 
+
+  // getCalendar(await authenticate(['https://www.googleapis.com/auth/calendar.readonly'], oauth2Client));
+
 
 async function runSample() {
   // retrieve user profile
@@ -171,4 +159,4 @@ async function getCalendar(auth) {
 
 
 
-module.exports = {authorize, listEvents};
+module.exports = {authorize, listEvents, getCalendar, createOAuthClient};
