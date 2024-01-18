@@ -1,5 +1,3 @@
-const fs = require('fs').promises;
-const http = require('http');
 const process = require('process');
 const {google} = require('googleapis');
 
