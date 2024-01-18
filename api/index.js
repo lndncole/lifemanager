@@ -29,9 +29,15 @@ async function authorize() {
     keys.client_secret,
     keys.redirect_uris[0]
   );
-
-
+  
   google.options({auth: oauth2Client});
+
+  const authorizeUrl = oauth2Client.generateAuthUrl({
+    access_type: 'offline',
+    scope: 'https://www.googleapis.com/auth/calendar.readonly'
+  });
+
+  return authorizeUrl;
 
   
   const scopesTest = [
@@ -47,7 +53,7 @@ async function authorize() {
   // .catch(console.error); 
 
 
-  getCalendar(await authenticate(['https://www.googleapis.com/auth/calendar.readonly'], oauth2Client));
+  // getCalendar(await authenticate(['https://www.googleapis.com/auth/calendar.readonly'], oauth2Client));
 
 }
 
@@ -55,10 +61,7 @@ async function authenticate(scopes, oauth2Client) {
   console.log("authentication");
   return new Promise((resolve, reject) => {
     // grab the url that will be used for authorization
-    const authorizeUrl = oauth2Client.generateAuthUrl({
-      access_type: 'offline',
-      scope: scopes.join(' '),
-    });
+    
     const server = http
       .createServer(async (req, res) => {
         try {

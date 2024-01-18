@@ -75,7 +75,7 @@ router.get('/terms-of-service', (req, res) => {
 router.get('/calendar', async (req, res) => {
   try {
     const authClient = await api.authorize();
-    console.log(authClient);
+    // console.log(authClient);
     res.send(authClient);
     // console.log(authClient);
     // const events = await api.listEvents(authClient);
