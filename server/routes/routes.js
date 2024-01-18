@@ -72,11 +72,6 @@ router.get('/terms-of-service', (req, res) => {
   res.send(termsOfSericeVerbiage);
 });
 
-router.get('/oauth2callback', (req, res) => {
-  console.log("RESPONSE: ", res);
-  res.send(res);
-});
-
 router.get('/calendar', async (req, res) => {
   try {
     const authClient = await api.authorize();

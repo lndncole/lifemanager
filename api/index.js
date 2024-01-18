@@ -42,12 +42,12 @@ async function authorize() {
   ];
 
 
-  authenticate(scopesTest, oauth2Client)
-  .then(client => runSample(client))
-  .catch(console.error); 
+  // authenticate(scopesTest, oauth2Client)
+  // .then(client => runSample(client))
+  // .catch(console.error); 
 
 
-  // getCalendar(await authenticate(['https://www.googleapis.com/auth/calendar.readonly'], oauth2Client));
+  getCalendar(await authenticate(['https://www.googleapis.com/auth/calendar.readonly'], oauth2Client));
 
 }
 
@@ -62,19 +62,22 @@ async function authenticate(scopes, oauth2Client) {
       .createServer(async (req, res) => {
         try {
           if (req.url.indexOf('/oauth2callback') > -1) {
-            const qs = new url.URL(req.url, keys.javascript_origins)
-              .searchParams;
-            res.end('Authentication successful! Please return to the console.');
+            const qs = new url.URL(req.url, keys.javascript_origins).searchParams;
             server.destroy();
             const {tokens} = await oauth2Client.getToken(qs.get('code'));
             oauth2Client.credentials = tokens; // eslint-disable-line require-atomic-updates
             resolve(oauth2Client);
+            // res.writeHead('302', {
+            //   'Location': '/oauth2callback'
+            // });
+            
+            res.end('Authentication successful! Please return to the console.');
           }
         } catch (e) {
           reject(e);
         }
       })
-      .listen(3000, () => {
+      .listen(3000, (req, res) => {
         console.log("listening on port 3000");
         // open the browser to the authorize url to start the workflow
         opn(authorizeUrl, {wait: false}).then(cp => cp.unref());
