@@ -5,9 +5,10 @@ const url = require('url');
 const opn = require('open');
 const destroyer = require('server-destroy');
 const process = require('process');
-// const {authenticate} = require('@google-cloud/local-auth');
+const oauth2ClientExport = require('./oauth2Client');
 const {google} = require('googleapis');
 const people = google.people('v1');
+
 
 // If modifying these scopes, delete token.json.
 const SCOPES = ['https://www.googleapis.com/auth/calendar.readonly'];
@@ -20,6 +21,7 @@ const CREDENTIALS_PATH = process.env.NODE_ENV == 'production' ? process.env.GOOG
  *
  */
 async function authorize() {
+
   const unparsedKeys = await fs.readFile(CREDENTIALS_PATH);
 
   keys = JSON.parse(unparsedKeys)['web'];
@@ -29,6 +31,7 @@ async function authorize() {
     keys.client_secret,
     keys.redirect_uris[0]
   );
+
   google.options({auth: oauth2Client});
 
   const authorizeUrl = oauth2Client.generateAuthUrl({
@@ -60,7 +63,10 @@ async function authenticate(scopes, oauth2Client) {
   console.log("authentication");
   return new Promise((resolve, reject) => {
     // grab the url that will be used for authorization
-    
+    const authorizeUrl = oauth2Client.generateAuthUrl({
+      access_type: 'offline',
+      scope: 'https://www.googleapis.com/auth/calendar.readonly'
+    });
     const server = http
       .createServer(async (req, res) => {
         try {
@@ -79,7 +85,7 @@ async function authenticate(scopes, oauth2Client) {
       .listen(3000, (req, res) => {
         console.log("listening on port 3000");
         // open the browser to the authorize url to start the workflow
-        // opn(authorizeUrl, {wait: false}).then(cp => cp.unref());
+        opn(authorizeUrl, {wait: false}).then(cp => cp.unref());
       });
     destroyer(server);
   });

@@ -2,6 +2,9 @@ const express = require('express');
 const router = express.Router();
 const api = require('../../api/index.js');
 const url = require('url');
+const session = require('express-session');
+
+const javascriptOrigins = process.env.NODE_ENV == 'production' ? 'https://lifemanager-c8d019eb99cb.herokuapp.com' : 'http://localhost:8080';
 
 const privacyPolicyVerbiage = `Privacy Policy 
 Introduction
@@ -73,15 +76,16 @@ router.get('/terms-of-service', (req, res) => {
   res.send(termsOfSericeVerbiage);
 });
 
-router.get('/oauth2callback', (req, res) => {
-    // const qs = new url.URL(req.url, keys.javascript_origins).searchParams;
+router.get('/oauth2callback', async (req, res) => {
+    const qs = new url.URL(req.url, javascriptOrigins).searchParams;
 
-    // const {tokens} = await oauth2Client.getToken(qs.get('code'));
+    const {tokens} = await oauth2Client.getToken(qs.get('code'));
+    req.session.tokens = tokens;
     // oauth2Client.credentials = tokens; // eslint-disable-line require-atomic-updates
 
     // res.end('Authentication successful! Please return to the console.');
-  console.log(req)
-  // res.send(termsOfSericeVerbiage);
+  console.log(qs)
+  // res.json(qs);
 });
 
 router.get('/calendar', async (req, res) => {

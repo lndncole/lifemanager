@@ -8,7 +8,8 @@ const ButtonComponent = () => {
         try {
           // Make an Axios call to your backend when the button is clicked
           const response = await axios.get(`${domain}/calendar`);
-          window.open(response.data);
+          console.log(response);
+        //   window.open(response.data);
         } catch (error) {
           console.error('Error fetching data from the backend:', error);
         }

@@ -5,6 +5,7 @@ const pool = require('../db/db.js');
 const cors = require('cors');
 
 const express = require('express');
+const session = require('express-session');
 const bodyParser = require('body-parser');
 
 const app = express();
@@ -12,6 +13,12 @@ const app = express();
 app.use(cors());
 app.use(routes);
 app.use(bodyParser.json());
+app.use(session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false }
+  }));
 
 
 const port = process.env.PORT || 8080;
