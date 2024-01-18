@@ -19,6 +19,7 @@
   "main": "index.js",
   "scripts": {
     "start": "webpack-dev-server --mode development --open --hot",
+    "start-dev": "node server/server.js",
     "build": "webpack --mode production"
   },
   "keywords": [],

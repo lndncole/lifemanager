@@ -5,7 +5,6 @@ const pool = require('../db/db.js');
 
 const express = require('express');
 const bodyParser = require('body-parser');
-const { Pool } = require('pg');
 
 const app = express();
 
@@ -13,7 +12,7 @@ app.use(routes);
 app.use(bodyParser.json());
 
 
-const port = process.env.PORT || 3002;
+const port = process.env.PORT || 8080;
 
 //Add this in for Heroku specifically because Heroku listens on port 8000
 if (port == null || port == "") {

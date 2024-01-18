@@ -52,6 +52,7 @@ async function authorize() {
 }
 
 async function authenticate(scopes, oauth2Client) {
+  console.log("authentication");
   return new Promise((resolve, reject) => {
     // grab the url that will be used for authorization
     const authorizeUrl = oauth2Client.generateAuthUrl({
@@ -76,7 +77,7 @@ async function authenticate(scopes, oauth2Client) {
       .listen(3000, (req, res) => {
         console.log("listening on port 3000");
         // open the browser to the authorize url to start the workflow
-        opn(authorizeUrl, {wait: false}).then(cp => cp.unref());
+        // opn(authorizeUrl, {wait: false}).then(cp => cp.unref());
       });
     destroyer(server);
   });

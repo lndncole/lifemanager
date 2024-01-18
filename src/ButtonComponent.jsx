@@ -2,7 +2,7 @@ import React from 'react';
 
 const ButtonComponent = () => {
   const handleClick = () => {
-    window.location.href = '/calendar';
+    window.location.href = 'http://localhost:8080/calendar';
   };
 
   return (
