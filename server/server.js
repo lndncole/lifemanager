@@ -18,10 +18,6 @@ app.use(session({
 }));
 
 app.use(express.static(path.join(__dirname, '../dist')));
-// app.get('*', (req, res) => {
-//     res.sendFile(path.join(__dirname, '../dist', 'index.html'));
-// });
-
 
 const corsOptions = {
     origin: 'http://localhost:8081',  // Frontend origin
@@ -32,6 +28,9 @@ app.use(cors(corsOptions));
 app.use(routes);
 app.use(bodyParser.json());
 
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../dist', 'index.html'));
+});
 
 const port = process.env.PORT || 8080;
 

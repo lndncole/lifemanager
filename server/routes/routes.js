@@ -3,7 +3,6 @@ const router = express.Router();
 const api = require('../../api/index.js');
 const url = require('url');
 
-
 const javascriptOrigins = process.env.NODE_ENV == 'production' ? 'https://lifemanager-c8d019eb99cb.herokuapp.com' : 'http://localhost:8080';
 
 const privacyPolicyVerbiage = `Privacy Policy 
@@ -139,7 +138,5 @@ router.get('/calendar', async (req, res) => {
     res.status(500).send('Error retrieving calendar data');
   }
 });
-
-
 
 module.exports = router;
