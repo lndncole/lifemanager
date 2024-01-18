@@ -2,12 +2,12 @@ import React from 'react';
 
 const ButtonComponent = () => {
   const handleClick = () => {
-    alert('Button clicked!');
+    window.location.href = '/calendar';
   };
 
   return (
     <div>
-      <button onClick={handleClick}>Click Me</button>
+      <button onClick={handleClick}>Go to Calendar</button>
     </div>
   );
 };
