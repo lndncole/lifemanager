@@ -3,6 +3,7 @@
     "@google-cloud/local-auth": "^2.1.0",
     "axios": "^1.6.5",
     "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "firebase": "^10.7.1",
@@ -19,7 +20,7 @@
   "main": "index.js",
   "scripts": {
     "start": "webpack-dev-server --mode development --open --hot",
-    "start-dev": "node server/server.js",
+    "start-dev": "nodemon server/server.js",
     "build": "webpack --mode production"
   },
   "keywords": [],

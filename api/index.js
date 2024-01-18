@@ -13,7 +13,7 @@ const people = google.people('v1');
 const SCOPES = ['https://www.googleapis.com/auth/calendar.readonly'];
 
 // const TOKEN_PATH = path.join(process.cwd(), 'token.json');
-const CREDENTIALS_PATH = process.env.NODE_ENV ? process.env.GOOGLE_APPLICATION_CREDENTIALS : path.join(process.cwd(), 'credentials.json');
+const CREDENTIALS_PATH = process.env.NODE_ENV == 'production' ? process.env.GOOGLE_APPLICATION_CREDENTIALS : path.join(process.cwd(), 'credentials.json');
 
 /**
  * Load or request or authorization to call APIs.
@@ -29,7 +29,6 @@ async function authorize() {
     keys.client_secret,
     keys.redirect_uris[0]
   );
-  
   google.options({auth: oauth2Client});
 
   const authorizeUrl = oauth2Client.generateAuthUrl({

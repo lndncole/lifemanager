@@ -2,12 +2,14 @@ require('dotenv').config();
 
 const routes = require('./routes/routes.js');
 const pool = require('../db/db.js');
+const cors = require('cors');
 
 const express = require('express');
 const bodyParser = require('body-parser');
 
 const app = express();
 
+app.use(cors());
 app.use(routes);
 app.use(bodyParser.json());
 

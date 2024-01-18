@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const api = require('../../api/index.js');
+const url = require('url');
 
 const privacyPolicyVerbiage = `Privacy Policy 
 Introduction
@@ -70,6 +71,17 @@ router.get('/privacy-policy', (req, res) => {
 
 router.get('/terms-of-service', (req, res) => {
   res.send(termsOfSericeVerbiage);
+});
+
+router.get('/oauth2callback', (req, res) => {
+    // const qs = new url.URL(req.url, keys.javascript_origins).searchParams;
+
+    // const {tokens} = await oauth2Client.getToken(qs.get('code'));
+    // oauth2Client.credentials = tokens; // eslint-disable-line require-atomic-updates
+
+    // res.end('Authentication successful! Please return to the console.');
+  console.log(req)
+  // res.send(termsOfSericeVerbiage);
 });
 
 router.get('/calendar', async (req, res) => {
