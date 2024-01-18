@@ -150,7 +150,7 @@ async function getCalendar(auth) {
       eventList.push(`${start} - ${event.summary}`);
     });
 
-    return JSON.stringify(eventList);
+    return eventList;
   } catch (error) {
     console.error('Error retrieving calendar events:', error);
     throw error;
