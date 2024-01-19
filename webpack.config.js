@@ -1,6 +1,7 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
+const processImport = require('process');
 
 module.exports = {
   entry: './src/index.js', // Update this path based on where your React code will live
@@ -25,17 +26,6 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       template: './src/index.html', // Update this path to your HTML file
-    }),
-    new webpack.DefinePlugin({
-      'process.env': {
-        REACT_APP_API_DOMAIN: JSON.stringify(process.env.REACT_APP_API_DOMAIN),
-        // Add other environment variables here if needed
-      },
-      process: {
-        env: {
-          NODE_ENV: JSON.stringify(process.env.NODE_ENV),
-        },
-      },
     })
   ],
 };
