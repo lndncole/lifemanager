@@ -1,6 +1,7 @@
 import React from 'react';
-const domain = 'https://lifemanager-c8d019eb99cb.herokuapp.com';
-// const domain = 'http://localhost:8080';
+
+// Access the environment variable and set the domain
+const domain = process.env.REACT_APP_API_DOMAIN || 'http://localhost:8080';
 
 const ButtonComponent = () => {
     const handleClick = () => {
