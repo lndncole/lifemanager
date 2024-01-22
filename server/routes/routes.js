@@ -3,7 +3,7 @@ const router = express.Router();
 const api = require('../../api/index.js');
 const url = require('url');
 
-const javascriptOrigins = process.env.NODE_ENV == 'production' ? 'https://lifemanager-c8d019eb99cb.herokuapp.com' : 'http://localhost:8080';
+const domain = process.env.NODE_ENV == 'production' ? 'https://lifemanager-c8d019eb99cb.herokuapp.com' : 'http://localhost:8080';
 
 const privacyPolicyVerbiage = `Privacy Policy \n
 Introduction \n
@@ -79,7 +79,7 @@ router.get('/terms-of-service', (req, res) => {
 router.get('/oauth2callback', async (req, res) => {
   try {
     //Get the authorization code that's passed back to us from Google 
-    const qs = new url.URL(req.url, javascriptOrigins).searchParams;
+    const qs = new url.URL(req.url, domain).searchParams;
     const code = qs.get('code');
 
     //Check to see that the user is authorized
@@ -98,9 +98,10 @@ router.get('/oauth2callback', async (req, res) => {
     const { tokens } = await oauth2Client.getToken(code);
     req.session.tokens = tokens;
 
+    //Redirect to "post-auth" screen upon successful authentication and setting of authentication token in to user session
+    res.redirect(`${domain}/post-auth`);
 
     oauth2Client.setCredentials(req.session.tokens); //Set credentials using session tokens
-
     // Use oauth2Client to make a call to the Google Calendar API
     const events = await api.getCalendar(oauth2Client);
     
@@ -112,8 +113,7 @@ router.get('/oauth2callback', async (req, res) => {
   }
 });
 
-
-router.get('/calendar', async (req, res) => {
+router.get('/authenticate', async (req, res) => {
   try {
     // Create a new OAuth2 client
     const oauth2Client = api.createOAuthClient();
