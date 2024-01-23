@@ -43,33 +43,41 @@ async function addCalendarEvent(auth, req) {
 }
 
 async function getCalendar(auth) {
-  //Get the last 10 events in the user's calendar
   try {
-    //Connect to Google Calendar API using oAuth client
     const calendar = google.calendar({ version: 'v3', auth });
-    const res = await calendar.events.list({
-      calendarId: 'primary',
-      timeMax: new Date().toISOString(),
-      maxResults: 10,
-      singleEvents: true,
-      orderBy: 'startTime',
-    });
 
-    const events = res.data.items;
-    if (!events || events.length === 0) {
-      console.log('No upcoming events found.');
-      return [];
+    // Fetch all calendar IDs
+    const calendarListRes = await calendar.calendarList.list();
+    const calendarIds = calendarListRes.data.items.map(item => item.id);
+
+    // Calculate the time range for the next 30 days
+    const timeMin = new Date().toISOString();
+    const timeMax = new Date();
+    timeMax.setDate(timeMax.getDate() + 30);
+    
+    let allEvents = [];
+
+    // Fetch events from each calendar
+    for (const calendarId of calendarIds) {
+      const eventsRes = await calendar.events.list({
+        calendarId: calendarId,
+        timeMin: timeMin,
+        timeMax: timeMax.toISOString(),
+        singleEvents: true,
+        orderBy: 'startTime'
+      });
+
+      const events = eventsRes.data.items;
+      if (events && events.length > 0) {
+        events.forEach(event => {
+          const start = event.start.dateTime || event.start.date;
+          console.log(`${start} - ${event.summary}`);
+          allEvents.push({ start: start, summary: event.summary });
+        });
+      }
     }
 
-    let eventList = [];
-    console.log('Last 10 events:');
-    events.forEach((event, i) => {
-      const start = event.start.dateTime || event.start.date;
-      console.log(`${start} - ${event.summary}`);
-      eventList.push(`${start} - ${event.summary}`);
-    });
-
-    return eventList;
+    return allEvents;
   } catch (error) {
     console.error('Error retrieving calendar events:', error);
     throw error;
