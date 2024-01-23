@@ -75,6 +75,43 @@ router.get('/terms-of-service', (req, res) => {
   res.send(termsOfSericeVerbiage);
 });
 
+//Fetch the calendar
+router.get('/fetch-calendar', async (req, res) => {
+  if (!req.session.oauth2ClientConfig) {
+    return res.status(401).send('User not authenticated');
+  }
+
+  const oauth2Client = api.createOAuthClient();
+  oauth2Client.setCredentials(req.session.tokens);
+
+  try {
+    const events = await api.getCalendar(oauth2Client);
+    res.json(events);
+  } catch (error) {
+    console.error('Error fetching calendar:', error);
+    res.status(500).send('Error fetching calendar data');
+  }
+});
+
+//Add event
+router.post('/add-calendar-event', async (req, res) => {
+  if (!req.session.oauth2ClientConfig) {
+    return res.status(401).send('User not authenticated');
+  }
+
+  const oauth2Client = api.createOAuthClient();
+  oauth2Client.setCredentials(req.session.tokens);
+
+  try {
+    response = await api.addCalendarEvent(oauth2Client, req);
+    console.log(response);
+    res.json(response);
+  } catch (error) {
+    console.error('Error adding calendar event:', error);
+    res.status(500).send('Error adding event to calendar');
+  }
+});
+
 //oAuth callback that get's hit when Google responds to user authentication request
 router.get('/oauth2callback', async (req, res) => {
   try {
@@ -100,19 +137,13 @@ router.get('/oauth2callback', async (req, res) => {
 
     //Redirect to "post-auth" screen upon successful authentication and setting of authentication token in to user session
     res.redirect(`${domain}/post-auth`);
-
-    oauth2Client.setCredentials(req.session.tokens); //Set credentials using session tokens
-    // Use oauth2Client to make a call to the Google Calendar API
-    const events = await api.getCalendar(oauth2Client);
-    
-    res.json(events); // Send the events back to the client
-
   } catch (error) {
     console.error('Error during OAuth callback:', error);
     res.status(500).send('Internal Server Error');
   }
 });
 
+//Send initial request to Google for authenitcation 
 router.get('/authenticate', async (req, res) => {
   try {
     // Create a new OAuth2 client
@@ -121,7 +152,7 @@ router.get('/authenticate', async (req, res) => {
     // Generate the authorization URL using Calendar scope specifically
     const authorizeUrl = oauth2Client.generateAuthUrl({
       access_type: 'offline',
-      scope: 'https://www.googleapis.com/auth/calendar.readonly'
+      scope: 'https://www.googleapis.com/auth/calendar'
     });
 
     // Store the client's config in session

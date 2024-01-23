@@ -25,6 +25,7 @@ const corsOptions = {
   };
 
 app.use(cors(corsOptions));
+app.use(express.json());
 app.use(routes);
 app.use(bodyParser.json());
 

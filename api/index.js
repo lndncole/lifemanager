@@ -20,6 +20,28 @@ function createOAuthClient() {
   return oauth2Client;
 }
 
+async function addCalendarEvent(auth, req) {
+  try {
+    const calendar = google.calendar({ version: 'v3', auth: auth });
+    const event = {
+      summary: req.body.summary,
+      start: req.body.start,
+      end: req.body.end,
+      description: req.body.description,
+    };
+
+    const response = await calendar.events.insert({
+      calendarId: 'primary',
+      resource: event,
+    });
+
+    return response;
+  } catch (error) {
+    console.error('Error adding and event to the calendar:', error);
+    throw error;
+  }
+}
+
 async function getCalendar(auth) {
   //Get the last 10 events in the user's calendar
   try {
@@ -54,4 +76,4 @@ async function getCalendar(auth) {
   }
 }
 
-module.exports = { getCalendar, createOAuthClient };
+module.exports = { getCalendar, createOAuthClient, addCalendarEvent };
