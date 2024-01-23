@@ -23,6 +23,9 @@
 
 <body>
     <style>
+        * {
+            box-sizing: border-box;
+        }
         .app-container {
             width: 100%;;
         }
@@ -33,19 +36,24 @@
         #root {
             width: 100%;
         }
-        .post-auth-container {
+        .add-event-container {
+            display: flex;
+            flex-direction: column;
+        }
+        .container {
+            padding: 5%;
+            width: 100%;
+        }
+
+        .f-col {
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
         }
-        .add-event-container {
-            display: flex;
-            flex-direction: column;
-            width: 100%;  
-        }
-        .container {
-            padding: 5%;
+
+        .form-input {
+            width: 100%;
         }
     </style>
     <div id="root"></div>

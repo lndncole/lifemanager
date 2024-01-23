@@ -1,10 +1,9 @@
 import React from 'react';
 
-// Set the domain
-// const domain = "https://lifemanager-c8d019eb99cb.herokuapp.com";
-const domain = "http://localhost:8080";
 const ButtonComponent = () => {
     const handleClick = () => {
+      const domain = window.location.origin;
+        // Redirect to the authenticate route
         window.location.href = `${domain}/authenticate`;
     };
 
