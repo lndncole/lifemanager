@@ -3,7 +3,7 @@ const router = express.Router();
 const api = require('../../api/index.js');
 const url = require('url');
 
-const domain = process.env.NODE_ENV == 'production' ? 'https://lifemngr.co' : 'http://localhost:8080';
+const domain = process.env.NODE_ENV == 'production' ? 'https://www.lifemngr.co' : 'http://localhost:8080';
 
 const privacyPolicyVerbiage = `Privacy Policy \n
 Introduction \n
