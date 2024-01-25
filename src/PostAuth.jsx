@@ -84,18 +84,17 @@ const PostAuth = () => {
                     placeholder="Event Details"
                     class="form-input"
                 />
-
-                {confirmationMessage && <p>{confirmationMessage}</p>}
-
+                <button onClick={handleAddEvent}>Add Calendar Event</button>
+            </div>
+        }
+        {confirmationMessage && 
+            <div class="f-col">
+                <p>{confirmationMessage}</p>
                 {eventLink && (
-                <button onClick={() => window.open(eventLink, "_blank")}>
-                    View Event
-                </button>
+                    <button onClick={() => window.open(eventLink, "_blank")}>
+                        View Event
+                    </button>
                 )}
-
-                {!confirmationMessage &&
-                    <button onClick={handleAddEvent}>Add Calendar Event</button>
-                }
             </div>
         }
     </div>
