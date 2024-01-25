@@ -58,29 +58,31 @@ const PostAuth = () => {
             <div class="f-col">
                 <p>Add an event to your calendar.</p>
                 <input
-                type="text"
-                value={eventName}
-                onChange={(e) => setEventName(e.target.value)}
-                placeholder="Event Name"
-                class="form-input"
+                    type="text"
+                    value={eventName}
+                    onChange={(e) => setEventName(e.target.value)}
+                    placeholder="Event Name"
+                    class="form-input"
                 />
                 <span>Date</span>
                 <input
-                type="date"
-                value={eventDate}
-                onChange={(e) => setEventDate(e.target.value)}
+                    type="date"
+                    value={eventDate}
+                    onChange={(e) => setEventDate(e.target.value)}
+                    class="form-input"
                 />
                 <span>Time</span>
                 <input
-                type="time"
-                value={eventTime}
-                onChange={(e) => setEventTime(e.target.value)}
+                    type="time"
+                    value={eventTime}
+                    onChange={(e) => setEventTime(e.target.value)}
+                    class="form-input"
                 />
                 <textarea
-                value={eventDetails}
-                onChange={(e) => setEventDetails(e.target.value)}
-                placeholder="Event Details"
-                class="form-input"
+                    value={eventDetails}
+                    onChange={(e) => setEventDetails(e.target.value)}
+                    placeholder="Event Details"
+                    class="form-input"
                 />
 
                 {confirmationMessage && <p>{confirmationMessage}</p>}
