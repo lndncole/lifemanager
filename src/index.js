@@ -10,7 +10,7 @@ const container = document.getElementById('root');
 const App = () => {
   return (
     <Router>
-      <div className='app-container'>
+      <div className='container'>
         <Routes>
           <Route path="/post-auth" element={<PostAuth />} />
           <Route path="/" element={<HomeComonent />} />
