@@ -3,8 +3,9 @@ import ButtonComponent from './ButtonComponent';
 
 const Home = () => {
   return (
-    <div>
-      <h1>Welcome to the Home Page</h1>
+    <div class="f-col">
+      <h1>Welcome to Life Manager</h1>
+      <p>Sign in with your Google Account.</p>
       <ButtonComponent />
     </div>
   );
