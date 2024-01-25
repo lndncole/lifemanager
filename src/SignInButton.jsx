@@ -1,6 +1,6 @@
 import React from 'react';
 
-const ButtonComponent = () => {
+const SignInButton = () => {
     const handleClick = () => {
       const domain = window.location.origin;
         // Redirect to the authenticate route
@@ -14,4 +14,4 @@ const ButtonComponent = () => {
   );
 };
 
-export default ButtonComponent;
+export default SignInButton;
