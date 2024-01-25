@@ -45,15 +45,17 @@ const PostAuth = () => {
 
   return (
     
-    <div class="container post-auth-container f-col">
-        <div class="container post-auth-hero-container f-col">
+    <div class="f-col">
+        <div class="f-col">
             <h1>You've been authenticated!</h1>
             <p>What would you like to do next?</p>
         </div>
-        <div class="container get-events-container f-col">
+        <div class="f-col">
+            <p>Get calednar events for the next 30 days.</p>
             <button onClick={handleFetchCalendar}>Get Calendar</button>
         </div>
-        <div class="container add-event-container f-col">
+        <div class="f-col">
+            <p>Add an event to your calendar.</p>
             {!confirmationMessage &&
                 <div class="container f-col">
                     <input
