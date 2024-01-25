@@ -51,13 +51,13 @@ const PostAuth = () => {
             <p>What would you like to do next?</p>
         </div>
         <div class="f-col">
-            <p>Get calednar events for the next 30 days.</p>
+            <p>Get calendar events for the next 30 days.</p>
             <button onClick={handleFetchCalendar}>Get Calendar</button>
         </div>
         <div class="f-col">
-            <p>Add an event to your calendar.</p>
             {!confirmationMessage &&
-                <div class="container f-col">
+                <div class="f-col">
+                    <p>Add an event to your calendar.</p>
                     <input
                     type="text"
                     value={eventName}
