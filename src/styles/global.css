@@ -33,7 +33,7 @@ body {
 }
 
 .full-screen {
-    height: 88vh;
+    height: 84vh;
     width: 100%;
     display: flex;
     justify-content: center;
@@ -91,5 +91,8 @@ h2 {
     }
     button {
         font-size: 36px;
+    }
+    .full-screen {
+        height: 77vh;
     }
 }
