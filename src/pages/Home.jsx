@@ -32,14 +32,17 @@ const Home = () => {
         });
     
         if (!response.ok) {
-          throw new Error('Network response was not ok');
+          console.error('Network response was not ok');
+          setFetchCalendar('error');
+        } else {
+          const data = await response.json();
+          setFetchCalendar(data);
         }
     
-        const data = await response.json();
-        setFetchCalendar(data);
       } catch (error) {
         console.error('Fetch error:', error);
         setFetchCalendar('Error fetching calendar');
+
       }
     };
 
@@ -58,14 +61,12 @@ const Home = () => {
   
       // Check if the response is ok (status in the range 200-299)
       if (!response.ok) {
-        throw new Error('Network response was not ok');
+        console.error('Network response was not ok');
+      } else {
+        const data = await response.json();
+        setFetchCalendar(data);
       }
-  
-      // Parse the JSON from the response
-      const data = await response.json();
-  
-      // Set the parsed data to state
-      setFetchCalendar(data);
+      
     } catch (error) {
       console.error('Fetch error:', error);
       setFetchCalendar('Error fetching calendar');
@@ -107,21 +108,23 @@ const Home = () => {
         <div class="f-col">
             <h1>lifeMNGR</h1>
         </div>
-        <div class="home-content-container">
+        <div class="home-calendar-content-container">
           <div class="f-col fetched-calendar">
             <h2>Upcoming events:</h2>
-            {fetchedCalendar && fetchedCalendar.length > 0 ? (
-              <>
-                <div class="event-card-container">
-                  {fetchedCalendar.map((event, i) => (
-                    i <= 50 ? (<EventCard key={event.start} event={event} />) : ("")
-                  ))}
-                </div>
-              </>
-            ) : (
-              <p>No events found.</p>
-            )}
-            {/* <button onClick={handleFetchCalendar}>Get Calendar</button> */}
+            {fetchedCalendar && Array.isArray(fetchedCalendar) && 
+              <div class="event-card-container">
+                {fetchedCalendar.map((event, i) => (
+                  i <= 50 ? (<EventCard key={event.start} event={event} />) : ("")
+                ))}
+              </div>
+            }
+            {fetchedCalendar && fetchedCalendar == 'error' &&
+              <div class="event-card-container">
+                <p>There was an error fetching your calendar.</p>
+                <p>Please reauthenticate by signing out and signing back in again.</p>
+              </div>
+            }
+            {!fetchedCalendar && <p>Loading...</p>}
           </div>
           {!confirmationMessage &&
               <div class="f-col">
@@ -160,9 +163,12 @@ const Home = () => {
             <div class="f-col">
                 <p>{confirmationMessage}</p>
                 {eventLink && (
+                  <>
                     <button onClick={() => window.open(eventLink, "_blank")}>
                         View Event
                     </button>
+                    <button onClick={handleFetchCalendar}>Refresh Calendar</button>
+                  </>
                 )}
             </div>
         }

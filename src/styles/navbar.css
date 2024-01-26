@@ -1,17 +1,29 @@
-nav {
+.nav {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     width: 100vw;
     align-items: center;
-    padding: 3% 2%;
+    padding: 12px 24px;
     position: sticky;
     top: 0px;
     left: 0px;
-    border-bottom: 1px solid black;
-    background-color: azure;
-    height: 40px;
+    background-color: lightseagreen;
     box-shadow: 0 4px 2px -2px gray;
+}
+
+.footer {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100vw;
+    align-items: center;
+    padding: 12px 24px;
+    position: relative;
+    bottom: 0px;
+    left: 0px;
+    border-top: 1px solid black;
+    background-color: teal;
 }
 
 .logo {
@@ -19,8 +31,9 @@ nav {
     align-items: center;
     max-width: 450px;
     text-decoration: none;
-    color: black;
-    transition: color .5s, font-weight .5s
+    color: floralwhite;
+    transition: color .5s, font-weight .5s;
+    font-size: xxx-large;
 }
 .logo:hover {
     cursor: pointer;
@@ -36,21 +49,48 @@ nav {
     gap: 8px;
     width: 20%;
 }
+.footer-item-container {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+    width: 100%;
+}
 
 .nav-item {
     text-decoration: none;
-    color: gray;
+    color: ghostwhite;
+    transition: color .5s, font-weight .5s, text-shadow .5s;
 }
 .nav-item:hover {
     cursor: pointer;
     text-decoration: underline;
-    color: black;
-    font-weight: 700;
-    transition: color .5s, font-weight .5s;
+    color: teal;
+    text-shadow: 0 0 black;
+}
+
+.footer-item {
+    text-decoration: none;
+    color: white;
+    font-size: 16px;
+}
+.footer-item:hover {
+    cursor: pointer;
+    text-decoration: underline;
+    color: lightseagreen;
+    transition: color .5s;
 }
 
 @media (max-width: 992px) {
     .nav-item-container {
-        width: 30%;
+        width: 100%;
+        justify-content: flex-end;
+        gap: 16px;
+    }
+    .footer-item {
+        font-size: 18px;
+    }
+    .footer-item-container {
+        gap: 16px;
     }
 }

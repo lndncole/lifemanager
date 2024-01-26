@@ -1,4 +1,4 @@
-.home-content-container {
+.home-calendar-content-container {
     display: flex;
     width: 100%;
 }
@@ -16,11 +16,7 @@
     font-size: 24px;
 }
 
-.home-content-container .fetched-calendar {
-    justify-content: flex-start;
-}
-
-.home-content-container .f-col {
+.home-calendar-content-container .f-col {
     justify-content: flex-start;
 }
 
@@ -28,7 +24,7 @@
     .form-input {
         font-size: 36px;
     }
-    .home-content-container {
+    .home-calendar-content-container {
         flex-direction: column;
     }
     .event-card-container {

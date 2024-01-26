@@ -1,3 +1,4 @@
+//server/routes/routes.js
 const express = require('express');
 const router = express.Router();
 const api = require('../../api/index.js');
@@ -52,14 +53,12 @@ We reserve the right to amend these terms at any time. Continued use of the webs
 Contact Information \n
 For any questions regarding these Terms of Service, please contact us at landon.metcalfweb@gmail.com.`
 
-// Sign Up Route
-router.get('/signup', (req, res) => {
-  res.send('Sign Up Page');
-});
-
-// Sign In Route
-router.get('/signin', (req, res) => {
-  res.send('Sign In Page');
+router.get('/get-auth', (req, res) => {
+  if (req.session.oauth2ClientConfig) {
+    res.status(200).send("Authenticated");
+  } else {
+    res.status(401).send("Not Authenticated");
+  }
 });
 
 router.get('/privacy-policy', (req, res) => {
@@ -99,7 +98,6 @@ router.post('/add-calendar-event', async (req, res) => {
 
   try {
     response = await api.addCalendarEvent(oauth2Client, req);
-    console.log(response);
     res.json(response);
   } catch (error) {
     console.error('Error adding calendar event:', error);

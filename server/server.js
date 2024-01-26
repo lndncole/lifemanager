@@ -51,7 +51,6 @@ const query = (text, params, callback) => {
 };
 
 app.get('/testdb', async (req, res) => {
-    console.log("sup");
     try {
         const { rows } = await query('SELECT NOW()');
         res.json(rows);
