@@ -5,7 +5,7 @@ import '../styles/navbar.css';
 export default function Navbar() {
     return (
         <nav class="nav">
-            <Link to="/" class="logo">
+            <Link to="/home" class="logo">
                 lifeMNGR
             </Link>
             <Link to="/about" class="nav-item">

@@ -7,10 +7,13 @@ import Home from './pages/Home';
 import About from './pages/About';
 import './styles/global.css';
 
+const path = window.location.pathname;
+const navBar = <Navbar />;
+
 const App = () => {
   return (
     <Router>
-      <Navbar />
+      {path != "/" ? navBar : ""}
         <Routes>
           <Route path="/" element={<SignInComponent />} />
           <Route path="/home" element={<Home />} />
