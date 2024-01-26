@@ -1,9 +1,10 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { createRoot } from 'react-dom/client';
-import Navbar from './Navbar';
-import SignInComponent from './SignInComponent';
-import Home from './Home';
+import Navbar from './components/Navbar';
+import SignInComponent from './pages/SignIn';
+import Home from './pages/Home';
+import About from './pages/About';
 import './styles/global.css';
 
 const App = () => {
@@ -11,8 +12,9 @@ const App = () => {
     <Router>
       <Navbar />
         <Routes>
-          <Route path="/home" element={<Home />} />
           <Route path="/" element={<SignInComponent />} />
+          <Route path="/home" element={<Home />} />
+          <Route path="/about" element={<About />} />
         </Routes>
     </Router>
   );

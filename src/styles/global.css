@@ -33,6 +33,14 @@ body {
     border: 1px solid;
 }
 
+.full-screen {
+    height: 100vh;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .form-input {
     width: 100%;
     max-width: 310px;

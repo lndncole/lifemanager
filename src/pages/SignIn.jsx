@@ -1,10 +1,9 @@
 import React from 'react';
-import SignInButton from './SignInButton';
-import './styles/home.css'
+import SignInButton from '../components/SignInButton';
 
-const Home = () => {
+const SignIn = () => {
   return (
-    <div class="f-col home">
+    <div class="f-col full-screen">
       <h1>lifeMNGR</h1>
       <p>Sign in with your Google Account.</p>
       <SignInButton />
@@ -12,4 +11,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default SignIn;
