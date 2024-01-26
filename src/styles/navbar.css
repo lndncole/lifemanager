@@ -1,0 +1,29 @@
+nav {
+    display: flex;
+    flex-direction: row;
+    width: 100vw;
+    align-items: center;
+    padding: 1%;
+    position: sticky;
+    top: 0px;
+    left: 0px;
+    border-bottom: 1px solid black;
+    background-color: azure;
+    height: 40px;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    align-self: baseline;
+    max-width: 450px;
+    text-decoration: none;
+    color: black;
+}
+.logo:hover {
+    cursor: pointer;
+    text-decoration: underline;
+    color: darkcyan;
+    font-weight: 700;
+    box-shadow: inset;
+}

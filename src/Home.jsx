@@ -1,7 +1,7 @@
 // src/PostAuth.jsx
 import React, { useState } from 'react';
 
-const PostAuth = () => {
+const Home = () => {
     const [eventName, setEventName] = useState('');
     const [eventDate, setEventDate] = useState('');
     const [eventTime, setEventTime] = useState('');
@@ -101,4 +101,4 @@ const PostAuth = () => {
   );
 };
 
-export default PostAuth;
+export default Home;

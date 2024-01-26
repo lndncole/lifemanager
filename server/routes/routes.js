@@ -62,11 +62,6 @@ router.get('/signin', (req, res) => {
   res.send('Sign In Page');
 });
 
-// Home Route - After Successful Sign In
-router.get('/home', (req, res) => {
-  res.send('Welcome to the Home Page');
-});
-
 router.get('/privacy-policy', (req, res) => {
   res.send(privacyPolicyVerbiage);
 });
@@ -136,7 +131,7 @@ router.get('/oauth2callback', async (req, res) => {
     req.session.tokens = tokens;
 
     //Redirect to "post-auth" screen upon successful authentication and setting of authentication token in to user session
-    res.redirect(`${domain}/post-auth`);
+    res.redirect(`${domain}/home`);
   } catch (error) {
     console.error('Error during OAuth callback:', error);
     res.status(500).send('Internal Server Error');
