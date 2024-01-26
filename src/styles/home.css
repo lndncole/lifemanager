@@ -16,13 +16,16 @@
     font-size: 24px;
 }
 
+.home-content-container .fetched-calendar {
+    justify-content: flex-start;
+}
+
 @media (max-width: 992px) {
     .form-input {
         font-size: 36px;
     }
     .home-content-container {
         flex-direction: column;
-        height: 88vh;
     }
     .event-card-container {
         width: 90%;

@@ -108,11 +108,10 @@ const Home = () => {
         </div>
         <div class="home-content-container">
           <div class="f-col fetched-calendar">
+            <h2>Upcoming events:</h2>
             {fetchedCalendar && fetchedCalendar.length > 0 ? (
               <>
-                <h2>Upcoming events:</h2>
                 <div class="event-card-container">
-                  
                   {fetchedCalendar.map((event, i) => (
                     i < 50 ? (<EventCard key={event.start} event={event} />) : ("")
                   ))}
