@@ -61,6 +61,19 @@ router.get('/get-auth', (req, res) => {
   }
 });
 
+router.get('/sign-out', (req, res) => {
+  // Clear the session
+  req.session.destroy(err => {
+    if (err) {
+      console.error('Error clearing session:', err);
+      return res.status(500).send('Internal Server Error');
+    }
+
+    // Optionally redirect to the sign-in page
+    res.redirect('/');
+  });
+});
+
 router.get('/privacy-policy', (req, res) => {
   res.send(privacyPolicyVerbiage);
 });
