@@ -80,7 +80,7 @@ const Home = () => {
         dateTime: eventDateTime,
       },
       end: {
-        dateTime: eventDateTime, // Adjust the end time as needed
+        dateTime: eventDateTime,
       },
       description: eventDetails,
     };
@@ -114,7 +114,7 @@ const Home = () => {
               <>
                 <div class="event-card-container">
                   {fetchedCalendar.map((event, i) => (
-                    i < 50 ? (<EventCard key={event.start} event={event} />) : ("")
+                    i <= 50 ? (<EventCard key={event.start} event={event} />) : ("")
                   ))}
                 </div>
               </>
