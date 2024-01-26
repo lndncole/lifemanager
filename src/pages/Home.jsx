@@ -46,6 +46,7 @@ const Home = () => {
     fetchCalendarData();
   }, []);
 
+  //Might add this to a button
   const handleFetchCalendar = async () => {
     try {
       const response = await fetch('/fetch-calendar', {
@@ -155,8 +156,7 @@ const Home = () => {
                   <button onClick={handleAddEvent}>Add Calendar Event</button>
               </div>
           }
-        </div>
-        {confirmationMessage && 
+          {confirmationMessage && 
             <div class="f-col">
                 <p>{confirmationMessage}</p>
                 {eventLink && (
@@ -166,6 +166,7 @@ const Home = () => {
                 )}
             </div>
         }
+        </div>
     </div>
   );
 };

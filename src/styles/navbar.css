@@ -20,6 +20,7 @@ nav {
     max-width: 450px;
     text-decoration: none;
     color: black;
+    transition: color .5s, font-weight .5s
 }
 .logo:hover {
     cursor: pointer;
@@ -45,6 +46,7 @@ nav {
     text-decoration: underline;
     color: black;
     font-weight: 700;
+    transition: color .5s, font-weight .5s;
 }
 
 @media (max-width: 992px) {
