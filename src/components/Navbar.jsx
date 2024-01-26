@@ -8,9 +8,14 @@ export default function Navbar() {
             <Link to="/home" class="logo">
                 lifeMNGR
             </Link>
-            <Link to="/about" class="nav-item">
-                about
-            </Link>
+            <div class="nav-item-container">
+                <Link to="/about" class="nav-item">
+                    about
+                </Link>
+                <Link to="/" class="nav-item">
+                    sign out
+                </Link>
+            </div>
         </nav>
     );
 };

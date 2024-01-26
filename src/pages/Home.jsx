@@ -1,15 +1,74 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { format } from 'date-fns';
+import '../styles/home.css';
 
 const Home = () => {
-    const [eventName, setEventName] = useState('');
-    const [eventDate, setEventDate] = useState('');
-    const [eventTime, setEventTime] = useState('');
-    const [eventDetails, setEventDetails] = useState('');
-    const [confirmationMessage, setConfirmationMessage] = useState('');
-    const [eventLink, setEventLink] = useState('');
+  const [eventName, setEventName] = useState('');
+  const [eventDate, setEventDate] = useState('');
+  const [eventTime, setEventTime] = useState('');
+  const [eventDetails, setEventDetails] = useState('');
+  const [confirmationMessage, setConfirmationMessage] = useState('');
+  const [eventLink, setEventLink] = useState('');
+  const [fetchedCalendar, setFetchCalendar] = useState('');
 
-  const handleFetchCalendar = () => {
-    window.location.href = '/fetch-calendar';
+  const EventCard = ({ event }) => {
+    const formattedDate = format(new Date(event.start), 'PPPppp');
+    return (
+      <div class="event-card">
+        <h4>{event.summary}</h4>
+        <span>Start: {formattedDate}</span>
+      </div>
+    );
+  };
+
+  useEffect(() => {
+    const fetchCalendarData = async () => {
+      try {
+        const response = await fetch('/fetch-calendar', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+    
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+    
+        const data = await response.json();
+        setFetchCalendar(data);
+      } catch (error) {
+        console.error('Fetch error:', error);
+        setFetchCalendar('Error fetching calendar');
+      }
+    };
+
+    fetchCalendarData();
+  }, []);
+
+  const handleFetchCalendar = async () => {
+    try {
+      const response = await fetch('/fetch-calendar', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+  
+      // Check if the response is ok (status in the range 200-299)
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+  
+      // Parse the JSON from the response
+      const data = await response.json();
+  
+      // Set the parsed data to state
+      setFetchCalendar(data);
+    } catch (error) {
+      console.error('Fetch error:', error);
+      setFetchCalendar('Error fetching calendar');
+    }
   };
 
   const handleAddEvent = async () => {
@@ -43,49 +102,61 @@ const Home = () => {
   };
 
   return (
-    
     <div class="f-col">
         <div class="f-col">
-            <h1>You've been authenticated!</h1>
-            <p>What would you like to do next?</p>
+            <h1>lifeMNGR</h1>
         </div>
-        <div class="f-col">
-            <p>Get calendar events for the next 30 days.</p>
-            <button onClick={handleFetchCalendar}>Get Calendar</button>
+        <div class="home-content-container">
+          <div class="f-col fetched-calendar">
+            {fetchedCalendar && fetchedCalendar.length > 0 ? (
+              <>
+                <h2>Upcoming events:</h2>
+                <div class="event-card-container">
+                  
+                  {fetchedCalendar.map((event, i) => (
+                    i < 50 ? (<EventCard key={event.start} event={event} />) : ("")
+                  ))}
+                </div>
+              </>
+            ) : (
+              <p>No events found.</p>
+            )}
+            {/* <button onClick={handleFetchCalendar}>Get Calendar</button> */}
+          </div>
+          {!confirmationMessage &&
+              <div class="f-col">
+                  <h2>Add an event to your calendar.</h2>
+                  <input
+                      type="text"
+                      value={eventName}
+                      onChange={(e) => setEventName(e.target.value)}
+                      placeholder="Event Name"
+                      class="form-input"
+                  />
+                  <span>Date</span>
+                  <input
+                      type="date"
+                      value={eventDate}
+                      onChange={(e) => setEventDate(e.target.value)}
+                      class="form-input"
+                  />
+                  <span>Time</span>
+                  <input
+                      type="time"
+                      value={eventTime}
+                      onChange={(e) => setEventTime(e.target.value)}
+                      class="form-input"
+                  />
+                  <textarea
+                      value={eventDetails}
+                      onChange={(e) => setEventDetails(e.target.value)}
+                      placeholder="Event Details"
+                      class="form-input"
+                  />
+                  <button onClick={handleAddEvent}>Add Calendar Event</button>
+              </div>
+          }
         </div>
-        {!confirmationMessage &&
-            <div class="f-col">
-                <p>Add an event to your calendar.</p>
-                <input
-                    type="text"
-                    value={eventName}
-                    onChange={(e) => setEventName(e.target.value)}
-                    placeholder="Event Name"
-                    class="form-input"
-                />
-                <span>Date</span>
-                <input
-                    type="date"
-                    value={eventDate}
-                    onChange={(e) => setEventDate(e.target.value)}
-                    class="form-input"
-                />
-                <span>Time</span>
-                <input
-                    type="time"
-                    value={eventTime}
-                    onChange={(e) => setEventTime(e.target.value)}
-                    class="form-input"
-                />
-                <textarea
-                    value={eventDetails}
-                    onChange={(e) => setEventDetails(e.target.value)}
-                    placeholder="Event Details"
-                    class="form-input"
-                />
-                <button onClick={handleAddEvent}>Add Calendar Event</button>
-            </div>
-        }
         {confirmationMessage && 
             <div class="f-col">
                 <p>{confirmationMessage}</p>

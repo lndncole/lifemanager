@@ -1,0 +1,34 @@
+.home-content-container {
+    display: flex;
+    width: 100%;
+}
+
+.event-card-container {
+    height: 400px;
+    overflow: scroll;
+}
+
+.event-card {
+    padding: 5px 10px;
+    border: 1px solid rgb(204, 204, 204);
+    border-radius: 5px;
+    background-color: rgb(249, 249, 249);
+    font-size: 24px;
+}
+
+@media (max-width: 992px) {
+    .form-input {
+        font-size: 36px;
+    }
+    .home-content-container {
+        flex-direction: column;
+        height: 88vh;
+    }
+    .event-card-container {
+        width: 90%;
+        height: 500px;
+    }
+    .fetched-calendar {
+        height: 500px;
+    }
+}

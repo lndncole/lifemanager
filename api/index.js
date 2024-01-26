@@ -53,7 +53,7 @@ async function getCalendar(auth) {
     // Calculate the time range for the next 30 days
     const timeMin = new Date().toISOString();
     const timeMax = new Date();
-    timeMax.setDate(timeMax.getDate() + 30);
+    timeMax.setDate(timeMax.getDate() + 50);
     
     let allEvents = [];
 

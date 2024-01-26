@@ -4,7 +4,7 @@ nav {
     justify-content: space-between;
     width: 100vw;
     align-items: center;
-    padding: 1% 2%;
+    padding: 3% 2%;
     position: sticky;
     top: 0px;
     left: 0px;
@@ -28,6 +28,14 @@ nav {
     font-weight: 700;
 }
 
+.nav-item-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    width: 16%;
+}
+
 .nav-item {
     text-decoration: none;
     color: gray;
@@ -37,4 +45,10 @@ nav {
     text-decoration: underline;
     color: black;
     font-weight: 700;
+}
+
+@media (max-width: 992px) {
+    .nav-item-container {
+        width: 30%;
+    }
 }
