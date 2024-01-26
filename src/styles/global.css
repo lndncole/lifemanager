@@ -65,7 +65,10 @@ button:hover {
 
 h1 {
     text-align: center;
-    margin: 0px;;
+    margin: 0px;
+}
+h2 {
+    margin: 0px;
 }
 
 @media (max-width: 992px) {

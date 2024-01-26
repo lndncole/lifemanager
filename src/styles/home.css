@@ -20,6 +20,10 @@
     justify-content: flex-start;
 }
 
+.home-content-container .f-col {
+    justify-content: flex-start;
+}
+
 @media (max-width: 992px) {
     .form-input {
         font-size: 36px;
