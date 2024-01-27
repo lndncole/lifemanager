@@ -1,3 +1,7 @@
+.home-container.f-col {
+    height: auto;
+    padding-bottom: 94px;
+}
 .home-calendar-content-container {
     display: flex;
     width: 100%;

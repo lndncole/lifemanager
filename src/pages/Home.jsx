@@ -104,7 +104,7 @@ const Home = () => {
   };
 
   return (
-    <div class="f-col">
+    <div class="f-col home-container">
         <div class="f-col">
             <h1>lifeMNGR</h1>
         </div>

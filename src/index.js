@@ -12,9 +12,7 @@ import './styles/global.css';
 const App = () => {
   return (
     <Router>
-        <AuthenticatedRoute>
-          <Navbar />
-        </AuthenticatedRoute> 
+        <Navbar />
         <Routes>
           <Route path="/" element={<SignIn />} />
             <Route path="/home" element={
@@ -24,9 +22,7 @@ const App = () => {
             }/>
           <Route path="/about" element={<About />} />
         </Routes>
-        <AuthenticatedRoute>
-          <Footer />
-        </AuthenticatedRoute>
+        <Footer />
     </Router>
   );
 };

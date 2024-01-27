@@ -1,8 +1,11 @@
 import React from 'react';
+import AuthenticatedRoute from './AuthenticatedRoute';
 import { Link } from 'react-router-dom';
 import '../styles/navbar.css';
 
 export default function Navbar() {
+    const windowLocation = window.location.href;
+    const atHome = windowLocation == '/' ? true : false;
 
     const handleSignOut = async ()=> {
         const response = await fetch('/sign-out', {
@@ -12,7 +15,7 @@ export default function Navbar() {
             },
         });
 
-        window.location.href = "/";
+        windowLocation = "/";
 
     };
 
@@ -25,9 +28,11 @@ export default function Navbar() {
                 <Link to="/about" class="nav-item">
                     about
                 </Link>
-                <a class="nav-item" onClick={handleSignOut}>
-                    sign out
-                </a>
+                <AuthenticatedRoute>
+                    <a class="nav-item" onClick={handleSignOut}>
+                        sign out
+                    </a>
+                </AuthenticatedRoute>
             </div>
         </nav>
     );

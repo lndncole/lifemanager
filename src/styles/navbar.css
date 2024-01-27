@@ -19,7 +19,7 @@
     width: 100vw;
     align-items: center;
     padding: 12px 24px;
-    position: relative;
+    position: fixed;
     bottom: 0px;
     left: 0px;
     border-top: 1px solid black;
