@@ -2,6 +2,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SignInButton from '../components/SignInButton';
+import { gaEvents } from '../middleware/ga.js';
 
 const SignIn = () => {
   const navigate = useNavigate();
@@ -18,6 +19,7 @@ const SignIn = () => {
         if (!response.ok) {
           console.warn('Not Authenticated. Please Sign In.');
         } else {
+          gaEvents.gaOauthLogin();
           window.location.href = "/home";
         }
     
