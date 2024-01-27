@@ -39,7 +39,7 @@ export default function Navbar() {
         });
 
         if(response.ok) {
-            navigate('/');
+            window.location.href = "/";
         } else {
             console.error("Unable to log out.");
         }
