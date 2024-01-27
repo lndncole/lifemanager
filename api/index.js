@@ -43,39 +43,32 @@ async function addCalendarEvent(auth, req) {
   }
 }
 
-async function getCalendar(auth) {
+async function getCalendar(auth, days) {
   try {
     const calendar = google.calendar({ version: 'v3', auth });
-
-    // Fetch all calendar IDs
-    const calendarListRes = await calendar.calendarList.list();
-    const calendarIds = calendarListRes.data.items.map(item => item.id);
 
     // Calculate the time range for the next 30 days
     const timeMin = new Date().toISOString();
     const timeMax = new Date();
-    timeMax.setDate(timeMax.getDate() + 50);
+    timeMax.setDate(timeMax.getDate() + days);
     
     let allEvents = [];
 
-    // Fetch events from each calendar
-    for (const calendarId of calendarIds) {
-      const eventsRes = await calendar.events.list({
-        calendarId: calendarId,
-        timeMin: timeMin,
-        timeMax: timeMax.toISOString(),
-        singleEvents: true,
-        orderBy: 'startTime'
-      });
+    const eventsRes = await calendar.events.list({
+      calendarId: "primary",
+      timeMin: timeMin,
+      timeMax: timeMax.toISOString(),
+      singleEvents: true,
+      orderBy: 'startTime'
+    });
 
-      const events = eventsRes.data.items;
-      if (events && events.length > 0) {
-        events.forEach(event => {
-          const start = event.start.dateTime || event.start.date;
-          console.log(`${start} - ${event.summary}`);
-          allEvents.push({ start: start, summary: event.summary });
-        });
-      }
+    const events = eventsRes.data.items;
+    if (events && events.length > 0) {
+      events.forEach(event => {
+        const start = event.start.dateTime || event.start.date;
+        console.log(`${start} - ${event.summary}`);
+        allEvents.push({ start: start, end: event.end?.date || event.end?.dateTime, summary: event.summary });
+      });
     }
 
     return allEvents;

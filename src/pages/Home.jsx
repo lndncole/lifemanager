@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import '../styles/home.css';
+import { castToError } from 'openai/core';
 
 const Home = () => {
   const [eventName, setEventName] = useState('');
@@ -11,6 +12,9 @@ const Home = () => {
   const [confirmationMessage, setConfirmationMessage] = useState('');
   const [eventLink, setEventLink] = useState('');
   const [fetchedCalendar, setFetchCalendar] = useState('');
+  const [eventsInMonthCount, setEventsInMonthCount] = useState(0);
+  const currentDate = new Date();
+  const currentMonth = currentDate.getMonth();
 
   const EventCard = ({ event }) => {
     const formattedDate = format(new Date(event.start), 'PPPppp');
@@ -45,10 +49,26 @@ const Home = () => {
         setFetchCalendar('Error fetching calendar');
 
       }
+
     };
 
     fetchCalendarData();
-  },[]);
+  }, []);
+
+  useEffect(() => {
+    calculatePercentageOfTimeThatIsScheduled(fetchedCalendar);
+  }, [fetchedCalendar]);
+
+  const calculatePercentageOfTimeThatIsScheduled = (calendar) => {
+    console.log(calendar);
+    if (calendar) {
+      const count = calendar.filter(event => {
+        const startDate = new Date(event.start);
+        return startDate.getMonth() == currentMonth;
+      }).length;
+      setEventsInMonthCount(count);
+    }
+  };
 
   //Might add this to a button
   const handleFetchCalendar = async () => {
@@ -107,7 +127,11 @@ const Home = () => {
   return (
     <div class="f-col home-container">
         <div class="f-col">
-            <h1>lifeMNGR</h1>
+            {eventsInMonthCount && eventsInMonthCount}
+            {/* Take a look at the user's:
+            Day (today - of a 16 hour day, how much of it is accounted for on your Google Calendar?),
+            Week (Next 7 days - of the 7 days, how many days have something scheduled?),
+            Month (Rest of current month - For the rest of the month, what percentage of days have something scheduled?) */}
         </div>
         <div class="home-calendar-content-container">
           <div class="f-col fetched-calendar">

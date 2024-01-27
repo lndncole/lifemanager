@@ -88,11 +88,13 @@ router.get('/fetch-calendar', async (req, res) => {
     return res.status(401).send('User not authenticated');
   }
 
+  const days = req.body.days ? req.body.days : 50;
+
   const oauth2Client = api.createOAuthClient();
   oauth2Client.setCredentials(req.session.tokens);
 
   try {
-    const events = await api.getCalendar(oauth2Client);
+    const events = await api.getCalendar(oauth2Client, days);
     res.json(events);
   } catch (error) {
     console.error('Error fetching calendar:', error);
