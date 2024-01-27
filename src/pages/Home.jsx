@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import '../styles/home.css';
-import { castToError } from 'openai/core';
 
 const Home = () => {
   const [eventName, setEventName] = useState('');
