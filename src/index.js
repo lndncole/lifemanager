@@ -1,3 +1,4 @@
+//src/index.js
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { createRoot } from 'react-dom/client';
@@ -15,11 +16,11 @@ const App = () => {
         <Navbar />
         <Routes>
           <Route path="/" element={<SignIn />} />
-            <Route path="/home" element={
-              <AuthenticatedRoute>
-                <Home />
-              </AuthenticatedRoute>
-            }/>
+          <Route path="/home" element={
+            <AuthenticatedRoute>
+              <Home />
+            </AuthenticatedRoute>
+          }/>
           <Route path="/about" element={<About />} />
         </Routes>
         <Footer />

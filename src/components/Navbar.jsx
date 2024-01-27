@@ -1,11 +1,34 @@
-import React from 'react';
-import AuthenticatedRoute from './AuthenticatedRoute';
-import { Link } from 'react-router-dom';
+//src/components/Navbar.jsx
+import React, {useEffect, useState} from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import '../styles/navbar.css';
 
 export default function Navbar() {
-    const windowLocation = window.location.href;
-    const atHome = windowLocation == '/' ? true : false;
+    const navigate = useNavigate();
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+    useEffect(() => {
+        const checkAuth = async () => {
+            try {
+                const response = await fetch('/get-auth', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+                if (response.ok) {
+                    setIsAuthenticated(true);
+                } else {
+                    setIsAuthenticated(false);
+                }
+            } catch (error) {
+                console.error('Error checking authentication:', error);
+                setIsAuthenticated(false);
+            }
+        };
+
+        checkAuth();
+    }, []);
 
     const handleSignOut = async ()=> {
         const response = await fetch('/sign-out', {
@@ -15,8 +38,11 @@ export default function Navbar() {
             },
         });
 
-        window.location.href = "/";
-
+        if(response.ok) {
+            navigate('/');
+        } else {
+            console.error("Unable to log out.");
+        }
     };
 
     return (
@@ -24,15 +50,15 @@ export default function Navbar() {
             <Link to="/home" class="logo">
                 lifeMNGR
             </Link>
-            <div class="nav-item-container">
+            <div class={isAuthenticated && "nav-item-container"}>
                 <Link to="/about" class="nav-item">
                     about
                 </Link>
-                <AuthenticatedRoute>
-                    <a class="nav-item" onClick={handleSignOut}>
+                {isAuthenticated && (
+                    <a className="nav-item" onClick={handleSignOut}>
                         sign out
                     </a>
-                </AuthenticatedRoute>
+                )}
             </div>
         </nav>
     );

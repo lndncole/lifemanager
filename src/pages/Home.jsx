@@ -1,3 +1,4 @@
+//src/pages/Home.jsx
 import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import '../styles/home.css';
@@ -47,7 +48,7 @@ const Home = () => {
     };
 
     fetchCalendarData();
-  }, []);
+  },[]);
 
   //Might add this to a button
   const handleFetchCalendar = async () => {

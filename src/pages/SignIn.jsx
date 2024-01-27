@@ -16,7 +16,7 @@ const SignIn = () => {
         });
     
         if (!response.ok) {
-          console.error('Network response was not ok');
+          console.warn('Not Authenticated. Please Sign In.');
         } else {
           window.location.href = "/home";
         }
