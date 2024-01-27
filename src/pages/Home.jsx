@@ -13,6 +13,7 @@ const Home = () => {
   const [eventLink, setEventLink] = useState('');
   const [fetchedCalendar, setFetchCalendar] = useState('');
   const [eventsInMonthCount, setEventsInMonthCount] = useState(0);
+  const [eventsInNextSevenDays, setEventsInNextSevenDays] = useState(0);
   const currentDate = new Date();
   const currentMonth = currentDate.getMonth();
 
@@ -60,13 +61,22 @@ const Home = () => {
   }, [fetchedCalendar]);
 
   const calculatePercentageOfTimeThatIsScheduled = (calendar) => {
-    console.log(calendar);
-    if (calendar) {
+    if (calendar && Array.isArray(calendar)) {
       const count = calendar.filter(event => {
         const startDate = new Date(event.start);
-        return startDate.getMonth() == currentMonth;
+        return startDate.getMonth() === currentMonth;
       }).length;
+  
+      const sevenDaysFromNow = new Date();
+      sevenDaysFromNow.setDate(currentDate.getDate() + 7);
+  
+      const eventsInNextSevenDaysFromCalendarCount = calendar.filter(event => {
+        const startDate = new Date(event.start);
+        return startDate >= currentDate && startDate < sevenDaysFromNow;
+      }).length;
+  
       setEventsInMonthCount(count);
+      setEventsInNextSevenDays(eventsInNextSevenDaysFromCalendarCount);
     }
   };
 
@@ -128,6 +138,7 @@ const Home = () => {
     <div class="f-col home-container">
         <div class="f-col">
             {eventsInMonthCount && eventsInMonthCount}
+            {eventsInNextSevenDays && eventsInNextSevenDays}
             {/* Take a look at the user's:
             Day (today - of a 16 hour day, how much of it is accounted for on your Google Calendar?),
             Week (Next 7 days - of the 7 days, how many days have something scheduled?),
