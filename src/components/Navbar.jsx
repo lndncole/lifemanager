@@ -1,5 +1,5 @@
+//src/components/Navbar.jsx
 import React from 'react';
-import AuthenticatedRoute from './AuthenticatedRoute';
 import { Link } from 'react-router-dom';
 import '../styles/navbar.css';
 
@@ -28,11 +28,9 @@ export default function Navbar() {
                 <Link to="/about" class="nav-item">
                     about
                 </Link>
-                <AuthenticatedRoute>
-                    <a class="nav-item" onClick={handleSignOut}>
-                        sign out
-                    </a>
-                </AuthenticatedRoute>
+                <a class="nav-item" onClick={handleSignOut}>
+                    sign out
+                </a>
             </div>
         </nav>
     );
