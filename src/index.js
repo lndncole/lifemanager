@@ -14,6 +14,8 @@ import Footer from './components/Footer';
 import SignIn from './pages/SignIn';
 import Home from './pages/Home';
 import About from './pages/About';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsOfService from './pages/TermsOfService';
 
 //Styles
 import './styles/global.css';
@@ -33,6 +35,8 @@ const App = () => {
             </AuthenticatedRoute>
           }/>
           <Route path="/about" element={<About />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/terms-of-service" element={<TermsOfService />} />
         </Routes>
         <Footer />
     </Router>
