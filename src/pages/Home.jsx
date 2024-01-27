@@ -19,18 +19,6 @@ const Home = () => {
   const lastDayOfMonth = new Date(currentYear, currentMonth + 1, 0);
   const daysLeftInMonth = lastDayOfMonth.getDate() - currentDate.getDate() + 1;
 
-
-
-  const EventCard = ({ event }) => {
-    const formattedDate = format(new Date(event.start), 'PPPppp');
-    return (
-      <div class="event-card">
-        <h4>{event.summary}</h4>
-        <span>Start: {formattedDate}</span>
-      </div>
-    );
-  };
-
   useEffect(() => {
     const fetchCalendarData = async () => {
       try {
@@ -61,35 +49,34 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
+    const calculatePercentageOfTimeThatIsScheduled = (calendar) => {
+      if (calendar && Array.isArray(calendar)) {
+        const daysOfMonthWithEvents = new Set();
+        calendar.forEach(event => {
+          const startDate = new Date(event.start);
+          if (startDate.getMonth() === currentMonth) {
+            daysOfMonthWithEvents.add(startDate.getDate());
+          }
+        });
+  
+        const countOfDaysOfMonthWithEvents = daysOfMonthWithEvents.size;
+    
+        const sevenDaysFromNow = new Date();
+        sevenDaysFromNow.setDate(currentDate.getDate() + 7);
+    
+        const eventsInNextSevenDaysFromCalendarCount = calendar.filter(event => {
+          const startDate = new Date(event.start);
+          return startDate >= currentDate && startDate < sevenDaysFromNow;
+        }).length;
+    
+        setEventsInMonthCount(countOfDaysOfMonthWithEvents);
+        setEventsInNextSevenDays(eventsInNextSevenDaysFromCalendarCount);
+      }
+    };
+
     calculatePercentageOfTimeThatIsScheduled(fetchedCalendar);
   }, [fetchedCalendar]);
 
-  const calculatePercentageOfTimeThatIsScheduled = (calendar) => {
-    if (calendar && Array.isArray(calendar)) {
-      const daysOfMonthWithEvents = new Set();
-      calendar.forEach(event => {
-        const startDate = new Date(event.start);
-        if (startDate.getMonth() === currentMonth) {
-          daysOfMonthWithEvents.add(startDate.getDate());
-        }
-      });
-
-      const countOfDaysOfMonthWithEvents = daysOfMonthWithEvents.size;
-  
-      const sevenDaysFromNow = new Date();
-      sevenDaysFromNow.setDate(currentDate.getDate() + 7);
-  
-      const eventsInNextSevenDaysFromCalendarCount = calendar.filter(event => {
-        const startDate = new Date(event.start);
-        return startDate >= currentDate && startDate < sevenDaysFromNow;
-      }).length;
-  
-      setEventsInMonthCount(countOfDaysOfMonthWithEvents);
-      setEventsInNextSevenDays(eventsInNextSevenDaysFromCalendarCount);
-    }
-  };
-
-  //Might add this to a button
   const handleFetchCalendar = async () => {
     try {
       const response = await fetch('/fetch-calendar', {
@@ -149,24 +136,30 @@ const Home = () => {
 
   return (
     <div class="f-col home-container">
-        <div class="w-100 section">
-            {eventsInMonthCount && 
-              <>
-                  <div># of days left in month: {(daysLeftInMonth)}</div>
-                  <div># days left in month with events: {(eventsInMonthCount)}</div>
-                  <div>
-                    % days of month with scheduled events: {(eventsInMonthCount/daysLeftInMonth) * 100}%
-                  </div>
-              </>
-            }
-            {/* Take a look at the user's:
-            Day (today - of a 16 hour day, how much of it is accounted for on your Google Calendar?),
-            Week (Next 7 days - of the 7 days, how many days have something scheduled?),
-            Month (Rest of current month - For the rest of the month, what percentage of days have something scheduled?) */}
+        <div class="home-calendar-content-container">
+          {eventsInNextSevenDays && 
+            <div class="w-100 section">
+              <h3>week: </h3>
+              <div># events this week: {(eventsInNextSevenDays)}</div>
+              <div>
+                % filled: {((eventsInNextSevenDays/7) * 100).toFixed(1)}%
+              </div>
+            </div>
+          }
+          {eventsInMonthCount && 
+            <div class="w-100 section">
+              <h3>month: </h3>
+              <div># of days left in month: {(daysLeftInMonth)}</div>
+              <div># of events in month: {(eventsInMonthCount)}</div>
+              <div>
+                % filled: {((eventsInMonthCount/daysLeftInMonth) * 100).toFixed(1)}%
+              </div>
+            </div>
+          }
         </div>
         <div class="home-calendar-content-container">
           <div class="f-col fetched-calendar section">
-            <h2>Upcoming events:</h2>
+            <h2>upcoming events:</h2>
             {fetchedCalendar && Array.isArray(fetchedCalendar) && 
               <div class="event-card-container">
                 {fetchedCalendar.map((event, i) => (
@@ -184,22 +177,22 @@ const Home = () => {
           </div>
           {!confirmationMessage &&
               <div class="f-col section">
-                  <h2>Add an event to your calendar.</h2>
+                  <h2>add an event:</h2>
                   <input
                       type="text"
                       value={eventName}
                       onChange={(e) => setEventName(e.target.value)}
-                      placeholder="Event Name"
+                      placeholder="event name"
                       class="form-input"
                   />
-                  <span>Date</span>
+                  <span>date</span>
                   <input
                       type="date"
                       value={eventDate}
                       onChange={(e) => setEventDate(e.target.value)}
                       class="form-input"
                   />
-                  <span>Time</span>
+                  <span>time</span>
                   <input
                       type="time"
                       value={eventTime}
@@ -209,10 +202,10 @@ const Home = () => {
                   <textarea
                       value={eventDetails}
                       onChange={(e) => setEventDetails(e.target.value)}
-                      placeholder="Event Details"
+                      placeholder="event details"
                       class="form-input"
                   />
-                  <button onClick={handleAddEvent}>Add Calendar Event</button>
+                  <button onClick={handleAddEvent}>add event</button>
               </div>
           }
           {confirmationMessage && 
@@ -221,15 +214,25 @@ const Home = () => {
                 {eventLink && (
                   <>
                     <button onClick={() => window.open(eventLink, "_blank")}>
-                        View Event
+                        view event
                     </button>
-                    <button onClick={handleFetchCalendar}>Refresh Calendar</button>
-                    <button onClick={handleAddAnotherEvent}>Add Another Event</button>
+                    <button onClick={handleFetchCalendar}>refresh calendar</button>
+                    <button onClick={handleAddAnotherEvent}>add another event</button>
                   </>
                 )}
             </div>
           }
         </div>
+    </div>
+  );
+};
+
+const EventCard = ({ event }) => {
+  const formattedDate = format(new Date(event.start), 'PPPppp');
+  return (
+    <div class="event-card">
+      <h4>{event.summary}</h4>
+      <span>Start: {formattedDate}</span>
     </div>
   );
 };
