@@ -67,10 +67,15 @@ const Home = () => {
 
   const calculatePercentageOfTimeThatIsScheduled = (calendar) => {
     if (calendar && Array.isArray(calendar)) {
-      const count = calendar.filter(event => {
+      const daysOfMonthWithEvents = new Set();
+      calendar.forEach(event => {
         const startDate = new Date(event.start);
-        return startDate.getMonth() === currentMonth;
-      }).length;
+        if (startDate.getMonth() === currentMonth) {
+          daysOfMonthWithEvents.add(startDate.getDate());
+        }
+      });
+
+      const countOfDaysOfMonthWithEvents = daysOfMonthWithEvents.size;
   
       const sevenDaysFromNow = new Date();
       sevenDaysFromNow.setDate(currentDate.getDate() + 7);
@@ -80,7 +85,7 @@ const Home = () => {
         return startDate >= currentDate && startDate < sevenDaysFromNow;
       }).length;
   
-      setEventsInMonthCount(count);
+      setEventsInMonthCount(countOfDaysOfMonthWithEvents);
       setEventsInNextSevenDays(eventsInNextSevenDaysFromCalendarCount);
     }
   };
