@@ -16,6 +16,11 @@ const Home = () => {
   const [eventsInNextSevenDays, setEventsInNextSevenDays] = useState(0);
   const currentDate = new Date();
   const currentMonth = currentDate.getMonth();
+  const currentYear = currentDate.getFullYear();
+  const lastDayOfMonth = new Date(currentYear, currentMonth + 1, 0);
+  const daysLeftInMonth = lastDayOfMonth.getDate() - currentDate.getDate() + 1;
+
+
 
   const EventCard = ({ event }) => {
     const formattedDate = format(new Date(event.start), 'PPPppp');
@@ -134,18 +139,29 @@ const Home = () => {
     }
   };
 
+  const handleAddAnotherEvent = () => {
+    setConfirmationMessage('');
+  };
+
   return (
     <div class="f-col home-container">
-        <div class="f-col">
-            {eventsInMonthCount && eventsInMonthCount}
-            {eventsInNextSevenDays && eventsInNextSevenDays}
+        <div class="w-100 section">
+            {eventsInMonthCount && 
+              <>
+                  <div># of days left in month: {(daysLeftInMonth)}</div>
+                  <div># days left in month with events: {(eventsInMonthCount)}</div>
+                  <div>
+                    % days of month with scheduled events: {(eventsInMonthCount/daysLeftInMonth) * 100}%
+                  </div>
+              </>
+            }
             {/* Take a look at the user's:
             Day (today - of a 16 hour day, how much of it is accounted for on your Google Calendar?),
             Week (Next 7 days - of the 7 days, how many days have something scheduled?),
             Month (Rest of current month - For the rest of the month, what percentage of days have something scheduled?) */}
         </div>
         <div class="home-calendar-content-container">
-          <div class="f-col fetched-calendar">
+          <div class="f-col fetched-calendar section">
             <h2>Upcoming events:</h2>
             {fetchedCalendar && Array.isArray(fetchedCalendar) && 
               <div class="event-card-container">
@@ -163,7 +179,7 @@ const Home = () => {
             {!fetchedCalendar && <p>Loading...</p>}
           </div>
           {!confirmationMessage &&
-              <div class="f-col">
+              <div class="f-col section">
                   <h2>Add an event to your calendar.</h2>
                   <input
                       type="text"
@@ -196,7 +212,7 @@ const Home = () => {
               </div>
           }
           {confirmationMessage && 
-            <div class="f-col">
+            <div class="f-col section">
                 <p>{confirmationMessage}</p>
                 {eventLink && (
                   <>
@@ -204,10 +220,11 @@ const Home = () => {
                         View Event
                     </button>
                     <button onClick={handleFetchCalendar}>Refresh Calendar</button>
+                    <button onClick={handleAddAnotherEvent}>Add Another Event</button>
                   </>
                 )}
             </div>
-        }
+          }
         </div>
     </div>
   );

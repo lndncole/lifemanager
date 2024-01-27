@@ -1,10 +1,14 @@
-.home-container.f-col {
+.home-container {
+    padding: 1% 2%;
     height: auto;
-    padding-bottom: 94px;
+    padding-top: 8px;
+    padding-bottom: 76px;
 }
+
 .home-calendar-content-container {
     display: flex;
     width: 100%;
+    gap: 8px;
 }
 
 .event-card-container {
@@ -20,13 +24,9 @@
     font-size: 24px;
 }
 
-.home-calendar-content-container .f-col {
-    justify-content: flex-start;
-}
-
 @media (max-width: 992px) {
-    .form-input {
-        font-size: 36px;
+    .home-container {
+        padding-bottom: 112px;
     }
     .home-calendar-content-container {
         flex-direction: column;
