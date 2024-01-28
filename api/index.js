@@ -1,6 +1,9 @@
 //api/index.js
 const process = require('process');
 const {google} = require('googleapis');
+const moment = require('moment-timezone');
+const userTimeZone = "America/Los_Angeles";
+
 
 const env = process.env.NODE_ENV == 'production' ? 'production' : 'development';
 const CREDENTIALS = env == 'production' ? process.env.GOOGLE_CREDENTIALS_PRODUCTION : process.env.GOOGLE_CREDENTIALS;
@@ -48,20 +51,16 @@ async function getCalendar(auth, days) {
     const calendar = google.calendar({ version: 'v3', auth });
 
     // Calculate the time range for the next 30 days
-    // Set timeMin to the start of the current day
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // Set to midnight
-    const timeMin = today.toISOString();
-    const timeMax = new Date();
-    timeMax.setDate(timeMax.getDate() + days);
-    const userTimeZone = "America/Los_Angeles";
+    // Use moment-timezone to handle PST time zone
+    const timeMin = moment.tz(userTimeZone).startOf('day').toISOString();
+    const timeMax = moment.tz(userTimeZone).add(days, 'days').toISOString();
     
     let allEvents = [];
 
     const eventsRes = await calendar.events.list({
       calendarId: "primary",
       timeMin: timeMin,
-      timeMax: timeMax.toISOString(),
+      timeMax: timeMax,
       timeZone: userTimeZone,
       singleEvents: true,
       orderBy: 'startTime'
