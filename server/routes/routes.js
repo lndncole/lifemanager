@@ -3,8 +3,27 @@ const express = require('express');
 const router = express.Router();
 const api = require('../../api/index.js');
 const url = require('url');
+const ai = require("../../ai/openai.js");
 
-const domain = process.env.NODE_ENV == 'production' ? 'https://www.lifemngr.co' : 'http://localhost:8080';
+const domain = 
+  process.env.NODE_ENV == 'production' ? 'https://www.lifemngr.co' 
+    : 'http://localhost:8080';
+
+router.post('/api/chat', async (req, res) => {
+  const { message } = req.body;
+
+  try {
+    const completion = await ai.startChat(message);
+    if (completion.choices && completion.choices.length > 0 && completion.choices[0].message) {
+      res.json({ response: completion.choices[0].message.content });
+    } else {
+      throw new Error('Invalid response structure from OpenAI API');
+    }
+  } catch (error) {
+    console.error('Error with OpenAI API:', error);
+    res.status(500).send('Error processing your request');
+  }
+});
 
 //Get authorization status
 router.get('/get-auth', (req, res) => {
