@@ -11,9 +11,11 @@ const Home = () => {
   const [confirmationMessage, setConfirmationMessage] = useState('');
   const [eventLink, setEventLink] = useState('');
   const [fetchedCalendar, setFetchCalendar] = useState('');
-  const [eventsInMonthCount, setEventsInMonthCount] = useState(0);
-  const [eventsInNextSevenDays, setEventsInNextSevenDays] = useState(0);
+  const [eventsInMonthCount, setEventsInMonthCount] = useState();
+  const [eventsInNextSevenDays, setEventsInNextSevenDays] = useState();
+  const [eventHoursFilledToday, setEventHoursFilledToday] = useState();
   const currentDate = new Date();
+  const currentDay = currentDate.getDate();
   const currentMonth = currentDate.getMonth();
   const currentYear = currentDate.getFullYear();
   const lastDayOfMonth = new Date(currentYear, currentMonth + 1, 0);
@@ -52,25 +54,34 @@ const Home = () => {
     const calculatePercentageOfTimeThatIsScheduled = (calendar) => {
       if (calendar && Array.isArray(calendar)) {
         const daysOfMonthWithEvents = new Set();
+        const hoursWithEventsToday = new Set();
+
         calendar.forEach(event => {
           const startDate = new Date(event.start);
-          if (startDate.getMonth() === currentMonth) {
+          const eventDay = startDate.getDate();
+          const eventMonth = startDate.getMonth();
+          const eventYear = startDate.getFullYear();
+          const eventHour = startDate.getHours();
+          if (eventMonth === currentMonth) {
             daysOfMonthWithEvents.add(startDate.getDate());
           }
+          if (eventDay === currentDay && eventMonth === currentMonth && eventYear === currentYear) {
+            hoursWithEventsToday.add(eventHour);
+          }
         });
-  
-        const countOfDaysOfMonthWithEvents = daysOfMonthWithEvents.size;
-    
-        const sevenDaysFromNow = new Date();
-        sevenDaysFromNow.setDate(currentDate.getDate() + 7);
-    
+
+        const countOfHoursWithEventsToday = hoursWithEventsToday.size;
+        setEventHoursFilledToday(countOfHoursWithEventsToday);
+
+        const sevenDaysFromNow = new Date().setDate(currentDate.getDate() + 7);
         const eventsInNextSevenDaysFromCalendarCount = calendar.filter(event => {
           const startDate = new Date(event.start);
           return startDate >= currentDate && startDate < sevenDaysFromNow;
         }).length;
-    
-        setEventsInMonthCount(countOfDaysOfMonthWithEvents);
         setEventsInNextSevenDays(eventsInNextSevenDaysFromCalendarCount);
+    
+        const countOfDaysOfMonthWithEvents = daysOfMonthWithEvents.size;
+        setEventsInMonthCount(countOfDaysOfMonthWithEvents);
       }
     };
 
@@ -133,10 +144,19 @@ const Home = () => {
   const handleAddAnotherEvent = () => {
     setConfirmationMessage('');
   };
-
+  
   return (
     <div class="f-col home-container">
         <div class="home-calendar-content-container">
+          {eventHoursFilledToday && 
+            <div class="w-100 section">
+              <h3>day: </h3>
+              <div># hours with events today: {(eventHoursFilledToday)}</div>
+              <div>
+                % filled: {((eventHoursFilledToday/24) * 100).toFixed(1)}%
+              </div>
+            </div>
+          }
           {eventsInNextSevenDays && 
             <div class="w-100 section">
               <h3>week: </h3>

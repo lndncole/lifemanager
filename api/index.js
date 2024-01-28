@@ -48,7 +48,10 @@ async function getCalendar(auth, days) {
     const calendar = google.calendar({ version: 'v3', auth });
 
     // Calculate the time range for the next 30 days
-    const timeMin = new Date().toISOString();
+    // Set timeMin to the start of the current day
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Set to midnight
+    const timeMin = today.toISOString();
     const timeMax = new Date();
     timeMax.setDate(timeMax.getDate() + days);
     
@@ -66,8 +69,7 @@ async function getCalendar(auth, days) {
     if (events && events.length > 0) {
       events.forEach(event => {
         const start = event.start.dateTime || event.start.date;
-        console.log(`${start} - ${event.summary}`);
-        allEvents.push({ start: start, end: event.end?.date || event.end?.dateTime, summary: event.summary });
+        allEvents.push({ start: start, end: event.end?.date || event.end?.dateTime, summary: event.summary, description: event.description });
       });
     }
 
