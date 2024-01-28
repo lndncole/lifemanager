@@ -219,7 +219,7 @@ const Home = () => {
         </div>
         <div class="home-calendar-content-container">
           <div class="f-col fetched-calendar section">
-            <h2>upcoming events:</h2>
+            <h2>scheduled events:</h2>
             {fetchedCalendar && Array.isArray(fetchedCalendar) && 
               <div class="event-card-container">
                 {fetchedCalendar.map((event, i) => (
@@ -245,16 +245,16 @@ const Home = () => {
                       placeholder="event name"
                       class="form-input"
                   />
-                  <span>date</span>
                   <input
                       type="date"
+                      placeholder='11/03/1986'
                       value={eventDate}
                       onChange={(e) => setEventDate(e.target.value)}
                       class="form-input"
                   />
-                  <span>time</span>
                   <input
                       type="time"
+                      placeholder='03:15AM'
                       value={eventTime}
                       onChange={(e) => setEventTime(e.target.value)}
                       class="form-input"
@@ -284,6 +284,8 @@ const Home = () => {
           }
         </div>
     </div>
+
+
   );
 };
 
