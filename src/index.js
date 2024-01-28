@@ -9,6 +9,7 @@ import ReactGA from 'react-ga4';
 import AuthenticatedRoute from './components/AuthenticatedRoute';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import ChatGPT from './components/ChatGPT';
 
 //Pages
 import SignIn from './pages/SignIn';
@@ -39,6 +40,9 @@ const App = () => {
           <Route path="/terms-of-service" element={<TermsOfService />} />
         </Routes>
         <Footer />
+        <AuthenticatedRoute>
+          <ChatGPT />
+        </AuthenticatedRoute>
     </Router>
   );
 };
