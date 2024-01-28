@@ -34,6 +34,9 @@ async function addCalendarEvent(auth, req) {
       description: req.body.description,
     };
 
+    console.log("auth: ", auth);
+    console.log("event added: ", event);
+
     const response = await calendar.events.insert({
       calendarId: 'primary',
       resource: event,
@@ -73,7 +76,9 @@ async function getCalendar(auth, days) {
         allEvents.push({ start: start, end: event.end?.date || event.end?.dateTime, summary: event.summary, description: event.description });
       });
     }
-
+    
+    console.log("auth: ", auth);
+    console.log("calendar: ", allEvents);
     return allEvents;
   } catch (error) {
     console.error('Error retrieving calendar events:', error);
