@@ -23,29 +23,28 @@ const Home = () => {
   const [eventsInNextSevenDays, setEventsInNextSevenDays] = useState();
   const [eventHoursFilledToday, setEventHoursFilledToday] = useState();
 
-  //Setting global event information dates and times
-  // Getting the current date and time
-  const currentDate = new Date();
-
-  // Getting the time zone offset in milliseconds (offset is in minutes)
-  const timezoneOffset = currentDate.getTimezoneOffset() * 60000;
-
-  // Creating a new Date object with the UTC equivalent of the current date and time
-  const currentUTCDate = new Date(currentDate.getTime() - timezoneOffset);
-
-  // Formatting the UTC date
-  const todaysDate = currentUTCDate.toLocaleDateString("en-US", { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-
-  // Extracting date components from the UTC date
-  const currentDay = currentUTCDate.getDate();
-  const currentMonth = currentUTCDate.getMonth();
-  const currentYear = currentUTCDate.getFullYear();
-
+  const moment = require('moment');
+  const momentTz = require('moment-timezone');
+  
+  // Assuming you want to use a specific time zone, e.g., 'America/Los_Angeles'
+  const userTimeZone = 'America/Los_Angeles';
+  
+  // Getting the current date and time in the user's time zone
+  const currentDate = momentTz.tz(userTimeZone);
+  
+  // Formatting the date for display
+  const todaysDate = currentDate.format('dddd, MMMM Do YYYY'); // e.g., "Monday, January 1st 2023"
+  
+  // Extracting date components
+  const currentDay = currentDate.date();
+  const currentMonth = currentDate.month(); // Note: Months are 0-indexed (0 = January, 11 = December)
+  const currentYear = currentDate.year();
+  
   // Calculating the last day of the month
-  const lastDayOfMonth = new Date(currentYear, currentMonth + 1, 0);
-
+  const lastDayOfMonth = currentDate.clone().endOf('month').date();
+  
   // Calculating the days left in the month
-  const daysLeftInMonth = lastDayOfMonth.getDate() - currentUTCDate.getDate() + 1;
+  const daysLeftInMonth = lastDayOfMonth - currentDay + 1;
 
   useEffect(() => {
     const fetchCalendarData = async () => {
@@ -84,27 +83,20 @@ const Home = () => {
         const eventsToday = [];
 
         calendar.forEach(event => {
-          const startDate = new Date(event.start);
-          const eventDay = startDate.getDate();
-          const eventMonth = startDate.getMonth();
-          const eventYear = startDate.getFullYear();
-          const eventHour = startDate.getHours();
+          const startDate = momentTz.tz(event.start, userTimeZone);
+          const eventDay = startDate.date();
+          const eventMonth = startDate.month();
+          const eventYear = startDate.year();
+          const eventHour = startDate.hour();
+        
           if (eventMonth === currentMonth) {
-            daysOfMonthWithEvents.add(startDate.getDate());
+            daysOfMonthWithEvents.add(eventDay);
           }
+        
           if (eventDay === currentDay && eventMonth === currentMonth && eventYear === currentYear) {
             hoursWithEventsToday.add(eventHour);
             eventsToday.push(event);
           }
-
-          //For debugging in production
-          console.log("event day: ", eventDay);
-          console.log("current day: ", currentDay);
-          console.log("event month: ", eventMonth);
-          console.log("current month: ", currentMonth);
-          console.log("event year: ", eventYear);
-          console.log("current year: ", currentYear);
-
         });
 
         setEventsToday(eventsToday);
@@ -112,15 +104,21 @@ const Home = () => {
         const countOfHoursWithEventsToday = hoursWithEventsToday.size;
         setEventHoursFilledToday(countOfHoursWithEventsToday);
 
-        const sevenDaysFromNow = new Date().setDate(currentDate.getDate() + 7);
+        // Calculating seven days from now in the user's time zone
+        const sevenDaysFromNow = currentDate.clone().add(7, 'days');
+
+        // Filtering events occurring in the next seven days
         const eventsInNextSevenDaysFromCalendarCount = calendar.filter(event => {
-          const startDate = new Date(event.start);
-          return startDate >= currentDate && startDate < sevenDaysFromNow;
+          const startDate = momentTz.tz(event.start, userTimeZone);
+          return startDate.isSameOrAfter(currentDate) && startDate.isBefore(sevenDaysFromNow);
         }).length;
         setEventsInNextSevenDays(eventsInNextSevenDaysFromCalendarCount);
     
         const countOfDaysOfMonthWithEvents = daysOfMonthWithEvents.size;
         setEventsInMonthCount(countOfDaysOfMonthWithEvents);
+
+        //For debugging in production
+        console.log("fetched calendar: ", calendar);
       }
     };
 
