@@ -54,6 +54,7 @@ async function getCalendar(auth, days) {
     const timeMin = today.toISOString();
     const timeMax = new Date();
     timeMax.setDate(timeMax.getDate() + days);
+    const userTimeZone = "America/Los_Angeles";
     
     let allEvents = [];
 
@@ -61,6 +62,7 @@ async function getCalendar(auth, days) {
       calendarId: "primary",
       timeMin: timeMin,
       timeMax: timeMax.toISOString(),
+      timeZone: userTimeZone,
       singleEvents: true,
       orderBy: 'startTime'
     });

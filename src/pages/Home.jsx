@@ -24,13 +24,28 @@ const Home = () => {
   const [eventHoursFilledToday, setEventHoursFilledToday] = useState();
 
   //Setting global event information dates and times
+  // Getting the current date and time
   const currentDate = new Date();
-  const todaysDate = currentDate.toLocaleDateString("en-US", { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-  const currentDay = currentDate.getDate();
-  const currentMonth = currentDate.getMonth();
-  const currentYear = currentDate.getFullYear();
+
+  // Getting the time zone offset in milliseconds (offset is in minutes)
+  const timezoneOffset = currentDate.getTimezoneOffset() * 60000;
+
+  // Creating a new Date object with the UTC equivalent of the current date and time
+  const currentUTCDate = new Date(currentDate.getTime() - timezoneOffset);
+
+  // Formatting the UTC date
+  const todaysDate = currentUTCDate.toLocaleDateString("en-US", { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+  // Extracting date components from the UTC date
+  const currentDay = currentUTCDate.getDate();
+  const currentMonth = currentUTCDate.getMonth();
+  const currentYear = currentUTCDate.getFullYear();
+
+  // Calculating the last day of the month
   const lastDayOfMonth = new Date(currentYear, currentMonth + 1, 0);
-  const daysLeftInMonth = lastDayOfMonth.getDate() - currentDate.getDate() + 1;
+
+  // Calculating the days left in the month
+  const daysLeftInMonth = lastDayOfMonth.getDate() - currentUTCDate.getDate() + 1;
 
   useEffect(() => {
     const fetchCalendarData = async () => {
@@ -275,11 +290,14 @@ const Home = () => {
 };
 
 const EventCard = ({ event }) => {
-  const formattedDate = format(new Date(event.start), 'PPPppp');
+  const utcStartDate = new Date(event.start);
+  const formattedDate = format(utcStartDate, 'PPPppp', { timeZone: 'UTC' });
+  // Convert to local time for display
+  const localFormattedDate = new Date(utcStartDate).toLocaleString();
   return (
-    <div class="event-card">
+    <div className="event-card">
       <h4>{event.summary}</h4>
-      <span>Start: {formattedDate}</span>
+      <span>Start: {localFormattedDate}</span>
     </div>
   );
 };
