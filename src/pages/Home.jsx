@@ -4,17 +4,28 @@ import { format } from 'date-fns';
 import '../styles/home.css';
 
 const Home = () => {
+  //For adding events
   const [eventName, setEventName] = useState('');
   const [eventDate, setEventDate] = useState('');
   const [eventTime, setEventTime] = useState('');
   const [eventDetails, setEventDetails] = useState('');
+
+  //Getting response back after adding event
   const [confirmationMessage, setConfirmationMessage] = useState('');
   const [eventLink, setEventLink] = useState('');
+
+  //Getting response from fetching calendar
   const [fetchedCalendar, setFetchCalendar] = useState('');
+
+  //Parsing calendar
+  const [eventsToday, setEventsToday] = useState();
   const [eventsInMonthCount, setEventsInMonthCount] = useState();
   const [eventsInNextSevenDays, setEventsInNextSevenDays] = useState();
   const [eventHoursFilledToday, setEventHoursFilledToday] = useState();
+
+  //Setting global event information dates and times
   const currentDate = new Date();
+  const todaysDate = currentDate.toLocaleDateString("en-US", { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
   const currentDay = currentDate.getDate();
   const currentMonth = currentDate.getMonth();
   const currentYear = currentDate.getFullYear();
@@ -55,6 +66,7 @@ const Home = () => {
       if (calendar && Array.isArray(calendar)) {
         const daysOfMonthWithEvents = new Set();
         const hoursWithEventsToday = new Set();
+        const eventsToday = [];
 
         calendar.forEach(event => {
           const startDate = new Date(event.start);
@@ -67,8 +79,20 @@ const Home = () => {
           }
           if (eventDay === currentDay && eventMonth === currentMonth && eventYear === currentYear) {
             hoursWithEventsToday.add(eventHour);
+            eventsToday.push(event);
           }
+
+          //For debugging in production
+          console.log("event day: ", eventDay);
+          console.log("current day: ", currentDay);
+          console.log("event month: ", eventMonth);
+          console.log("current month: ", currentMonth);
+          console.log("event year: ", eventYear);
+          console.log("current year: ", currentYear);
+
         });
+
+        setEventsToday(eventsToday);
 
         const countOfHoursWithEventsToday = hoursWithEventsToday.size;
         setEventHoursFilledToday(countOfHoursWithEventsToday);
@@ -148,16 +172,19 @@ const Home = () => {
   return (
     <div class="f-col home-container">
         <div class="home-calendar-content-container">
-          {eventHoursFilledToday && 
             <div class="w-100 section">
               <h3>day: </h3>
-              <div># hours with events today: {(eventHoursFilledToday)}</div>
-              <div>
-                % filled: {((eventHoursFilledToday/24) * 100).toFixed(1)}%
-              </div>
+              <div style={{ textDecoration: 'underline' }}>{todaysDate}</div>
+              {eventHoursFilledToday > 0 &&
+                <>
+                  <div># events today: {(eventsToday.length)}</div>
+                  <div>
+                    % filled: {((eventHoursFilledToday/24) * 100).toFixed(1)}%
+                  </div>
+                </>
+              }
             </div>
-          }
-          {eventsInNextSevenDays && 
+          {eventsInNextSevenDays > 0 && 
             <div class="w-100 section">
               <h3>week: </h3>
               <div># events this week: {(eventsInNextSevenDays)}</div>
@@ -166,7 +193,7 @@ const Home = () => {
               </div>
             </div>
           }
-          {eventsInMonthCount && 
+          {eventsInMonthCount > 0 && 
             <div class="w-100 section">
               <h3>month: </h3>
               <div># of days left in month: {(daysLeftInMonth)}</div>
