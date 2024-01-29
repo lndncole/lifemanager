@@ -1,7 +1,8 @@
 // src/components/ChatGPT.jsx
 import React, { useState, useEffect, useRef } from "react";
-
 import '../styles/chatgpt.css';
+import { IoSparklesOutline } from "react-icons/io5";
+
 
 const ChatGPT = () => {
   //Handling state
@@ -25,8 +26,8 @@ const ChatGPT = () => {
         toggleChat();
       }
     }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("mouseup", handleClickOutside);
+    return () => document.removeEventListener("mouseup", handleClickOutside);
   }, [isOpen]);
 
   const toggleChat = () => {
@@ -73,11 +74,13 @@ const ChatGPT = () => {
   return (
     <div className={`chat-container ${isOpen ? "open" : ""}`}>
       <div className={`chat-tab ${isOpen ? "open" : ""}`} onClick={toggleChat}>
-        AI
+        ChatGPT <IoSparklesOutline />
       </div>
-      {isOpen && (
-        <div className="chat-window" ref={chatWindowRef}>
-          <button className="close-chat" onClick={toggleChat}>X</button>
+  
+        <div className={`chat-window ${isOpen ? "open" : ""}`} ref={chatWindowRef}>
+          {isOpen && 
+            <button className="close-chat" onClick={toggleChat}>X</button>
+          }
           <div className="chat-messages">
             {conversation.map((msg, index) => (
               <div key={index} className={`message ${msg.role}`}
@@ -97,7 +100,7 @@ const ChatGPT = () => {
             <button onClick={sendMessage}>Send</button>
           </div>
         </div>
-      )}
+    
 
     </div>
   );
