@@ -34,7 +34,7 @@ async function addCalendarEvent(auth, req) {
       description: req.body.description,
     };
 
-    console.log("auth: ", auth);
+    //log for debugging
     console.log("event added: ", event);
 
     const response = await calendar.events.insert({
@@ -45,6 +45,17 @@ async function addCalendarEvent(auth, req) {
     return response;
   } catch (error) {
     console.error('Error adding and event to the calendar:', error);
+    throw error;
+  }
+}
+
+async function getUserInfo(auth) {
+  try {
+    const oauth2 = google.oauth2({ auth: auth, version: 'v2' });
+    const userInfo = await oauth2.userinfo.get();
+    return userInfo.data; // Make sure to return the data property
+  } catch (error) {
+    console.error('Error fetching user info:', error);
     throw error;
   }
 }
@@ -76,8 +87,7 @@ async function getCalendar(auth, days) {
         allEvents.push({ start: start, end: event.end?.date || event.end?.dateTime, summary: event.summary, description: event.description });
       });
     }
-    
-    console.log("auth: ", auth);
+
     console.log("calendar: ", allEvents);
     return allEvents;
   } catch (error) {
@@ -86,4 +96,4 @@ async function getCalendar(auth, days) {
   }
 }
 
-module.exports = { getCalendar, createOAuthClient, addCalendarEvent };
+module.exports = { getCalendar, getUserInfo, createOAuthClient, addCalendarEvent };

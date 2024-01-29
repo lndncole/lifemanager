@@ -20,9 +20,9 @@ app.use(session({
 app.use(express.static(path.join(__dirname, '../dist')));
 
 const corsOptions = {
-    origin: 'http://localhost:8081',  // Frontend origin
+    origin: process.env.NODE_ENV === 'production' ? 'https://www.yourproductiondomain.com' : 'http://localhost:8081',
     optionsSuccessStatus: 200
-  };
+};
 
 app.use(cors(corsOptions));
 app.use(express.json());

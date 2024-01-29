@@ -60,18 +60,21 @@ const Home = () => {
           console.error('Network response was not ok');
           setFetchCalendar('error');
         } else {
-          const data = await response.json();
-          setFetchCalendar(data);
+          const contentType = response.headers.get("content-type");
+          if (contentType && contentType.indexOf("application/json") !== -1) {
+            const data = await response.json();
+            setFetchCalendar(data);
+          } else {
+            console.error('Response not JSON');
+            setFetchCalendar('error');
+          }
         }
-    
       } catch (error) {
         console.error('Fetch error:', error);
         setFetchCalendar('Error fetching calendar');
-
       }
-
     };
-
+  
     fetchCalendarData();
   }, []);
 
@@ -116,9 +119,6 @@ const Home = () => {
     
         const countOfDaysOfMonthWithEvents = daysOfMonthWithEvents.size;
         setEventsInMonthCount(countOfDaysOfMonthWithEvents);
-
-        //For debugging in production
-        console.log("fetched calendar: ", calendar);
       }
     };
 
