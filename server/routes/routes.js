@@ -27,7 +27,7 @@ router.post('/api/chat', async (req, res) => {
 
 //Get authorization status
 router.get('/get-auth', (req, res) => {
-  if (req.session.oauth2ClientConfig) {
+  if (req.session.tokens) {
     res.status(200).send("Authenticated");
   } else {
     res.status(401).send("Not Authenticated");
@@ -50,7 +50,7 @@ router.get('/sign-out', (req, res) => {
 
 //Fetch user's calendar
 router.get('/fetch-calendar', async (req, res) => {
-  if (!req.session.oauth2ClientConfig) {
+  if (!req.session.tokens) {
     return res.status(401).send('User not authenticated');
   }
 
@@ -70,7 +70,7 @@ router.get('/fetch-calendar', async (req, res) => {
 
 //Add event to calendar
 router.post('/add-calendar-event', async (req, res) => {
-  if (!req.session.oauth2ClientConfig) {
+  if (!req.session.tokens) {
     return res.status(401).send('User not authenticated');
   }
 
@@ -97,6 +97,7 @@ router.get('/oauth2callback', async (req, res) => {
     if (!req.session.oauth2ClientConfig) {
       return res.status(400).send('App session expired or invalid state');
     }
+
 
     //Check to see that the user was Authenticated through Google
     if (!code) {
@@ -131,6 +132,7 @@ router.get('/authenticate', async (req, res) => {
 
     // Store the client's config in session
     req.session.oauth2ClientConfig = {
+      auth: oauth2Client,
       client_id: oauth2Client._clientId,
       client_secret: oauth2Client._clientSecret,
       redirect_uris: oauth2Client.redirectUri

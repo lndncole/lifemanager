@@ -33,6 +33,7 @@ const App = () => {
           <Route path="/home" element={
             <AuthenticatedRoute>
               <Home />
+              <ChatGPT />
             </AuthenticatedRoute>
           }/>
           <Route path="/about" element={<About />} />
@@ -40,9 +41,6 @@ const App = () => {
           <Route path="/terms-of-service" element={<TermsOfService />} />
         </Routes>
         <Footer />
-        <AuthenticatedRoute>
-          <ChatGPT />
-        </AuthenticatedRoute>
     </Router>
   );
 };
