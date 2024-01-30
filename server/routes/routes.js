@@ -27,8 +27,8 @@ router.post('/api/chat', async (req, res) => {
 
 //Get authorization status
 router.get('/get-auth', (req, res) => {
-  if (req.session.tokens) {
-    res.status(200).send("Authenticated");
+  if (req.session.tokens && req.session.user) {
+    res.status(200).send(req.session.user);
   } else {
     res.status(401).send("Not Authenticated");
   }
@@ -110,6 +110,30 @@ router.get('/oauth2callback', async (req, res) => {
     const { tokens } = await oauth2Client.getToken(code);
     req.session.tokens = tokens;
 
+    // Retrieve user's profile information with error handling
+    try {
+      oauth2Client.setCredentials(req.session.tokens);
+
+      const userInfo = await api.getUserInfo(oauth2Client);
+      
+      if (userInfo) {
+        req.session.user = {
+          email: userInfo.email,
+          name: userInfo.name,
+          picture: userInfo.picture
+        };
+        
+        //log user for debugging 
+        console.log("user: ", req.session.user);
+      } else {
+        console.error('User info not found');
+        // Handle the case where user info is not found
+      }
+    } catch (userInfoError) {
+      console.error('Error retrieving user info:', userInfoError);
+      // Handle the error, e.g., by sending a response or logging
+    }
+
     //Redirect to "post-auth" screen upon successful authentication and setting of authentication token in to user session
     res.redirect(`${domain}/home`);
   } catch (error) {
@@ -124,10 +148,14 @@ router.get('/authenticate', async (req, res) => {
     // Create a new OAuth2 client
     const oauth2Client = api.createOAuthClient();
 
-    // Generate the authorization URL using Calendar scope specifically
+    // Generate the authorization URL with multiple scopes
     const authorizeUrl = oauth2Client.generateAuthUrl({
       access_type: 'offline',
-      scope: 'https://www.googleapis.com/auth/calendar'
+      scope: [
+        'https://www.googleapis.com/auth/calendar',
+        'https://www.googleapis.com/auth/userinfo.email',
+        'https://www.googleapis.com/auth/userinfo.profile'
+      ]
     });
 
     // Store the client's config in session
