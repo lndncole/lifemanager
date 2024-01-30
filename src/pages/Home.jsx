@@ -3,6 +3,9 @@ import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import '../styles/home.css';
 
+//Components
+import ChatGPT from '../components/ChatGPT';
+
 const Home = () => {
   //For adding events
   const [eventName, setEventName] = useState('');
@@ -177,6 +180,7 @@ const Home = () => {
   };
   
   return (
+    <>
     <div class="f-col home-container">
         <div class="home-calendar-content-container">
             <div class="w-100 section">
@@ -279,7 +283,8 @@ const Home = () => {
         </div>
     </div>
 
-
+    <ChatGPT />
+    </>
   );
 };
 
