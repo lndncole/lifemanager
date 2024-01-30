@@ -60,14 +60,8 @@ const Home = () => {
           console.error('Network response was not ok');
           setFetchCalendar('error');
         } else {
-          const contentType = response.headers.get("content-type");
-          if (contentType && contentType.indexOf("application/json") !== -1) {
-            const data = await response.json();
-            setFetchCalendar(data);
-          } else {
-            console.error('Response not JSON');
-            setFetchCalendar('error');
-          }
+          const data = await response.json();
+          setFetchCalendar(data);
         }
       } catch (error) {
         console.error('Fetch error:', error);

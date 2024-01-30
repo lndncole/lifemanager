@@ -1,10 +1,15 @@
 require('dotenv').config();
 
-const routes = require('./routes/routes.js');
-const pool = require('../db/db.js');
+//routes
+const routes = require('./routes/routes');
+const dbRoute = require('./routes/db');
+const gptAuthRoutes = require('./routes/gptAuth');
+
+//dependencies
 const cors = require('cors');
 const path = require('path');
 
+//server
 const express = require('express');
 const session = require('express-session');
 const bodyParser = require('body-parser');
@@ -17,6 +22,8 @@ app.use(session({
     cookie: { secure: false }
 }));
 
+
+//options and connections
 app.use(express.static(path.join(__dirname, '../dist')));
 
 const corsOptions = {
@@ -27,8 +34,11 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(routes);
+app.use(dbRoute);
+app.use(gptAuthRoutes);
 app.use(bodyParser.json());
 
+//catch all for routes
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '../dist', 'index.html'));
 });
@@ -42,20 +52,4 @@ if (port == null || port == "") {
 
 app.listen(port, () => {
  console.log(`Server running on port ${port}`);
-});
-
-
-//Database basic query
-const query = (text, params, callback) => {
-    return pool.query(text, params, callback);
-};
-
-app.get('/testdb', async (req, res) => {
-    try {
-        const { rows } = await query('SELECT NOW()');
-        res.json(rows);
-    } catch (err) {
-        console.error(err);
-        res.status(500).send('Error while connecting to database');
-    }
 });
