@@ -41,9 +41,6 @@ const App = () => {
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/terms-of-service" element={<TermsOfService />} />
           </Routes>
-          <AuthenticatedRoute>
-            <ChatGPT />
-          </AuthenticatedRoute>
           <Footer />
       </Router>
     </AuthProvider>
