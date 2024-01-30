@@ -88,7 +88,8 @@ async function getCalendar(auth, days) {
       });
     }
 
-    console.log("calendar: ", allEvents);
+    //Debug
+    // console.log("calendar: ", allEvents);
     return allEvents;
   } catch (error) {
     console.error('Error retrieving calendar events:', error);

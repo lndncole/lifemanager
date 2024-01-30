@@ -54,7 +54,7 @@ router.get('/fetch-calendar', async (req, res) => {
     return res.status(401).send('User not authenticated');
   }
 
-  const days = req.body.days ? req.body.days : 50;
+  const days = req.body.days ? req.body.days : 10;
 
   const oauth2Client = api.createOAuthClient();
   oauth2Client.setCredentials(req.session.tokens);
@@ -70,7 +70,19 @@ router.get('/fetch-calendar', async (req, res) => {
 
 //Add event to calendar
 router.post('/add-calendar-event', async (req, res) => {
-  if (!req.session.tokens) {
+  // Check if the request is from GPT
+  if (req.headers['x-gpt-request']) {
+    const oauth2Client = api.createOAuthClient();
+    oauth2Client.setCredentials({ access_token: process.env.TOKENS.access_token });
+    
+    try {
+      response = await api.addCalendarEvent(oauth2Client, req);
+      res.json(response);
+    } catch (error) {
+      console.error('Error adding calendar event:', error);
+      res.status(500).send('Error adding event to calendar');
+    }
+  } else if (!req.session.tokens) {
     return res.status(401).send('User not authenticated');
   }
 
@@ -134,8 +146,18 @@ router.get('/oauth2callback', async (req, res) => {
       // Handle the error, e.g., by sending a response or logging
     }
 
-    //Redirect to "post-auth" screen upon successful authentication and setting of authentication token in to user session
-    res.redirect(`${domain}/home`);
+    // Check the source of the request
+    if (req.session.authSource === 'gpt') {
+
+      console.log("getting gpt source request in oauth2callback callback url: ", req);
+      // For GPT-initiated requests, send a JSON response
+      res.json({ status: 'success', message: 'Authentication successful' });
+    } else {
+      console.log("getting normal source request in oauth2callback callback url: ", req);
+
+      // For app-initiated requests, redirect to home
+      res.redirect(`${domain}/home`);
+    }
   } catch (error) {
     console.error('Error during OAuth callback:', error);
     res.status(500).send('Internal Server Error');
@@ -147,8 +169,6 @@ router.get('/authenticate', async (req, res) => {
   try {
     // Create a new OAuth2 client
     const oauth2Client = api.createOAuthClient();
-
-    // Generate the authorization URL with multiple scopes
     const authorizeUrl = oauth2Client.generateAuthUrl({
       access_type: 'offline',
       scope: [
@@ -158,16 +178,48 @@ router.get('/authenticate', async (req, res) => {
       ]
     });
 
-    // Store the client's config in session
-    req.session.oauth2ClientConfig = {
-      auth: oauth2Client,
-      client_id: oauth2Client._clientId,
-      client_secret: oauth2Client._clientSecret,
-      redirect_uris: oauth2Client.redirectUri
-    };
+    if (req.query.source === 'gpt') {
+      console.log("gpt check: ", req.query);
+      oauth2Client.setCredentials({ refresh_token: process.env.TOKENS.refresh_token });
 
-    // Redirect to the authorization URL
-    res.redirect(authorizeUrl);
+      try {
+        const { tokens } = await oauth2Client.refreshAccessToken();
+
+        console.log("getting gpt source authentication request: ", req);
+        // You can store these tokens or use them directly for GPT requests
+        // Send a successful response back to GPT
+        res.json({ status: 'success', tokens: tokens, authUrl: authorizeUrl });
+      } catch (error) {
+        console.error('Error refreshing access token:', error);
+        res.status(500).send('Internal Server Error');
+      }
+    } else {
+      // Generate the authorization URL with multiple scopes
+      const authorizeUrl = oauth2Client.generateAuthUrl({
+        access_type: 'offline',
+        scope: [
+          'https://www.googleapis.com/auth/calendar',
+          'https://www.googleapis.com/auth/userinfo.email',
+          'https://www.googleapis.com/auth/userinfo.profile'
+        ]
+      });
+
+      // Store the client's config in session
+      req.session.oauth2ClientConfig = {
+        auth: oauth2Client,
+        client_id: oauth2Client._clientId,
+        client_secret: oauth2Client._clientSecret,
+        redirect_uris: oauth2Client.redirectUri
+      };
+
+      //Get query parameter "source"if there is one
+      req.session.authSource = req.query.source ? req.query.source : null;
+
+      console.log("getting normal source authentication request: ", req);
+
+      // Redirect to the authorization URL
+      res.redirect(authorizeUrl);
+    }
   } catch (error) {
     console.error('Error during calendar API call:', error);
     res.status(500).send('Error retrieving calendar data');
