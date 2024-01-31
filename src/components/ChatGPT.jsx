@@ -50,12 +50,17 @@ const ChatGPT = () => {
     }
   };
 
+  const formatCalendarEvents = (events) => {
+    return events.map(event => 
+      `Event: ${event.summary}\nTime: ${new Date(event.start).toLocaleString()} - ${new Date(event.end).toLocaleString()}\nDescription: ${event.description || 'No description'}`
+    ).join('\n\n');
+  };
+
   const sendMessage = async () => {
     const message = { role: "user", content: userInput };
     setConversation([...conversation, message]);
     setUserInput("");
 
-    // Send the message to the backend
     const response = await fetch("/api/chat", {
       method: "POST",
       headers: {
@@ -64,11 +69,23 @@ const ChatGPT = () => {
       body: JSON.stringify({ message: userInput }),
     });
     const data = await response.json();
-    setConversation([
-      ...conversation,
-      message,
-      { role: "ai", content: data.response },
-    ]);
+
+    console.log(data);
+
+    if (data && data.gptFunction && data.gptFunction == 'fetch-calendar') {
+      const formattedEvents = formatCalendarEvents(data.calendarEvents);
+      setConversation([
+          ...conversation,
+          message,
+          { role: "ai", content: "Here are your calendar events:\n\n" + formattedEvents }
+      ]);
+    } else {
+      setConversation([
+          ...conversation,
+          message,
+          { role: "ai", content: data.response || "Sorry, I couldn't fetch the events." }
+      ]);
+    }
   };
 
   return (

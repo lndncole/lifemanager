@@ -1,6 +1,6 @@
 //src/index.js
 //Dependencies
-import React from 'react';
+import React, { StrictMode } from 'react';
 import { AuthProvider } from './contexts/AuthContext';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { createRoot } from 'react-dom/client';
@@ -9,7 +9,6 @@ import ReactGA from 'react-ga4';
 //Components
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import ChatGPT from './components/ChatGPT';
 import AuthenticatedRoute from './components/AuthenticatedRoute';
 
 //Pages
@@ -33,9 +32,9 @@ const App = () => {
           <Routes>
             <Route path="/" element={<SignIn />} />
             <Route path="/home" element={
-              <AuthenticatedRoute>
+              // <AuthenticatedRoute>
                 <Home />
-              </AuthenticatedRoute>
+              // </AuthenticatedRoute>
             }/>
             <Route path="/about" element={<About />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
@@ -49,6 +48,10 @@ const App = () => {
 
 const container = document.getElementById('root');
 const root = createRoot(container);
-root.render(<App />);
+root.render(
+  <StrictMode>
+    <App />
+  </StrictMode>
+);
 
 export default App;
