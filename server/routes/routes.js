@@ -15,7 +15,24 @@ router.post('/api/chat', async (req, res) => {
   try {
     const completion = await ai.startChat(message);
     if (completion.choices && completion.choices.length > 0 && completion.choices[0].message) {
-      res.json({ response: completion.choices[0].message.content });
+      const choice = completion.choices[0].message;
+      if(choice.function_call) {
+        const days = req.body.days ? req.body.days : 10;
+
+        const oauth2Client = api.createOAuthClient();
+        oauth2Client.setCredentials(req.session.tokens);
+        try {
+          const events = await api.getCalendar(oauth2Client, days);
+          res.json( {
+            gptFunction: 'fetch-calendar', // Add a key to denote the GPT function
+            calendarEvents: events // The actual events data
+          } );
+        } catch (e) {
+          console.error("error getting calendar data through the chatbot: ", e);
+        }
+      } else {
+        res.json({ response: completion.choices[0].message.content });
+      }
     } else {
       throw new Error('Invalid response structure from OpenAI API');
     }

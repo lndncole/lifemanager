@@ -51,11 +51,10 @@ const ChatGPT = () => {
   };
 
   const sendMessage = async () => {
-    const message = { role: "user", content: userInput };
-    setConversation([...conversation, message]);
+    const userMessage = { role: "user", content: userInput };
+    setConversation(currentConversation => [...currentConversation, userMessage]);
     setUserInput("");
-
-    // Send the message to the backend
+  
     const response = await fetch("/api/chat", {
       method: "POST",
       headers: {
@@ -64,11 +63,17 @@ const ChatGPT = () => {
       body: JSON.stringify({ message: userInput }),
     });
     const data = await response.json();
-    setConversation([
-      ...conversation,
-      message,
-      { role: "ai", content: data.response },
-    ]);
+  
+    if (data && data.gptFunction && data.gptFunction === 'fetch-calendar') {
+      const calendarMessages = data.calendarEvents.map(event => ({
+        role: "ai",
+        content: `Event: ${event.summary}\nTime: ${new Date(event.start).toLocaleString()} - ${new Date(event.end).toLocaleString()}\nDescription: ${event.description || 'No description'}`
+      }));
+      setConversation(currentConversation => [...currentConversation, ...calendarMessages]);
+    } else {
+      const aiResponse = { role: "ai", content: data.response };
+      setConversation(currentConversation => [...currentConversation, aiResponse]);
+    }
   };
 
   return (
