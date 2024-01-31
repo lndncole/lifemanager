@@ -24,28 +24,45 @@ router.post('/api/chat', async (req, res) => {
 
     if (completion && completion.choices && completion.choices.length > 0) {
       const choice = completion.choices[0].message;
-      if (choice.function_call && choice.function_call.name === "fetch-calendar") {
-        try {
+      if (choice.function_call) {
           // Parse the JSON string to an object
           const functionArgs = JSON.parse(choice.function_call.arguments);
-
           // Ensure oauth2Client is correctly authenticated
           const oauth2Client = api.createOAuthClient();
           oauth2Client.setCredentials(req.session.tokens);
+        if (choice.function_call.name === "fetch-calendar") {
+          try {
+            // Format dates to RFC3339 if necessary
+            const timeMin = new Date(functionArgs.timeMin).toISOString();
+            const timeMax = new Date(functionArgs.timeMax).toISOString();
 
-          // Format dates to RFC3339 if necessary
-          const timeMin = new Date(functionArgs.timeMin).toISOString();
-          const timeMax = new Date(functionArgs.timeMax).toISOString();
+            const events = await api.getCalendar(oauth2Client, timeMin, timeMax);
+            res.json({
+              gptFunction: 'fetch-calendar',
+              calendarEvents: events
+            });
+          } catch (e) {
+            console.error("Error getting calendar data:", e);
+            res.status(500).send("Error fetching calendar data");
+          }
+        } else if(choice.function_call && choice.function_call.name === "add-calendar-event") {
+          try {
+            
 
-          const events = await api.getCalendar(oauth2Client, timeMin, timeMax);
-          res.json({
-            gptFunction: 'fetch-calendar',
-            calendarEvents: events
-          });
-        } catch (e) {
-          console.error("Error getting calendar data:", e);
-          res.status(500).send("Error fetching calendar data");
-        }
+            // Format dates to RFC3339 if necessary
+            const timeMin = new Date(functionArgs.timeMin).toISOString();
+            const timeMax = new Date(functionArgs.timeMax).toISOString();
+
+            const events = await api.getCalendar(oauth2Client, timeMin, timeMax);
+            res.json({
+              gptFunction: 'fetch-calendar',
+              calendarEvents: events
+            });
+          } catch (e) {
+            console.error("Error getting calendar data:", e);
+            res.status(500).send("Error fetching calendar data");
+          }
+        } 
       } else {
         res.json({ response: choice });
       }
