@@ -10,13 +10,20 @@ const domain =
     : 'http://localhost:8080';
 
 router.post('/api/chat', async (req, res) => {
-  const { message } = req.body;
+  const { conversation } = req.body;
 
   try {
-    const completion = await ai.startChat(message);
-    if (completion.choices && completion.choices.length > 0) {
+
+    // Ensure messages array is not empty
+    if (!conversation || !conversation.length) {
+      throw new Error("The 'messages' array is empty.");
+    }
+
+    const completion = await ai.startChat(conversation);
+
+
+    if (completion && completion.choices && completion.choices.length > 0) {
       const choice = completion.choices[0].message;
-      console.log("ai response: ", choice);
       if (choice.function_call && choice.function_call.name === "fetch-calendar") {
         try {
           // Parse the JSON string to an object
@@ -40,7 +47,7 @@ router.post('/api/chat', async (req, res) => {
           res.status(500).send("Error fetching calendar data");
         }
       } else {
-        res.json({ response: choice.content });
+        res.json({ response: choice });
       }
     } else {
       throw new Error('Invalid response structure from OpenAI API');

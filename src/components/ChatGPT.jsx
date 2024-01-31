@@ -14,6 +14,7 @@ const ChatGPT = () => {
   const chatWindowRef = useRef(null);
 
   useEffect(() => {
+    //For updating the chat box when the conversation updates
     if (lastMessageRef.current) {
       lastMessageRef.current.scrollIntoView({ behavior: "smooth" });
     }
@@ -27,6 +28,7 @@ const ChatGPT = () => {
       }
     }
     document.addEventListener("mouseup", handleClickOutside);
+    //cleanup event handler when the component unmounts
     return () => document.removeEventListener("mouseup", handleClickOutside);
   }, [isOpen]);
 
@@ -51,16 +53,20 @@ const ChatGPT = () => {
   };
 
   const sendMessage = async () => {
-    const userMessage = { role: "user", content: userInput };
-    setConversation(currentConversation => [...currentConversation, userMessage]);
+    const newMessage = { role: "user", content: userInput };
+    // Update local state first
+    setConversation(prevConversation => [...prevConversation, newMessage]);
     setUserInput("");
+
+    // Prepare the conversation for the API call
+    const conversationForApi = [...conversation, newMessage];
   
     const response = await fetch("/api/chat", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ message: userInput }),
+      body: JSON.stringify({ conversation: conversationForApi }),
     });
     const data = await response.json();
   
@@ -71,7 +77,7 @@ const ChatGPT = () => {
       }));
       setConversation(currentConversation => [...currentConversation, ...calendarMessages]);
     } else {
-      const aiResponse = { role: "ai", content: data.response };
+      const aiResponse = { role: data.response.role, content: data.response.content };
       setConversation(currentConversation => [...currentConversation, aiResponse]);
     }
   };
@@ -87,12 +93,14 @@ const ChatGPT = () => {
             <button className="close-chat" onClick={toggleChat}>X</button>
           }
           <div className="chat-messages">
-            {conversation.map((msg, index) => (
-              <div key={index} className={`message ${msg.role}`}
-                  ref={index === conversation.length - 1 ? lastMessageRef : null}>
-                {msg.content}
-              </div>
-            ))}
+            {conversation.map((msg, index) => {
+              let messageClass = msg.role != 'user' ? 'ai' : 'user';
+              return (
+                <div key={index} className={`message ${messageClass}`}
+                    ref={index === conversation.length - 1 ? lastMessageRef : null}>
+                  {msg.content}
+                </div>
+            )})}
           </div>
           <div className="chat-input">
             <input
