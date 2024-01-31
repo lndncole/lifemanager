@@ -14,24 +14,33 @@ router.post('/api/chat', async (req, res) => {
 
   try {
     const completion = await ai.startChat(message);
-    if (completion.choices && completion.choices.length > 0 && completion.choices[0].message) {
+    if (completion.choices && completion.choices.length > 0) {
       const choice = completion.choices[0].message;
-      if(choice.function_call) {
-        const days = req.body.days ? req.body.days : 10;
-
-        const oauth2Client = api.createOAuthClient();
-        oauth2Client.setCredentials(req.session.tokens);
+      console.log("ai response: ", choice);
+      if (choice.function_call && choice.function_call.name === "fetch-calendar") {
         try {
-          const events = await api.getCalendar(oauth2Client, days);
-          res.json( {
-            gptFunction: 'fetch-calendar', // Add a key to denote the GPT function
-            calendarEvents: events // The actual events data
-          } );
+          // Parse the JSON string to an object
+          const functionArgs = JSON.parse(choice.function_call.arguments);
+
+          // Ensure oauth2Client is correctly authenticated
+          const oauth2Client = api.createOAuthClient();
+          oauth2Client.setCredentials(req.session.tokens);
+
+          // Format dates to RFC3339 if necessary
+          const timeMin = new Date(functionArgs.timeMin).toISOString();
+          const timeMax = new Date(functionArgs.timeMax).toISOString();
+
+          const events = await api.getCalendar(oauth2Client, timeMin, timeMax);
+          res.json({
+            gptFunction: 'fetch-calendar',
+            calendarEvents: events
+          });
         } catch (e) {
-          console.error("error getting calendar data through the chatbot: ", e);
+          console.error("Error getting calendar data:", e);
+          res.status(500).send("Error fetching calendar data");
         }
       } else {
-        res.json({ response: completion.choices[0].message.content });
+        res.json({ response: choice.content });
       }
     } else {
       throw new Error('Invalid response structure from OpenAI API');
@@ -77,7 +86,7 @@ router.get('/fetch-calendar', async (req, res) => {
   oauth2Client.setCredentials(req.session.tokens);
 
   try {
-    const events = await api.getCalendar(oauth2Client, days);
+    const events = await api.getCalendar(oauth2Client, null, null, days);
     res.json(events);
   } catch (error) {
     console.error('Error fetching calendar:', error);
@@ -165,13 +174,9 @@ router.get('/oauth2callback', async (req, res) => {
 
     // Check the source of the request
     if (req.session.authSource === 'gpt') {
-
-      console.log("getting gpt source request in oauth2callback callback url: ", req);
       // For GPT-initiated requests, send a JSON response
       res.json({ status: 'success', message: 'Authentication successful' });
     } else {
-      console.log("getting normal source request in oauth2callback callback url: ", req);
-
       // For app-initiated requests, redirect to home
       res.redirect(`${domain}/home`);
     }
@@ -201,8 +206,6 @@ router.get('/authenticate', async (req, res) => {
 
       try {
         const { tokens } = await oauth2Client.refreshAccessToken();
-
-        console.log("getting gpt source authentication request: ", req);
         // You can store these tokens or use them directly for GPT requests
         // Send a successful response back to GPT
         res.json({ status: 'success', tokens: tokens, authUrl: authorizeUrl });
@@ -231,8 +234,6 @@ router.get('/authenticate', async (req, res) => {
 
       //Get query parameter "source"if there is one
       req.session.authSource = req.query.source ? req.query.source : null;
-
-      console.log("getting normal source authentication request: ", req);
 
       // Redirect to the authorization URL
       res.redirect(authorizeUrl);

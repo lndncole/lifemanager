@@ -22,16 +22,20 @@ async function startChat(message) {
   // Define a dummy function for GPT to call
   const functions = [{
     name: "fetch-calendar",
-    description: "Fetch calendar events for a given date",
+    description: "Fetch calendar events for a given date range.",
     parameters: {
       type: "object",
       properties: {
-        date: {
+        timeMin: {
           type: "string",
-          description: "The date to fetch events for, in YYYY-MM-DD format"
+          description: "Start date/time for events, in YYYY-MM-DD format"
+        },
+        timeMax: {
+          type: "string",
+          description: "End date/time for events, in YYYY-MM-DD format"
         }
       },
-      required: ["date"]
+      required: ["timeMin", "timeMax"]
     }
   }];
 
