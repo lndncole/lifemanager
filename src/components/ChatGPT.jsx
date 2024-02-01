@@ -52,6 +52,15 @@ const ChatGPT = () => {
     }
   };
 
+  function extractUrlFromString(text) {
+      // Regular expression to match a URL starting with "https://www"
+      const regex = /https:\/\/www\.[^\s]+/g;
+      const matches = text.match(regex);
+      
+      // Return the first match found or null if no match is found
+      return matches ? matches[0] : null;
+  };
+
   const sendMessage = async () => {
     const newMessage = { role: "user", content: userInput };
     // Update local state first
@@ -70,12 +79,18 @@ const ChatGPT = () => {
     });
     const data = await response.json();
   
-    if (data && data.gptFunction && data.gptFunction === 'fetch-calendar') {
-      const calendarMessages = data.calendarEvents.map(event => ({
-        role: "ai",
-        content: `Event: ${event.summary}\nTime: ${new Date(event.start).toLocaleString()} - ${new Date(event.end).toLocaleString()}\nDescription: ${event.description || 'No description'}`
-      }));
-      setConversation(currentConversation => [...currentConversation, ...calendarMessages]);
+    if (data && data.gptFunction) {
+      if(data.gptFunction == 'fetch-calendar') {
+        const calendarMessages = data.calendarEvents.map(event => ({
+          role: "assistant",
+          content: `Event: ${event.summary}\nTime: ${new Date(event.start).toLocaleString()} - ${new Date(event.end).toLocaleString()}\nDescription: ${event.description || 'No description'}`
+        }));
+        setConversation(currentConversation => [...currentConversation, ...calendarMessages]);
+      } else if(data.gptFunction == "add-calendar-event") {
+        const addCalendarResponse = { role: 'assistant', content: "Your event has been added, here's the link! " + data.addedEvent.htmlLink};
+        console.log(data);
+        setConversation(currentConversation => [...currentConversation, addCalendarResponse]);
+      }
     } else {
       const aiResponse = { role: data.response.role, content: data.response.content };
       setConversation(currentConversation => [...currentConversation, aiResponse]);
@@ -93,14 +108,23 @@ const ChatGPT = () => {
             <button className="close-chat" onClick={toggleChat}>X</button>
           }
           <div className="chat-messages">
-            {conversation.map((msg, index) => {
-              let messageClass = msg.role != 'user' ? 'ai' : 'user';
-              return (
-                <div key={index} className={`message ${messageClass}`}
-                    ref={index === conversation.length - 1 ? lastMessageRef : null}>
-                  {msg.content}
-                </div>
-            )})}
+          {conversation.map((msg, index) => {
+            const messageClass = msg.role !== 'user' ? 'ai' : 'user';
+            const isLinkMessage = msg.content.includes("http") && msg.role === 'assistant';
+            
+            return (
+              <div key={index} className={`message ${messageClass}`}
+                  ref={index === conversation.length - 1 ? lastMessageRef : null}>
+                {isLinkMessage ? (
+                  <span>
+                    Your event has been added, here's the link! <a href={extractUrlFromString(msg.content)} target="_blank" rel="noopener noreferrer">Click here</a>
+                  </span>
+                ) : (
+                  msg.content
+                )}
+              </div>
+            );
+          })}
           </div>
           <div className="chat-input">
             <input

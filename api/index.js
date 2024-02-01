@@ -25,6 +25,7 @@ function createOAuthClient() {
 }
 
 async function addCalendarEvent(auth, req) {
+  console.log("calendar request: ", req);
   try {
     const calendar = google.calendar({ version: 'v3', auth: auth });
     const event = {

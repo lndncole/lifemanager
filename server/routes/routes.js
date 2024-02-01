@@ -47,19 +47,30 @@ router.post('/api/chat', async (req, res) => {
           }
         } else if(choice.function_call && choice.function_call.name === "add-calendar-event") {
           try {
-            
-
             // Format dates to RFC3339 if necessary
-            const timeMin = new Date(functionArgs.timeMin).toISOString();
-            const timeMax = new Date(functionArgs.timeMax).toISOString();
+            const startTime = new Date(functionArgs.start).toISOString();
+            const endTime = new Date(functionArgs.end).toISOString();
+            
+            // Create a request object that matches the expected structure
+            const req = {
+                body: {
+                    summary: functionArgs.summary,
+                    start: {dateTime: startTime},
+                    end: {dateTime: endTime},
+                    description: functionArgs.description
+                }
+            };
 
-            const events = await api.getCalendar(oauth2Client, timeMin, timeMax);
+            // Pass the oauth2Client and the constructed req object to the addCalendarEvent function
+            const response = await api.addCalendarEvent(oauth2Client, req);
+
+            // Assuming the response contains the added event, format and send the response back
             res.json({
-              gptFunction: 'fetch-calendar',
-              calendarEvents: events
+                gptFunction: 'add-calendar-event',
+                addedEvent: response.data // Adjust according to the actual response structure
             });
           } catch (e) {
-            console.error("Error getting calendar data:", e);
+            // console.error("Error getting calendar data:", e);
             res.status(500).send("Error fetching calendar data");
           }
         } 
