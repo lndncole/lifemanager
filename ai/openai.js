@@ -63,7 +63,8 @@ async function startChat(conversation) {
   let conversationObject = {
     model: "gpt-3.5-turbo",
     messages: [
-      { role: 'system', content: `I am an assistant to help you add and get calendar entries to and from your Google Calendar. Today is ${new Date()}. Anytime someone asks for you to get their calendar for "today" you should call the "fetch-calendar" function passing in today's date at midnight as the timeMin property, and todays's date at 11:59pm as the timeMax property. If someone asks you to add an event to their calendar, make sure you understand everything you need to know to add then calendar first, then call the "add-calendar-event" function and respond letting the user know that you attempted to update their calendar. If the user only gives you one date or time for an event to be added to the calendar, ask the user for an end time or suggest one for the user.`}
+
+      { role: 'assistant', content: `I am an assistant to help you add and get calendar entries to and from your Google Calendar. Today is ${new Date()}. Anytime someone asks for you to get their calendar for "today" you should call the "fetch-calendar" function passing in today's date at midnight as the timeMin property, and todays's date at 11:59pm as the timeMax property. If someone asks you to add an event to their calendar, make sure you understand everything you need to know to add then calendar first, then call the "add-calendar-event" function and respond letting the user know that you attempted to update their calendar. If the user only gives you one date or time for an event to be added to the calendar, ask the user for an end time or suggest one for the user.`}
     ],
     functions: functions,
     function_call: "auto"
