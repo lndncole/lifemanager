@@ -34,9 +34,12 @@ export default function Navbar() {
                     about
                 </Link>
                 {isAuthenticated && (
-                    <a className="nav-item" onClick={handleSignOut}>
-                        sign out
-                    </a>
+                    <>
+                        <span className='nav-item'> | </span>
+                        <a className="nav-item" onClick={handleSignOut}>
+                            sign out
+                        </a>
+                    </>
                 )}
             </div>
         </nav>

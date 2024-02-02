@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import '../styles/chatgpt.css';
 import { IoSparklesOutline } from "react-icons/io5";
+import { FaArrowUpLong } from "react-icons/fa6";
 
 
 const ChatGPT = () => {
@@ -100,7 +101,7 @@ const ChatGPT = () => {
   return (
     <div className={`chat-container ${isOpen ? "open" : ""}`}>
       <div className={`chat-tab ${isOpen ? "open" : ""}`} onClick={toggleChat}>
-        ChatGPT <IoSparklesOutline />
+        ChatGPT <IoSparklesOutline /> 
       </div>
   
         <div className={`chat-window ${isOpen ? "open" : ""}`} ref={chatWindowRef}>
@@ -127,14 +128,14 @@ const ChatGPT = () => {
           })}
           </div>
           <div className="chat-input">
-            <input
-              type="text"
-              value={userInput}
-              onChange={handleInputChange}
-              onKeyPress={handleKeyPress} 
-              placeholder="Type your message..."
-            />
-            <button onClick={sendMessage}>Send</button>
+              <input
+                type="text"
+                value={userInput}
+                onChange={handleInputChange}
+                onKeyDown={handleKeyPress} 
+                placeholder="Type your message..."
+              />
+              <button onClick={sendMessage}><FaArrowUpLong /></button>
           </div>
         </div>
     

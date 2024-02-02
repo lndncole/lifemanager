@@ -36,6 +36,9 @@
         width: 90%;
         height: 500px;
     }
+    .event-card {
+        font-size: 32px;
+    }
     .fetched-calendar {
         height: 500px;
     }
