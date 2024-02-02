@@ -26,8 +26,6 @@ router.get('/authenticate-gpt', isGptRequest, async (req, res) => {
             prompt: 'consent', // Ensure that we always get a refresh token
         });
 
-        console.log("getting /authenticate-gpt request to authenticate: ", req);
-
         // The response includes the URL to which the GPT instance should navigate to authenticate
         res.json({ status: 'success', authUrl: authorizeUrl });
     } catch (error) {
@@ -48,8 +46,6 @@ router.get('/gpt-oauth2callback', isGptRequest, async (req, res) => {
 
         const oauth2Client = api.createOAuthClient();
         const { tokens } = await oauth2Client.getToken(code);
-
-        console.log("getting /gpt-oauth2callback request: ", req);
 
         // You might want to store these tokens in a secure way for future GPT requests
         // For now, sending the tokens back in the response for simplicity

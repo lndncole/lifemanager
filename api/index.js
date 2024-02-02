@@ -25,6 +25,7 @@ function createOAuthClient() {
 }
 
 async function addCalendarEvent(auth, req) {
+  console.log("calendar request: ", req);
   try {
     const calendar = google.calendar({ version: 'v3', auth: auth });
     const event = {
@@ -60,14 +61,18 @@ async function getUserInfo(auth) {
   }
 }
 
-async function getCalendar(auth, days) {
+async function getCalendar(oauth2Client, timeMin, timeMax) {
   try {
-    const calendar = google.calendar({ version: 'v3', auth });
+    const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
 
-    // Calculate the time range for the next 30 days
-    // Use moment-timezone to handle PST time zone
-    const timeMin = moment.tz(userTimeZone).startOf('day').toISOString();
-    const timeMax = moment.tz(userTimeZone).add(days, 'days').toISOString();
+
+    // If timeMin and timeMax are not provided, calculate a default range
+    if(!timeMin || !timeMax) {
+      const now = moment.tz(userTimeZone);
+      timeMin = now.startOf('day').toISOString();
+      timeMax = now.add(10, 'days').toISOString();
+    }
+    
     
     let allEvents = [];
 
