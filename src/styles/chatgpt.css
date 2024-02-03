@@ -155,7 +155,7 @@
         justify-content: space-between;
     }
     .chat-tab.open {
-        width: 263px;
+        width: 100%;
         display: unset;
         justify-content: unset;
     }

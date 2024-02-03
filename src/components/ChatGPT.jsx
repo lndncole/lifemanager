@@ -101,7 +101,7 @@ const ChatGPT = () => {
   return (
     <div className={`chat-container ${isOpen ? "open" : ""}`}>
       <div className={`chat-tab ${isOpen ? "open" : ""}`} onClick={toggleChat}>
-        ChatGPT <IoSparklesOutline /> 
+        lifeMNGR <IoSparklesOutline /> 
       </div>
   
         <div className={`chat-window ${isOpen ? "open" : ""}`} ref={chatWindowRef}>
