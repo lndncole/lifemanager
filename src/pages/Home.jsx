@@ -3,6 +3,9 @@ import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import '../styles/home.css';
 
+//Components
+import ChatGPT from '../components/ChatGPT';
+
 const Home = () => {
   //For adding events
   const [eventName, setEventName] = useState('');
@@ -63,15 +66,12 @@ const Home = () => {
           const data = await response.json();
           setFetchCalendar(data);
         }
-    
       } catch (error) {
         console.error('Fetch error:', error);
         setFetchCalendar('Error fetching calendar');
-
       }
-
     };
-
+  
     fetchCalendarData();
   }, []);
 
@@ -116,9 +116,6 @@ const Home = () => {
     
         const countOfDaysOfMonthWithEvents = daysOfMonthWithEvents.size;
         setEventsInMonthCount(countOfDaysOfMonthWithEvents);
-
-        //For debugging in production
-        console.log("fetched calendar: ", calendar);
       }
     };
 
@@ -183,6 +180,7 @@ const Home = () => {
   };
   
   return (
+    <>
     <div class="f-col home-container">
         <div class="home-calendar-content-container">
             <div class="w-100 section">
@@ -285,7 +283,8 @@ const Home = () => {
         </div>
     </div>
 
-
+    <ChatGPT />
+    </>
   );
 };
 

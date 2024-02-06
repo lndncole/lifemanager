@@ -9,6 +9,7 @@ export default function Footer() {
                 <Link to="/privacy-policy" class="footer-item">
                     privacy policy
                 </Link>
+                <span className='footer-item'> | </span>
                 <Link to="/terms-of-service" class="footer-item">
                     terms of service
                 </Link>

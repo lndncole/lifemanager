@@ -1,34 +1,12 @@
 //src/components/Navbar.jsx
 import React, {useEffect, useState} from 'react';
+import { useAuth } from '../contexts/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import '../styles/navbar.css';
 
 export default function Navbar() {
+    const { logout, isAuthenticated } = useAuth();
     const navigate = useNavigate();
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-    useEffect(() => {
-        const checkAuth = async () => {
-            try {
-                const response = await fetch('/get-auth', {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                });
-                if (response.ok) {
-                    setIsAuthenticated(true);
-                } else {
-                    setIsAuthenticated(false);
-                }
-            } catch (error) {
-                console.error('Error checking authentication:', error);
-                setIsAuthenticated(false);
-            }
-        };
-
-        checkAuth();
-    }, []);
 
     const handleSignOut = async ()=> {
         const response = await fetch('/sign-out', {
@@ -39,6 +17,7 @@ export default function Navbar() {
         });
 
         if(response.ok) {
+            logout();
             window.location.href = "/";
         } else {
             console.error("Unable to log out.");
@@ -55,9 +34,12 @@ export default function Navbar() {
                     about
                 </Link>
                 {isAuthenticated && (
-                    <a className="nav-item" onClick={handleSignOut}>
-                        sign out
-                    </a>
+                    <>
+                        <span className='nav-item'> | </span>
+                        <a className="nav-item" onClick={handleSignOut}>
+                            sign out
+                        </a>
+                    </>
                 )}
             </div>
         </nav>

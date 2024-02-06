@@ -25,6 +25,7 @@ function createOAuthClient() {
 }
 
 async function addCalendarEvent(auth, req) {
+  console.log("calendar request: ", req);
   try {
     const calendar = google.calendar({ version: 'v3', auth: auth });
     const event = {
@@ -34,7 +35,7 @@ async function addCalendarEvent(auth, req) {
       description: req.body.description,
     };
 
-    console.log("auth: ", auth);
+    //log for debugging
     console.log("event added: ", event);
 
     const response = await calendar.events.insert({
@@ -49,14 +50,29 @@ async function addCalendarEvent(auth, req) {
   }
 }
 
-async function getCalendar(auth, days) {
+async function getUserInfo(auth) {
   try {
-    const calendar = google.calendar({ version: 'v3', auth });
+    const oauth2 = google.oauth2({ auth: auth, version: 'v2' });
+    const userInfo = await oauth2.userinfo.get();
+    return userInfo.data; // Make sure to return the data property
+  } catch (error) {
+    console.error('Error fetching user info:', error);
+    throw error;
+  }
+}
 
-    // Calculate the time range for the next 30 days
-    // Use moment-timezone to handle PST time zone
-    const timeMin = moment.tz(userTimeZone).startOf('day').toISOString();
-    const timeMax = moment.tz(userTimeZone).add(days, 'days').toISOString();
+async function getCalendar(oauth2Client, timeMin, timeMax) {
+  try {
+    const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
+
+
+    // If timeMin and timeMax are not provided, calculate a default range
+    if(!timeMin || !timeMax) {
+      const now = moment.tz(userTimeZone);
+      timeMin = now.startOf('day').toISOString();
+      timeMax = now.add(10, 'days').toISOString();
+    }
+    
     
     let allEvents = [];
 
@@ -76,9 +92,9 @@ async function getCalendar(auth, days) {
         allEvents.push({ start: start, end: event.end?.date || event.end?.dateTime, summary: event.summary, description: event.description });
       });
     }
-    
-    console.log("auth: ", auth);
-    console.log("calendar: ", allEvents);
+
+    //Debug
+    // console.log("calendar: ", allEvents);
     return allEvents;
   } catch (error) {
     console.error('Error retrieving calendar events:', error);
@@ -86,4 +102,4 @@ async function getCalendar(auth, days) {
   }
 }
 
-module.exports = { getCalendar, createOAuthClient, addCalendarEvent };
+module.exports = { getCalendar, getUserInfo, createOAuthClient, addCalendarEvent };
