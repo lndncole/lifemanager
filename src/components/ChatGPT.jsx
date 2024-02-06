@@ -81,6 +81,7 @@ const ChatGPT = () => {
     const data = await response.json();
   
     if (data && data.gptFunction) {
+      console.log(data);
       if(data.gptFunction == 'fetch-calendar') {
         const calendarMessages = data.calendarEvents.map(event => ({
           role: "assistant",
@@ -89,8 +90,10 @@ const ChatGPT = () => {
         setConversation(currentConversation => [...currentConversation, ...calendarMessages]);
       } else if(data.gptFunction == "add-calendar-event") {
         const addCalendarResponse = { role: 'assistant', content: "Your event has been added, here's the link! " + data.addedEvent.htmlLink};
-        console.log(data);
         setConversation(currentConversation => [...currentConversation, addCalendarResponse]);
+      } else if(data.gptFunction == "google-search") {
+        const googleSearchResponse = { role: 'assistant', content: data.result, name: 'google-searcher'};
+        setConversation(currentConversation => [...currentConversation, googleSearchResponse]);
       }
     } else {
       const aiResponse = { role: data.response.role, content: data.response.content };
@@ -110,8 +113,9 @@ const ChatGPT = () => {
           }
           <div className="chat-messages">
           {conversation.map((msg, index) => {
+            console.log(msg);
             const messageClass = msg.role !== 'user' ? 'ai' : 'user';
-            const isLinkMessage = msg.content.includes("http") && msg.role === 'assistant';
+            const isLinkMessage = msg.content.includes("http") && msg.role === 'assistant' && msg.name != 'google-searcher';
             
             return (
               <div key={index} className={`message ${messageClass}`}

@@ -32,9 +32,9 @@ const App = () => {
           <Routes>
             <Route path="/" element={<SignIn />} />
             <Route path="/home" element={
-              <AuthenticatedRoute>
+              // <AuthenticatedRoute>
                 <Home />
-              </AuthenticatedRoute>
+              // </AuthenticatedRoute>
             }/>
             <Route path="/about" element={<About />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />

@@ -24,6 +24,21 @@ function createOAuthClient() {
   return oauth2Client;
 }
 
+async function search(req) {
+  try {
+    const search = google.customsearch('v1');
+    const searchRes = await search.cse.list({
+      cx: process.env.GOOGLE_CUSTOM_SEARCH_ENGINE_ID,
+      q: req.q,
+      auth: process.env.GOOGLE_CLOUD_API_KEY,
+    });
+    console.log(searchRes.data);
+    return searchRes.data;
+  } catch(e) {
+    throw e;
+  }
+}
+
 async function addCalendarEvent(auth, req) {
   console.log("calendar request: ", req);
   try {
@@ -102,4 +117,4 @@ async function getCalendar(oauth2Client, timeMin, timeMax) {
   }
 }
 
-module.exports = { getCalendar, getUserInfo, createOAuthClient, addCalendarEvent };
+module.exports = { getCalendar, getUserInfo, createOAuthClient, addCalendarEvent, search };
