@@ -62,13 +62,34 @@ router.post('/api/chat', async (req, res) => {
             };
 
             // Pass the oauth2Client and the constructed req object to the addCalendarEvent function
-            const response = await api.addCalendarEvent(oauth2Client, req);
+            const googleCalendarAddEventResponse = await api.addCalendarEvent(oauth2Client, req);
 
-            // Assuming the response contains the added event, format and send the response back
-            res.json({
-                gptFunction: 'add-calendar-event',
-                addedEvent: response.data // Adjust according to the actual response structure
-            });
+            // Check if googleCalendarAddEventResponse.items exists and has length
+            if (googleCalendarAddEventResponse && googleCalendarAddEventResponse.data) {
+
+              console.log(googleCalendarAddEventResponse.data);
+        
+              // Pass the extracted information to the chat GPT function
+              const gptResponse = await ai.startChat([...conversation, {
+                role: 'function',
+                content: JSON.stringify(googleCalendarAddEventResponse.data),
+                name: 'add-calendar-event'
+              }]);
+        
+              if (gptResponse && gptResponse.choices && gptResponse.choices.length > 0) {
+                const gptChoice = gptResponse.choices[0].message;
+                console.log(gptChoice);
+                // Process and return GPT's response to the Calendar's response
+                res.json({
+                  gptFunction: 'add-calendar-event',
+                  response: gptChoice.content
+                });
+              } else {
+                res.status(500).send("Error adding Google calendar event with lifeMNGR.");
+              }
+            } else {
+              res.status(500).send("Error adding Google calendar event.");
+            }
           } catch (e) {
             // console.error("Error getting calendar data:", e);
             res.status(500).send("Error fetching calendar data");
