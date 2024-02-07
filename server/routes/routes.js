@@ -10,6 +10,7 @@ const chatGPTApi = require("../../api/chatGPT/index.js");
 
 //Functions
 const chatGPT = require('./chatGPT.js');
+const google = require('./google.js');
 
 const domain = 
   process.env.NODE_ENV == 'production' ? 'https://www.lifemngr.co' 
@@ -37,58 +38,19 @@ router.get('/sign-out', (req, res) => {
   });
 });
 
+//All chats to GPT
 router.post('/api/chatGPT', async (req, res) => {
   await chatGPT.chat(req, res, chatGPTApi, googleApi);
 });
 
 //Fetch user's calendar
-router.get('/fetch-calendar', async (req, res) => {
-  if (!req.session.tokens) {
-    return res.status(401).send('User not authenticated');
-  }
-
-  const days = req.body.days ? req.body.days : 10;
-
-  const oauth2Client = googleApi.createOAuthClient();
-  oauth2Client.setCredentials(req.session.tokens);
-
-  try {
-    const events = await googleApi.getCalendar(oauth2Client, null, null, days);
-    res.json(events);
-  } catch (error) {
-    console.error('Error fetching calendar:', error);
-    res.status(500).send('Error fetching calendar data');
-  }
+router.get('/api/google/fetch-calendar', async (req, res) => {
+  await google.fetchCalendar(req, res, googleApi);
 });
 
 //Add event to calendar
-router.post('/add-calendar-event', async (req, res) => {
-  // Check if the request is from GPT
-  if (req.headers['x-gpt-request']) {
-    const oauth2Client = googleApi.createOAuthClient();
-    oauth2Client.setCredentials({ access_token: process.env.TOKENS.access_token });
-    
-    try {
-      response = await googleApi.addCalendarEvent(oauth2Client, req);
-      res.json(response);
-    } catch (error) {
-      console.error('Error adding calendar event:', error);
-      res.status(500).send('Error adding event to calendar');
-    }
-  } else if (!req.session.tokens) {
-    return res.status(401).send('User not authenticated');
-  }
-
-  const oauth2Client = googleApi.createOAuthClient();
-  oauth2Client.setCredentials(req.session.tokens);
-
-  try {
-    response = await googleApi.addCalendarEvent(oauth2Client, req);
-    res.json(response);
-  } catch (error) {
-    console.error('Error adding calendar event:', error);
-    res.status(500).send('Error adding event to calendar');
-  }
+router.post('/api/google/add-calendar-events', async (req, res) => {
+  await google.addCalendarEvents(req, res, googleApi);
 });
 
 //oAuth callback that get's hit when Google responds to user authentication request

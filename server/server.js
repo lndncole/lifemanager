@@ -23,7 +23,6 @@ app.use(session({
     cookie: { secure: false }
 }));
 
-
 //options and connections
 app.use(express.static(path.join(__dirname, '../dist')));
 
