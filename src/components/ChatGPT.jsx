@@ -72,7 +72,7 @@ const ChatGPT = () => {
     const conversationForApi = [...conversation, newMessage];
   
     try{
-      const response = await fetch("/api/chat", {
+      const response = await fetch("/api/chatGPT", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

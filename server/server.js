@@ -2,8 +2,9 @@ require('dotenv').config();
 
 //routes
 const routes = require('./routes/routes');
-const dbRoute = require('./routes/db');
-const gptAuthRoutes = require('./routes/gptAuth');
+
+//db
+const dbRoute = require('./db');
 
 //dependencies
 const cors = require('cors');
@@ -35,7 +36,6 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(routes);
 app.use(dbRoute);
-app.use(gptAuthRoutes);
 app.use(bodyParser.json());
 
 //catch all for routes
