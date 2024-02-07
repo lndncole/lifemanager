@@ -32,7 +32,6 @@ async function search(req) {
       q: req.q,
       auth: process.env.GOOGLE_CLOUD_API_KEY,
     });
-    console.log(searchRes.data);
     return searchRes.data;
   } catch(e) {
     throw e;
@@ -40,7 +39,6 @@ async function search(req) {
 }
 
 async function addCalendarEvent(auth, req) {
-  console.log("calendar request: ", req);
   try {
     const calendar = google.calendar({ version: 'v3', auth: auth });
     const event = {
@@ -49,9 +47,6 @@ async function addCalendarEvent(auth, req) {
       end: req.body.end,
       description: req.body.description,
     };
-
-    //log for debugging
-    console.log("event added: ", event);
 
     const response = await calendar.events.insert({
       calendarId: 'primary',

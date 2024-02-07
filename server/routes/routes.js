@@ -45,54 +45,60 @@ router.post('/api/chat', async (req, res) => {
             console.error("Error getting calendar data:", e);
             res.status(500).send("Error fetching calendar data");
           }
-        } else if(choice.function_call && choice.function_call.name === "add-calendar-event") {
+        } else if(choice.function_call && choice.function_call.name === "add-calendar-events") {
+          const events = JSON.parse(choice.function_call.arguments).events;
           try {
-            // Format dates to RFC3339 if necessary
-            const startTime = new Date(functionArgs.start).toISOString();
-            const endTime = new Date(functionArgs.end).toISOString();
-            
-            // Create a request object that matches the expected structure
-            const req = {
-                body: {
-                    summary: functionArgs.summary,
-                    start: {dateTime: startTime},
-                    end: {dateTime: endTime},
-                    description: functionArgs.description
+            // Iterate through each event object and add it to the calendar
+            const googleCalendarResponses = [];
+            for (const event of events) {
+              try {
+                // Format dates to RFC3339 if necessary
+                const startTime = new Date(event.start).toISOString();
+                const endTime = new Date(event.end).toISOString();
+                
+                // Create a request object for each event
+                const req = {
+                  body: {
+                    summary: event.summary,
+                    start: { dateTime: startTime },
+                    end: { dateTime: endTime },
+                    description: event.description
+                  }
+                };
+                // Pass the oauth2Client and the constructed req object to the addCalendarEvent function
+                const googleCalendarAddEventResponse = await api.addCalendarEvent(oauth2Client, req);
+                // Check if googleCalendarAddEventResponse.items exists and has length
+                if (googleCalendarAddEventResponse && googleCalendarAddEventResponse.data) {
+                  googleCalendarResponses.push(googleCalendarAddEventResponse.data); // Add response to array
+                } else {
+                  throw new Error('No data received from addCalendarEvent');
                 }
-            };
-
-            // Pass the oauth2Client and the constructed req object to the addCalendarEvent function
-            const googleCalendarAddEventResponse = await api.addCalendarEvent(oauth2Client, req);
-
-            // Check if googleCalendarAddEventResponse.items exists and has length
-            if (googleCalendarAddEventResponse && googleCalendarAddEventResponse.data) {
-
-              console.log(googleCalendarAddEventResponse.data);
-        
-              // Pass the extracted information to the chat GPT function
-              const gptResponse = await ai.startChat([...conversation, {
-                role: 'function',
-                content: JSON.stringify(googleCalendarAddEventResponse.data),
-                name: 'add-calendar-event'
-              }]);
-        
-              if (gptResponse && gptResponse.choices && gptResponse.choices.length > 0) {
-                const gptChoice = gptResponse.choices[0].message;
-                console.log(gptChoice);
-                // Process and return GPT's response to the Calendar's response
-                res.json({
-                  gptFunction: 'add-calendar-event',
-                  response: gptChoice.content
-                });
-              } else {
-                res.status(500).send("Error adding Google calendar event with lifeMNGR.");
+              } catch (e) {
+                console.error(`Error adding event: ${event.summary}`, e);
+                googleCalendarResponses.push({ error: `Error adding event: ${event.summary}`, details: e.toString() });
               }
+            }
+            
+            // Pass the extracted information to the chat GPT function
+            const gptResponse = await ai.startChat([...conversation, {
+              role: 'function',
+              content: JSON.stringify(googleCalendarResponses),
+              name: 'add-calendar-events'
+            }]);
+      
+            if (gptResponse && gptResponse.choices && gptResponse.choices.length > 0) {
+              const gptChoice = gptResponse.choices[0].message;
+              // Process and return GPT's response to the Calendar's response
+              res.json({
+                gptFunction: 'add-calendar-events',
+                response: gptChoice.content
+              });
             } else {
-              res.status(500).send("Error adding Google calendar event.");
+              res.status(500).send("Error adding Google calendar event with lifeMNGR.");
             }
           } catch (e) {
             // console.error("Error getting calendar data:", e);
-            res.status(500).send("Error fetching calendar data");
+            res.status(500).send("Error adding calendar data");
           }
         } else if(choice.function_call && choice.function_call.name === "google-search") {
           try {
