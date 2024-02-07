@@ -1,9 +1,12 @@
 //server/routes/routes.js
+//Dependencies
 const express = require('express');
 const router = express.Router();
-const api = require('../../api/index.js');
 const url = require('url');
-const ai = require("../../ai/openai.js");
+
+//APIs
+const googleApi = require('../../api/google/index.js');
+const chatGPTApi = require("../../api/chatGPT/index.js");
 
 const domain = 
   process.env.NODE_ENV == 'production' ? 'https://www.lifemngr.co' 
@@ -19,7 +22,7 @@ router.post('/api/chat', async (req, res) => {
       throw new Error("The 'messages' array is empty.");
     }
 
-    const completion = await ai.startChat(conversation);
+    const completion = await chatGPTApi.startChat(conversation);
 
 
     if (completion && completion.choices && completion.choices.length > 0) {
@@ -28,7 +31,7 @@ router.post('/api/chat', async (req, res) => {
           // Parse the JSON string to an object
           const functionArgs = JSON.parse(choice.function_call.arguments);
           // Ensure oauth2Client is correctly authenticated
-          const oauth2Client = api.createOAuthClient();
+          const oauth2Client = googleApi.createOAuthClient();
           oauth2Client.setCredentials(req.session.tokens);
         if (choice.function_call.name === "fetch-calendar") {
           try {
@@ -36,7 +39,7 @@ router.post('/api/chat', async (req, res) => {
             const timeMin = new Date(functionArgs.timeMin).toISOString();
             const timeMax = new Date(functionArgs.timeMax).toISOString();
 
-            const events = await api.getCalendar(oauth2Client, timeMin, timeMax);
+            const events = await googleApi.getCalendar(oauth2Client, timeMin, timeMax);
             res.json({
               gptFunction: 'fetch-calendar',
               calendarEvents: events
@@ -66,7 +69,7 @@ router.post('/api/chat', async (req, res) => {
                   }
                 };
                 // Pass the oauth2Client and the constructed req object to the addCalendarEvent function
-                const googleCalendarAddEventResponse = await api.addCalendarEvent(oauth2Client, req);
+                const googleCalendarAddEventResponse = await googleApi.addCalendarEvent(oauth2Client, req);
                 // Check if googleCalendarAddEventResponse.items exists and has length
                 if (googleCalendarAddEventResponse && googleCalendarAddEventResponse.data) {
                   googleCalendarResponses.push(googleCalendarAddEventResponse.data); // Add response to array
@@ -80,7 +83,7 @@ router.post('/api/chat', async (req, res) => {
             }
             
             // Pass the extracted information to the chat GPT function
-            const gptResponse = await ai.startChat([...conversation, {
+            const gptResponse = await chatGPTApi.startChat([...conversation, {
               role: 'function',
               content: JSON.stringify(googleCalendarResponses),
               name: 'add-calendar-events'
@@ -108,7 +111,7 @@ router.post('/api/chat', async (req, res) => {
             };
         
             // Simulate calling the Google search API function
-            const googleSearchResponse = await api.search(req);
+            const googleSearchResponse = await googleApi.search(req);
         
             // Check if googleSearchResponse.items exists and has length
             if (googleSearchResponse && googleSearchResponse.items && googleSearchResponse.items.length > 0) {
@@ -119,7 +122,7 @@ router.post('/api/chat', async (req, res) => {
               }));
         
               // Pass the extracted information to the chat GPT function
-              const gptResponse = await ai.startChat([...conversation, {
+              const gptResponse = await chatGPTApi.startChat([...conversation, {
                 role: 'function',
                 content: JSON.stringify(searchResults),
                 name: 'google-search'
@@ -186,11 +189,11 @@ router.get('/fetch-calendar', async (req, res) => {
 
   const days = req.body.days ? req.body.days : 10;
 
-  const oauth2Client = api.createOAuthClient();
+  const oauth2Client = googleApi.createOAuthClient();
   oauth2Client.setCredentials(req.session.tokens);
 
   try {
-    const events = await api.getCalendar(oauth2Client, null, null, days);
+    const events = await googleApi.getCalendar(oauth2Client, null, null, days);
     res.json(events);
   } catch (error) {
     console.error('Error fetching calendar:', error);
@@ -202,11 +205,11 @@ router.get('/fetch-calendar', async (req, res) => {
 router.post('/add-calendar-event', async (req, res) => {
   // Check if the request is from GPT
   if (req.headers['x-gpt-request']) {
-    const oauth2Client = api.createOAuthClient();
+    const oauth2Client = googleApi.createOAuthClient();
     oauth2Client.setCredentials({ access_token: process.env.TOKENS.access_token });
     
     try {
-      response = await api.addCalendarEvent(oauth2Client, req);
+      response = await googleApi.addCalendarEvent(oauth2Client, req);
       res.json(response);
     } catch (error) {
       console.error('Error adding calendar event:', error);
@@ -216,11 +219,11 @@ router.post('/add-calendar-event', async (req, res) => {
     return res.status(401).send('User not authenticated');
   }
 
-  const oauth2Client = api.createOAuthClient();
+  const oauth2Client = googleApi.createOAuthClient();
   oauth2Client.setCredentials(req.session.tokens);
 
   try {
-    response = await api.addCalendarEvent(oauth2Client, req);
+    response = await googleApi.addCalendarEvent(oauth2Client, req);
     res.json(response);
   } catch (error) {
     console.error('Error adding calendar event:', error);
@@ -247,7 +250,7 @@ router.get('/oauth2callback', async (req, res) => {
     }
 
     // Create another OAuth2 client using the stored config
-    const oauth2Client = api.createOAuthClient(req.session.oauth2ClientConfig);
+    const oauth2Client = googleApi.createOAuthClient(req.session.oauth2ClientConfig);
     //Get the tokens for the specific user's session and store them in the session
     const { tokens } = await oauth2Client.getToken(code);
     req.session.tokens = tokens;
@@ -256,7 +259,7 @@ router.get('/oauth2callback', async (req, res) => {
     try {
       oauth2Client.setCredentials(req.session.tokens);
 
-      const userInfo = await api.getUserInfo(oauth2Client);
+      const userInfo = await googleApi.getUserInfo(oauth2Client);
       
       if (userInfo) {
         req.session.user = {
@@ -294,7 +297,7 @@ router.get('/oauth2callback', async (req, res) => {
 router.get('/authenticate', async (req, res) => {
   try {
     // Create a new OAuth2 client
-    const oauth2Client = api.createOAuthClient();
+    const oauth2Client = googleApi.createOAuthClient();
     const authorizeUrl = oauth2Client.generateAuthUrl({
       access_type: 'offline',
       scope: [

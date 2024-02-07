@@ -1,7 +1,7 @@
 // routes/gptAuthRoutes.js
 const express = require('express');
 const router = express.Router();
-const api = require('../../api/index.js'); // Adjust the path as per your project structure
+const api = require('../../api/chatGPT/index.js'); // Adjust the path as per your project structure
 
 // Middleware to check if the request is from GPT
 function isGptRequest(req, res, next) {
