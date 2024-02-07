@@ -83,7 +83,7 @@ const ChatGPT = () => {
           content: `Event: ${event.summary}\nTime: ${new Date(event.start).toLocaleString()} - ${new Date(event.end).toLocaleString()}\nDescription: ${event.description || 'No description'}`
         }));
         setConversation(currentConversation => [...currentConversation, ...calendarMessages]);
-      } else if(data.gptFunction == "add-calendar-event") {
+      } else if(data.gptFunction == "add-calendar-events") {
         const googleAddEventResponse = { role: 'assistant', content: data.response, name: 'google-add-event'};
         setConversation(currentConversation => [...currentConversation, googleAddEventResponse]);
       } else if(data.gptFunction == "google-search") {

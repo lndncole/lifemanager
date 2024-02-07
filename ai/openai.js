@@ -33,31 +33,26 @@ async function startChat(conversation) {
       }
     },
     {
-      name: "add-calendar-event",
-      description: "Add an event to the calendar.",
+      name: "add-calendar-events",
+      description: "Add multiple events to the calendar.",
       parameters: {
         type: "object",
         properties: {
-          summary: {
-            type: "string",
-            description: "The summary or title of the event"
-          },
-          start: {
-            type: "string",
-            format: "date-time",
-            description: "Start date for the event, in YYYY-MM-DD format or RFC3339 timestamp"
-          },
-          end: {
-            type: "string",
-            format: "date-time",
-            description: "End date for the event, in YYYY-MM-DD format or RFC3339 timestamp"
-          },
-          description: {
-            type: "string",
-            description: "A detailed description of the event"
+          events: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                summary: { type: "string", description: "The summary or title of the event" },
+                start: { type: "string", format: "date-time", description: "Start date/time for the event" },
+                end: { type: "string", format: "date-time", description: "End date/time for the event" },
+                description: { type: "string", description: "A detailed description of the event" },
+              },
+              required: ["summary", "start", "end"]
+            }
           }
         },
-        required: ["summary", "start", "end"]
+        required: ["events"]
       }
     },
     {
