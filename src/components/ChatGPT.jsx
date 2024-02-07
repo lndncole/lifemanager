@@ -7,7 +7,7 @@ import ReactMarkdown from 'react-markdown';
 //styles and icons
 import '../styles/chatgpt.css';
 import { IoSparklesOutline } from "react-icons/io5";
-import { FaArrowUpLong } from "react-icons/fa6";
+import { FaArrowUpLong, FaSpinner } from "react-icons/fa6";
 
 
 const ChatGPT = () => {
@@ -15,9 +15,11 @@ const ChatGPT = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [userInput, setUserInput] = useState("");
   const [conversation, setConversation] = useState([]);
+  const [isLoading, setIsLoading] = useState(false); 
   //Global variables
   const lastMessageRef = useRef(null);
   const chatWindowRef = useRef(null);
+
 
   useEffect(() => {
     //For updating the chat box when the conversation updates
@@ -59,6 +61,8 @@ const ChatGPT = () => {
   };
 
   const sendMessage = async () => {
+    setIsLoading(true);
+
     const newMessage = { role: "user", content: userInput };
     // Update local state first
     setConversation(prevConversation => [...prevConversation, newMessage]);
@@ -67,32 +71,38 @@ const ChatGPT = () => {
     // Prepare the conversation for the API call
     const conversationForApi = [...conversation, newMessage];
   
-    const response = await fetch("/api/chat", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ conversation: conversationForApi }),
-    });
-    const data = await response.json();
-  
-    if (data && data.gptFunction) {
-      if(data.gptFunction == 'fetch-calendar') {
-        const calendarMessages = data.calendarEvents.map(event => ({
-          role: "assistant",
-          content: `Event: ${event.summary}\nTime: ${new Date(event.start).toLocaleString()} - ${new Date(event.end).toLocaleString()}\nDescription: ${event.description || 'No description'}`
-        }));
-        setConversation(currentConversation => [...currentConversation, ...calendarMessages]);
-      } else if(data.gptFunction == "add-calendar-events") {
-        const googleAddEventResponse = { role: 'assistant', content: data.response, name: 'google-add-event'};
-        setConversation(currentConversation => [...currentConversation, googleAddEventResponse]);
-      } else if(data.gptFunction == "google-search") {
-        const googleSearchResponse = { role: 'assistant', content: data.result, name: 'google-searcher'};
-        setConversation(currentConversation => [...currentConversation, googleSearchResponse]);
+    try{
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ conversation: conversationForApi }),
+      });
+      const data = await response.json();
+    
+      if (data && data.gptFunction) {
+        if(data.gptFunction == 'fetch-calendar') {
+          const calendarMessages = data.calendarEvents.map(event => ({
+            role: "assistant",
+            content: `Event: ${event.summary}\nTime: ${new Date(event.start).toLocaleString()} - ${new Date(event.end).toLocaleString()}\nDescription: ${event.description || 'No description'}`
+          }));
+          setConversation(currentConversation => [...currentConversation, ...calendarMessages]);
+        } else if(data.gptFunction == "add-calendar-events") {
+          const googleAddEventResponse = { role: 'assistant', content: data.response, name: 'google-add-event'};
+          setConversation(currentConversation => [...currentConversation, googleAddEventResponse]);
+        } else if(data.gptFunction == "google-search") {
+          const googleSearchResponse = { role: 'assistant', content: data.result, name: 'google-searcher'};
+          setConversation(currentConversation => [...currentConversation, googleSearchResponse]);
+        }
+      } else {
+        const aiResponse = { role: data.response.role, content: data.response.content };
+        setConversation(currentConversation => [...currentConversation, aiResponse]);
       }
-    } else {
-      const aiResponse = { role: data.response.role, content: data.response.content };
-      setConversation(currentConversation => [...currentConversation, aiResponse]);
+    } catch(e) {
+      console.error("Error communicating with the GPT: ", e);
+    } finally {
+      setIsLoading(false); 
     }
   };
 
@@ -114,6 +124,7 @@ const ChatGPT = () => {
             </div>
           );
         })}
+        {isLoading && <div className="loading-indicator"><FaSpinner className="spinner" /></div>}
         </div>
         <div className="chat-input">
           <input
