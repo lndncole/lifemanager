@@ -24,8 +24,21 @@ function createOAuthClient() {
   return oauth2Client;
 }
 
+async function search(req) {
+  try {
+    const search = google.customsearch('v1');
+    const searchRes = await search.cse.list({
+      cx: process.env.GOOGLE_CUSTOM_SEARCH_ENGINE_ID,
+      q: req.q,
+      auth: process.env.GOOGLE_CLOUD_API_KEY,
+    });
+    return searchRes.data;
+  } catch(e) {
+    throw e;
+  }
+}
+
 async function addCalendarEvent(auth, req) {
-  console.log("calendar request: ", req);
   try {
     const calendar = google.calendar({ version: 'v3', auth: auth });
     const event = {
@@ -34,9 +47,6 @@ async function addCalendarEvent(auth, req) {
       end: req.body.end,
       description: req.body.description,
     };
-
-    //log for debugging
-    console.log("event added: ", event);
 
     const response = await calendar.events.insert({
       calendarId: 'primary',
@@ -102,4 +112,4 @@ async function getCalendar(oauth2Client, timeMin, timeMax) {
   }
 }
 
-module.exports = { getCalendar, getUserInfo, createOAuthClient, addCalendarEvent };
+module.exports = { getCalendar, getUserInfo, createOAuthClient, addCalendarEvent, search };

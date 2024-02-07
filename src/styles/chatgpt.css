@@ -1,3 +1,9 @@
+/*Keyframes*/
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
 /* Add this in your CSS file */
 .chat-container {
     width: 0;
@@ -138,6 +144,15 @@
     box-shadow: none;
 }
 
+.loading-indicator {
+    width: 100%;
+    display: flex;
+    justify-content: end;
+}
+.spinner {
+    animation: spin 1s linear infinite;
+}
+
 @media (max-width: 992px) {
     .chat-container {
         bottom: 50px;
@@ -161,6 +176,9 @@
     }
     .chat-messages {
         height: calc(100% - 120px);
+    }
+    .message.ai {
+        padding-left: 16px;
     }
     .chat-input button {
         width: 100px;
