@@ -1,5 +1,10 @@
 // src/components/ChatGPT.jsx
 import React, { useState, useEffect, useRef } from "react";
+
+//For markdown parsing
+import ReactMarkdown from 'react-markdown';
+
+//styles and icons
 import '../styles/chatgpt.css';
 import { IoSparklesOutline } from "react-icons/io5";
 import { FaArrowUpLong } from "react-icons/fa6";
@@ -53,15 +58,6 @@ const ChatGPT = () => {
     }
   };
 
-  function extractUrlFromString(text) {
-      // Regular expression to match a URL starting with "https://www"
-      const regex = /https:\/\/www\.[^\s]+/g;
-      const matches = text.match(regex);
-      
-      // Return the first match found or null if no match is found
-      return matches ? matches[0] : null;
-  };
-
   const sendMessage = async () => {
     const newMessage = { role: "user", content: userInput };
     // Update local state first
@@ -88,9 +84,11 @@ const ChatGPT = () => {
         }));
         setConversation(currentConversation => [...currentConversation, ...calendarMessages]);
       } else if(data.gptFunction == "add-calendar-event") {
-        const addCalendarResponse = { role: 'assistant', content: "Your event has been added, here's the link! " + data.addedEvent.htmlLink};
-        console.log(data);
-        setConversation(currentConversation => [...currentConversation, addCalendarResponse]);
+        const googleAddEventResponse = { role: 'assistant', content: data.response, name: 'google-add-event'};
+        setConversation(currentConversation => [...currentConversation, googleAddEventResponse]);
+      } else if(data.gptFunction == "google-search") {
+        const googleSearchResponse = { role: 'assistant', content: data.result, name: 'google-searcher'};
+        setConversation(currentConversation => [...currentConversation, googleSearchResponse]);
       }
     } else {
       const aiResponse = { role: data.response.role, content: data.response.content };
@@ -103,43 +101,31 @@ const ChatGPT = () => {
       <div className={`chat-tab ${isOpen ? "open" : ""}`} onClick={toggleChat}>
         lifeMNGR <IoSparklesOutline /> 
       </div>
-  
-        <div className={`chat-window ${isOpen ? "open" : ""}`} ref={chatWindowRef}>
-          {isOpen && 
-            <button className="close-chat" onClick={toggleChat}>X</button>
-          }
-          <div className="chat-messages">
-          {conversation.map((msg, index) => {
-            const messageClass = msg.role !== 'user' ? 'ai' : 'user';
-            const isLinkMessage = msg.content.includes("http") && msg.role === 'assistant';
-            
-            return (
-              <div key={index} className={`message ${messageClass}`}
-                  ref={index === conversation.length - 1 ? lastMessageRef : null}>
-                {isLinkMessage ? (
-                  <span>
-                    Your event has been added, here's the link! <a href={extractUrlFromString(msg.content)} target="_blank" rel="noopener noreferrer">Click here</a>
-                  </span>
-                ) : (
-                  msg.content
-                )}
-              </div>
-            );
-          })}
-          </div>
-          <div className="chat-input">
-              <input
-                type="text"
-                value={userInput}
-                onChange={handleInputChange}
-                onKeyDown={handleKeyPress} 
-                placeholder="Type your message..."
-              />
-              <button onClick={sendMessage}><FaArrowUpLong /></button>
-          </div>
+      <div className={`chat-window ${isOpen ? "open" : ""}`} ref={chatWindowRef}>
+        {isOpen && 
+          <button className="close-chat" onClick={toggleChat}>X</button>
+        }
+        <div className="chat-messages">
+        {conversation.map((msg, index) => {
+          const messageClass = msg.role !== 'user' ? 'ai' : 'user';
+          return (
+            <div key={index} className={`message ${messageClass}`} ref={index === conversation.length - 1 ? lastMessageRef : null}>
+              <ReactMarkdown children={msg.content} />
+            </div>
+          );
+        })}
         </div>
-    
-
+        <div className="chat-input">
+          <input
+            type="text"
+            value={userInput}
+            onChange={handleInputChange}
+            onKeyDown={handleKeyPress} 
+            placeholder="Type your message..."
+          />
+          <button onClick={sendMessage}><FaArrowUpLong /></button>
+        </div>
+      </div>
     </div>
   );
 };
