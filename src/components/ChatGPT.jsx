@@ -40,6 +40,21 @@ const ChatGPT = () => {
     return () => document.removeEventListener("mouseup", handleClickOutside);
   }, [isOpen]);
 
+
+  useEffect(() => {
+    const eventSource = new EventSource("/api/chatGPT");
+    eventSource.onmessage = function(event) {
+      const chunk = JSON.parse(event.data);
+      console.log(chunk); // Process the streamed chunk as needed
+      // For example, add to conversation
+      setConversation(currentConversation => [...currentConversation, {role: 'assistant', content: chunk}]);
+    };
+  
+    return () => {
+      eventSource.close();
+    };
+  }, []); // Run once when the component mounts
+
   const toggleChat = () => {
     setIsOpen(!isOpen);
     if (!isOpen) {

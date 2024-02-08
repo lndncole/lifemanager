@@ -15,12 +15,33 @@ async function chat(req, res, chatGPTApi, googleApi) {
     }
 
     try {
-        //Add to the chat with the GPT
-        const completion = await chatGPTApi.startChat(conversation);
 
-        if (completion && completion.choices && completion.choices.length > 0) {
+        // Set headers for SSE
+        res.writeHead(200, {
+            'Content-Type': 'text/event-stream',
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive',
+        });
+        //Add to the chat with the GPT
+        const stream = await chatGPTApi.startChat(conversation);
+
+        for await (const chunk of stream) {
+            res.write(`data: ${JSON.stringify(chunk.choices[0].delta)}\n\n`);
+            console.log(`data: ${JSON.stringify(chunk.choices[0].delta)}\n\n`);
+        }
+
+        // Keep the connection open
+        req.on('close', () => {
+            console.log('Client closed the connection');
+            res.end();
+        });
+
+        const chatCompletion = await stream.finalChatCompletion();
+        console.log("ChatCompletion", chatCompletion);
+
+        if (chatCompletion && chatCompletion.choices && chatCompletion.choices.length > 0) {
             //The response from the GPT
-            const choice = completion.choices[0].message;
+            const choice = chatCompletion.choices[0].message;
             //If the response is a function call
             if (choice.function_call) {
 

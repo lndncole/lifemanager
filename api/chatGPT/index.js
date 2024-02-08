@@ -92,13 +92,14 @@ async function startChat(conversation) {
       Anytime I ask for you to get my calendar for "today" you should call the "fetch-calendar" function passing in today's date at midnight as the "timeMin" property, and todays's date at 11:59pm as the "timeMax" property.`}
     ],
     functions: functions,
-    function_call: "auto"
+    function_call: "auto",
+    stream: true
   };
 
   conversationObject.messages = [...conversationObject.messages, ...conversation];
 
   try {
-    const completion = await openai.chat.completions.create(conversationObject);
+    const completion = await openai.beta.chat.completions.stream(conversationObject);
     return completion;
   } catch (e) {
     console.error('Error connecting to OpenAI API - heres the error:', e);
