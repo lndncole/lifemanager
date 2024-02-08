@@ -1,3 +1,12 @@
+function isValidJSON(text) {
+    try {
+        JSON.parse(text);
+        return true; // Parsing succeeded, the text is valid JSON
+    } catch (error) {
+        return false; // Parsing failed, the text is not valid JSON
+    }
+}
+
 async function chat(req, res, chatGPTApi, googleApi) {
     const { conversation } = req.body;
     // Ensure conversation array is not empty
@@ -14,8 +23,12 @@ async function chat(req, res, chatGPTApi, googleApi) {
             const choice = completion.choices[0].message;
             //If the response is a function call
             if (choice.function_call) {
-                // Parse the JSON string of function arguments in to an object
-                const functionArgs = JSON.parse(choice.function_call.arguments);
+
+            //Parse function args accordingly based on whether it's valid JSON or not
+            let functionArgs = 
+                isValidJSON(choice.function_call.arguments) ? JSON.parse(choice.function_call.arguments)
+                    : choice.function_call.arguments;
+                
                 // Ensure oauth2Client is correctly authenticated
                 const oauth2Client = googleApi.createOAuthClient();
                 oauth2Client.setCredentials(req.session.tokens);
@@ -38,7 +51,7 @@ async function chat(req, res, chatGPTApi, googleApi) {
                                     content: JSON.stringify(events),
                                     name: 'fetch-calendar'
                                 }]);
-                                
+
                                 if (gptResponse && gptResponse.choices && gptResponse.choices.length > 0) {
                                     const gptChoice = gptResponse.choices[0].message;
                                     // Process and return GPT's response with calendar events list
