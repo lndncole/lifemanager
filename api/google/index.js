@@ -75,14 +75,12 @@ async function getCalendar(oauth2Client, timeMin, timeMax) {
   try {
     const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
 
-
     // If timeMin and timeMax are not provided, calculate a default range
     if(!timeMin || !timeMax) {
       const now = moment.tz(userTimeZone);
       timeMin = now.startOf('day').toISOString();
       timeMax = now.add(10, 'days').toISOString();
     }
-    
     
     let allEvents = [];
 
@@ -103,8 +101,6 @@ async function getCalendar(oauth2Client, timeMin, timeMax) {
       });
     }
 
-    //Debug
-    // console.log("calendar: ", allEvents);
     return allEvents;
   } catch (error) {
     console.error('Error retrieving calendar events:', error);
