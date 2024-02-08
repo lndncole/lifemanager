@@ -52,7 +52,7 @@ const Home = () => {
   useEffect(() => {
     const fetchCalendarData = async () => {
       try {
-        const response = await fetch('/fetch-calendar', {
+        const response = await fetch('/api/google/fetch-calendar', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -124,7 +124,7 @@ const Home = () => {
 
   const handleFetchCalendar = async () => {
     try {
-      const response = await fetch('/fetch-calendar', {
+      const response = await fetch('/api/google/fetch-calendar', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -158,7 +158,7 @@ const Home = () => {
       description: eventDetails,
     };
 
-    const response = await fetch('/add-calendar-event', {
+    const response = await fetch('/api/google/add-calendar-events', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

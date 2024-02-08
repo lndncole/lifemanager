@@ -1,6 +1,6 @@
 //server/routes/db.js
 //dependencies
-const pool = require('../../db/db');
+const pool = require('../db/db');
 const express = require('express');
 const router = express.Router();
 

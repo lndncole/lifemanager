@@ -72,7 +72,7 @@ const ChatGPT = () => {
     const conversationForApi = [...conversation, newMessage];
   
     try{
-      const response = await fetch("/api/chat", {
+      const response = await fetch("/api/chatGPT", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -120,7 +120,12 @@ const ChatGPT = () => {
           const messageClass = msg.role !== 'user' ? 'ai' : 'user';
           return (
             <div key={index} className={`message ${messageClass}`} ref={index === conversation.length - 1 ? lastMessageRef : null}>
-              <ReactMarkdown children={msg.content} />
+              <ReactMarkdown 
+                children={msg.content} 
+                components={{
+                  a: ({node, ...props}) => <a {...props} target="_blank" rel="noopener noreferrer" />
+                }} 
+              />
             </div>
           );
         })}
