@@ -38,11 +38,9 @@ async function chat(req, res, chatGPTApi, googleApi) {
                                     content: JSON.stringify(events),
                                     name: 'fetch-calendar'
                                 }]);
-
-
+                                
                                 if (gptResponse && gptResponse.choices && gptResponse.choices.length > 0) {
                                     const gptChoice = gptResponse.choices[0].message;
-                                    console.log(gptChoice);
                                     // Process and return GPT's response with calendar events list
                                     res.json({
                                         gptFunction: 'fetch-calendar',
