@@ -11,7 +11,7 @@ const googleApi = require('../../api/google/index.js');
 const chatGPTApi = require("../../api/chatGPT/index.js");
 
 //Functions
-const chatGPT = require('./chatGPT.js');
+const chatGPT = require('./chatGPT/index.js');
 const google = require('./google.js');
 
 //Send initial request to Google for authenitcation 
