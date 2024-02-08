@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import SignInButton from '../components/SignInButton';
-import { gaEvents } from '../middleware/ga.js';
+import { gaEvents } from '../analytics/ga.js';
 
 const SignIn = () => {
   const navigate = useNavigate();

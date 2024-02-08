@@ -4,10 +4,8 @@ const domain =
     : 'http://localhost:8080';
 
 async function fetchCalendar(req, res, googleApi) {
-    if (!req.session.tokens) {
-        return res.status(401).send('User not authenticated');
-    }
 
+    //If a default set of days isn't given then default to ten days
     const days = req.body.days ? req.body.days : 10;
 
     const oauth2Client = googleApi.createOAuthClient();

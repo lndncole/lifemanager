@@ -83,16 +83,13 @@ const ChatGPT = () => {
     
       if (data && data.gptFunction) {
         if(data.gptFunction == 'fetch-calendar') {
-          const calendarMessages = data.calendarEvents.map(event => ({
-            role: "assistant",
-            content: `Event: ${event.summary}\nTime: ${new Date(event.start).toLocaleString()} - ${new Date(event.end).toLocaleString()}\nDescription: ${event.description || 'No description'}`
-          }));
-          setConversation(currentConversation => [...currentConversation, ...calendarMessages]);
+          const googleFetchCalendarResponse = { role: 'assistant', content: data.calendarEvents, name: 'google-calendar-fetch'};
+          setConversation(currentConversation => [...currentConversation, googleFetchCalendarResponse]);
         } else if(data.gptFunction == "add-calendar-events") {
-          const googleAddEventResponse = { role: 'assistant', content: data.response, name: 'google-add-event'};
+          const googleAddEventResponse = { role: 'assistant', content: data.response, name: 'google-calendar-add-event'};
           setConversation(currentConversation => [...currentConversation, googleAddEventResponse]);
         } else if(data.gptFunction == "google-search") {
-          const googleSearchResponse = { role: 'assistant', content: data.result, name: 'google-searcher'};
+          const googleSearchResponse = { role: 'assistant', content: data.result, name: 'google-search'};
           setConversation(currentConversation => [...currentConversation, googleSearchResponse]);
         }
       } else {
