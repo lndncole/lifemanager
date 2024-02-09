@@ -62,6 +62,67 @@ const ChatGPT = () => {
 
   const sendMessage = async () => {
     setIsLoading(true);
+  
+    const newMessage = { role: "user", content: userInput };
+    // Add user's message to the conversation immediately
+    setConversation(prevConversation => [...prevConversation, newMessage]);
+    setUserInput(""); // Clear the input field
+
+    let accumulatedGptResponse = ""; // Accumulator for GPT's ongoing response
+  
+    try {
+      const response = await fetch("/api/chatGPT", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ conversation: [...conversation, newMessage] }),
+      });
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder('utf-8');
+  
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break; // Exit the loop if the stream is finished
+  
+        const decodedChunk = decoder.decode(value, { stream: true });
+  
+        // Process the decoded chunk to extract message content
+        // Here, adjust your logic to extract the content from the chunk
+
+        const jsonPattern = /{[^{}]*}/g;
+        let match;
+      
+        while ((match = jsonPattern.exec(decodedChunk)) !== null) {
+          try {
+            const jsonObj = JSON.parse(match[0]);
+
+            accumulatedGptResponse += jsonObj.content;
+
+            setConversation(prevConversation => {
+              // Remove the last GPT message if it exists
+              const isLastMessageGpt = prevConversation.length && prevConversation[prevConversation.length - 1].role === 'assistant';
+              const updatedConversation = isLastMessageGpt ? prevConversation.slice(0, -1) : [...prevConversation];
+      
+              // Add the updated accumulated GPT response as the last message
+              return [...updatedConversation, { role: 'assistant', content: accumulatedGptResponse }];
+            });
+      
+            // After processing a match, you might want to do something with jsonObj
+            // For example, updating UI or state
+          } catch (e) {
+            console.error("Error parsing JSON chunk", e);
+          }
+        }
+      }
+    } catch (e) {
+      console.error("Error communicating with the GPT: ", e);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+
+  const sendMessage1 = async () => {
+    setIsLoading(true);
 
     const newMessage = { role: "user", content: userInput };
     // Update local state first
@@ -80,15 +141,55 @@ const ChatGPT = () => {
         body: JSON.stringify({ conversation: conversationForApi }),
       });
       const reader = response.body.getReader();
-
+      const decoder = new TextDecoder('utf-8');
+      
+      // Accumulate chunks for processing
+      let accumulatedChunks = '';
+      
       while(true) {
-        const chunk = await reader.read();
-        const { done, value } = chunk;
-        if(done) {
+        const { done, value } = await reader.read();
+        if (done) {
           break;
         }
-        console.log(value);
-      } 
+        // Decode each chunk
+        const decodedChunk = decoder.decode(value, {stream: true});
+        // Accumulate decoded chunk
+        accumulatedChunks += decodedChunk;
+      
+        // Handle accumulated chunks
+        // Use a RegExp to find JSON objects, assuming they are not nested
+        const jsonPattern = /{[^{}]*}/g;
+        let match;
+        let parsedData = [];
+      
+        while ((match = jsonPattern.exec(accumulatedChunks)) !== null) {
+          try {
+            const jsonObj = JSON.parse(match[0]);
+            parsedData.push(jsonObj);
+      
+            // After processing a match, you might want to do something with jsonObj
+            // For example, updating UI or state
+          } catch (e) {
+            console.error("Error parsing JSON chunk", e);
+          }
+        }
+      
+        // Assuming all JSON strings are parsed correctly, clear accumulatedChunks
+        // Or implement a more sophisticated method to only remove processed parts
+        accumulatedChunks = '';
+      
+        for (const chunk of parsedData) {
+          //use chunk.content to update the chat as if the GPT is chatting live
+          console.log(chunk.content);
+          if (chunk.content) {
+            // Update the conversation state to render this message
+            setConversation((prevConversation) => [
+              ...prevConversation,
+              { role: 'assistant', content: chunk.content },
+            ]);
+          }
+        }
+      }
     
       if (data && data.gptFunction) {
         if(data.gptFunction == 'fetch-calendar') {
@@ -122,20 +223,19 @@ const ChatGPT = () => {
           <button className="close-chat" onClick={toggleChat}>X</button>
         }
         <div className="chat-messages">
-        {conversation.map((msg, index) => {
-          const messageClass = msg.role !== 'user' ? 'ai' : 'user';
-          return (
-            <div key={index} className={`message ${messageClass}`} ref={index === conversation.length - 1 ? lastMessageRef : null}>
-              <ReactMarkdown 
-                children={msg.content} 
-                components={{
-                  a: ({node, ...props}) => <a {...props} target="_blank" rel="noopener noreferrer" />
-                }} 
-              />
-            </div>
-          );
-        })}
-        {isLoading && <div className="loading-indicator"><FaSpinner className="spinner" /></div>}
+          {conversation.map((msg, index) => {
+            const messageClass = msg.role !== 'user' ? 'ai' : 'user';
+            return (
+              <div key={index} className={`message ${messageClass}`} ref={index === conversation.length - 1 ? lastMessageRef : null}>
+                <ReactMarkdown 
+                  children={msg.content} 
+                  components={{
+                    a: ({node, ...props}) => <a {...props} target="_blank" rel="noopener noreferrer" />
+                  }} 
+                />
+              </div>
+            );
+          })}
         </div>
         <div className="chat-input">
           <input

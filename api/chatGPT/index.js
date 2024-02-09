@@ -99,7 +99,7 @@ async function startChat(conversation) {
   conversationObject.messages = [...conversationObject.messages, ...conversation];
 
   try {
-    const completion = await openai.chat.completions.create(conversationObject);
+    const completion = await openai.beta.chat.completions.stream(conversationObject);
     return completion;
   } catch (e) {
     console.error('Error connecting to OpenAI API - heres the error:', e);

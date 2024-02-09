@@ -25,7 +25,6 @@ async function chat(req, res, chatGPTApi, googleApi) {
 
         for await (const chunk of completion) {
             res.write(JSON.stringify(chunk));
-            console.log(chunk);
         }
 
         // if (completion && completion.choices && completion.choices.length > 0) {
