@@ -79,7 +79,16 @@ const ChatGPT = () => {
         },
         body: JSON.stringify({ conversation: conversationForApi }),
       });
-      const data = await response.json();
+      const reader = response.body.getReader();
+
+      while(true) {
+        const chunk = await reader.read();
+        const { done, value } = chunk;
+        if(done) {
+          break;
+        }
+        console.log(value);
+      } 
     
       if (data && data.gptFunction) {
         if(data.gptFunction == 'fetch-calendar') {
