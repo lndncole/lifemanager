@@ -95,7 +95,7 @@ const ChatGPT = () => {
           try {
             const jsonObj = JSON.parse(match[0]);
 
-            accumulatedGptResponse += jsonObj.content;
+            accumulatedGptResponse += jsonObj.content == undefined ? '' : jsonObj.content;
 
             setConversation(prevConversation => {
               // Remove the last GPT message if it exists
