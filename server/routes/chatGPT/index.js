@@ -33,19 +33,15 @@ async function chat(req, res, chatGPTApi, googleApi) {
             } else {
                 res.write(JSON.stringify(chunk));
             }
-            
         }
 
         if (gptFunctionCall) {
 
             //get completed chat object to send to functions
             const chatCompletion = await completion.finalChatCompletion();
-            console.log("GPT function call: ", chatCompletion);
-
 
             //The response from the GPT
             const choice = chatCompletion.choices[0].message;
-            console.log("GPT CHOICE: ", choice);
 
             //If the response is a function call
             if (choice.function_call) {
@@ -61,15 +57,10 @@ async function chat(req, res, chatGPTApi, googleApi) {
                 if (choice.function_call.name === "fetch-calendar") {
                     fetchCalendar(req, res, conversation, functionArgs, chatGPTApi, googleApi, oauth2Client);
                 } else if(choice.function_call && choice.function_call.name === "add-calendar-events") {
-                    await addCalendarEvents(req, res, conversation, choice, chatGPTApi, googleApi, oauth2Client);
+                    addCalendarEvents(req, res, conversation, choice, chatGPTApi, googleApi, oauth2Client);
                 } else if(choice.function_call && choice.function_call.name === "google-search") {
                     googleSearch(req, res, conversation, functionArgs, chatGPTApi, googleApi);
                 } 
-            } else {
-
-                console.log("got response: ", choice);
-                //If it's not a function call, just send the GPT's regular response back
-                res.json({ response: choice });
             }
         }
     } catch (e) {

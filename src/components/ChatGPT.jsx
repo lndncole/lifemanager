@@ -81,7 +81,6 @@ const ChatGPT = () => {
       const decoder = new TextDecoder('utf-8');
   
       while (true) {
-        setIsLoading(false);
         const { done, value } = await reader.read();
         if (done) break; // Exit the loop if the stream is finished
   
@@ -91,6 +90,7 @@ const ChatGPT = () => {
         let match;
       
         while ((match = jsonPattern.exec(decodedChunk)) !== null) {
+          setIsLoading(false);
           try {
             const jsonObj = JSON.parse(match[0]);
 
