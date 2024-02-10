@@ -22,29 +22,12 @@ const ChatGPT = ({ isOpen, setIsOpen }) => {
   const lastMessageRef = useRef(null);
   const chatWindowRef = useRef(null);
 
-   // Function to send a message to ChatGPT
-   const sendInitialTimezoneMessage = async (timezone) => {
-    const message = {role: "user", content: `My timezone is ${timezone}. It is ${moment()}`};
-    // Here you can structure the message in a way your API expects
-    // This is just an example and might need adjustment
-    setConversation(prevConversation => [...prevConversation, message]);
-
-    try {
-      const response = await fetch("/api/chatGPT", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ conversation: [...conversation, message] }),
-      });
-
-      // Handle the response if needed
-    } catch (error) {
-      console.error("Error sending timezone information: ", error);
-    }
-  };
+  const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const timeZoneMessge = `My timezone is ${userTimezone}. It is ${moment()}`;
 
   useEffect(() => {
-    const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    sendInitialTimezoneMessage(userTimezone);
+    sendMessage(timeZoneMessge);
+    // send a message to the GPT right away indicating my timeZone
   }, []);
 
 
@@ -87,10 +70,11 @@ const ChatGPT = ({ isOpen, setIsOpen }) => {
     }
   };
 
-  const sendMessage = async () => {
+  const sendMessage = async (userInputArgument) => {
+    let userInputToGpt = userInput ? userInput : userInputArgument;
     setIsLoading(true);
   
-    const newMessage = { role: "user", content: userInput };
+    const newMessage = { role: "user", content: userInputToGpt };
     // Add user's message to the conversation immediately
     setConversation(prevConversation => [...prevConversation, newMessage]);
     setUserInput(""); // Clear the input field

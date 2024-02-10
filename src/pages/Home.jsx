@@ -5,7 +5,7 @@ import ChatGPT from '../components/ChatGPT';
 import '../styles/home.css';
 
 const Home = () => {
-  const [isOpen, setIsOpen] = useState(false); // State to manage Chat visibility
+  const [isOpen, setIsOpen] = useState(true); // State to manage Chat visibility
   const navigate = useNavigate();
 
   const handleChatClick = () => {
