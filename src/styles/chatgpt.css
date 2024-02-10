@@ -156,11 +156,16 @@
 
 @media (max-width: 992px) {
     .chat-container {
-        bottom: 50px;
+        bottom: 120px;
     }
     .chat-container.open {
         width: 85vw;
+        height: 100%;
         max-width: unset;
+        bottom: -245px;
+    }
+    .chat-window.open {
+        height: 85%;
     }
     .close-chat {
         font-size: 42px;

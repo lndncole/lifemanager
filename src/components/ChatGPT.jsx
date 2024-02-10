@@ -19,6 +19,29 @@ const ChatGPT = ({ isOpen, setIsOpen }) => {
   const lastMessageRef = useRef(null);
   const chatWindowRef = useRef(null);
 
+   // Function to send a message to ChatGPT
+   const sendInitialTimezoneMessage = async (timezone) => {
+    const message = `The user's timezone is ${timezone}.`;
+    // Here you can structure the message in a way your API expects
+    // This is just an example and might need adjustment
+    try {
+      const response = await fetch("/api/chatGPT", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ conversation: [{ role: "system", content: message }] }),
+      });
+      console.log(response);
+      // Handle the response if needed
+    } catch (error) {
+      console.error("Error sending timezone information: ", error);
+    }
+  };
+
+  useEffect(() => {
+    const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    sendInitialTimezoneMessage(userTimezone);
+  }, []);
+
 
   useEffect(() => {
     //For updating the chat box when the conversation updates
