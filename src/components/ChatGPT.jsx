@@ -90,11 +90,19 @@ const ChatGPT = () => {
         let match;
       
         while ((match = jsonPattern.exec(decodedChunk)) !== null) {
-          setIsLoading(false);
+          console.log(match);
+          const isBlankMessage = match[0] === '{}';
+          if(isBlankMessage) {
+            setIsLoading(false);
+          }
           try {
             const jsonObj = JSON.parse(match[0]);
 
-            accumulatedGptResponse += jsonObj.content == undefined ? '' : jsonObj.content;
+            if(jsonObj.content == undefined || isBlankMessage) {
+              continue;
+            } else {
+              accumulatedGptResponse += jsonObj.content;
+            }
 
             setConversation(prevConversation => {
               // Remove the last GPT message if it exists
