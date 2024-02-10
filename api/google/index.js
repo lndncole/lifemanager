@@ -2,7 +2,6 @@
 const process = require('process');
 const {google} = require('googleapis');
 const moment = require('moment-timezone');
-const userTimeZone = "America/Los_Angeles";
 
 
 const env = process.env.NODE_ENV == 'production' ? 'production' : 'development';
@@ -45,7 +44,7 @@ async function addCalendarEvent(auth, req) {
       summary: req.body.summary,
       start: req.body.start,
       end: req.body.end,
-      description: req.body.description,
+      description: req.body.description
     };
 
     const response = await calendar.events.insert({
@@ -71,7 +70,7 @@ async function getUserInfo(auth) {
   }
 }
 
-async function getCalendar(oauth2Client, timeMin, timeMax) {
+async function getCalendar(oauth2Client, timeMin, timeMax, userTimeZone) {
   try {
     const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
 

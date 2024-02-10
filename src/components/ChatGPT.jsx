@@ -11,7 +11,6 @@ import { FaArrowUpLong, FaSpinner } from "react-icons/fa6";
 
 //Timezone stuff
 import moment from 'moment';
-import momentTz from 'moment-timezone';
 
 
 const ChatGPT = ({ isOpen, setIsOpen }) => {

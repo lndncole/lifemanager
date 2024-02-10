@@ -28,7 +28,8 @@ async function startChat(conversation) {
             type: "string",
             format: "date-time",
             description: "End date/time for events, in YYYY-MM-DD format"
-          }
+          },
+          userTimeZone: { type: "string", description: "The Timezone of the user"}
         },
         required: ["timeMin", "timeMax"]
       }
@@ -47,7 +48,7 @@ async function startChat(conversation) {
                 summary: { type: "string", description: "The summary or title of the event" },
                 start: { type: "string", format: "date-time", description: "Start date/time for the event" },
                 end: { type: "string", format: "date-time", description: "End date/time for the event" },
-                description: { type: "string", description: "A detailed description of the event" },
+                description: { type: "string", description: "A detailed description of the event" }
               },
               required: ["summary", "start", "end"]
             }

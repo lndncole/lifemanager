@@ -2,10 +2,11 @@ module.exports = async function fetchCalendar(req, res, conversation, functionAr
     // Format dates to RFC3339 if necessary
     const timeMin = new Date(functionArgs.timeMin).toISOString();
     const timeMax = new Date(functionArgs.timeMax).toISOString();
+    const timeZone = functionArgs.userTimeZone;
 
     try {
         //Fetch calendar events from the Google Calendar
-        const events = await googleApi.getCalendar(oauth2Client, timeMin, timeMax);
+        const events = await googleApi.getCalendar(oauth2Client, timeMin, timeMax, timeZone);
 
         // Check if googleSearchResponse.items exists and has length
         if (events && events.length > 0) {
