@@ -23,40 +23,55 @@ async function chat(req, res, chatGPTApi, googleApi) {
         //Add to the chat with the GPT
         const completion = await chatGPTApi.startChat(conversation);
 
+        let gptFunctionCall = false;
+
         for await (const chunk of completion) {
-            res.write(JSON.stringify(chunk));
+            let gptResponse = chunk.choices[0].delta;
+
+            if(gptResponse.function_call) {
+                gptFunctionCall = true;
+            } else {
+                res.write(JSON.stringify(chunk));
+            }
+            
         }
 
-        // if (completion && completion.choices && completion.choices.length > 0) {
-        //     //The response from the GPT
-        //     const choice = completion.choices[0].message;
-        //     //If the response is a function call
-        //     if (choice.function_call) {
-        //         //Parse function args accordingly based on whether it's valid JSON or not
-        //         let functionArgs = 
-        //             isValidJSON(choice.function_call.arguments) ? JSON.parse(choice.function_call.arguments)
-        //                 : choice.function_call.arguments;
+        if (gptFunctionCall) {
+
+            //get completed chat object to send to functions
+            const chatCompletion = await completion.finalChatCompletion();
+            console.log("GPT function call: ", chatCompletion);
+
+
+            //The response from the GPT
+            const choice = chatCompletion.choices[0].message;
+            console.log("GPT CHOICE: ", choice);
+
+            //If the response is a function call
+            if (choice.function_call) {
+                //Parse function args accordingly based on whether it's valid JSON or not
+                let functionArgs = 
+                    isValidJSON(choice.function_call.arguments) ? JSON.parse(choice.function_call.arguments)
+                        : choice.function_call.arguments;
                 
-        //         // Ensure oauth2Client is correctly authenticated
-        //         const oauth2Client = googleApi.createOAuthClient();
-        //         oauth2Client.setCredentials(req.session.tokens);
+                // Ensure oauth2Client is correctly authenticated
+                const oauth2Client = googleApi.createOAuthClient();
+                oauth2Client.setCredentials(req.session.tokens);
 
-        //         if (choice.function_call.name === "fetch-calendar") {
-        //             fetchCalendar(req, res, conversation, functionArgs, chatGPTApi, googleApi, oauth2Client);
-        //         } else if(choice.function_call && choice.function_call.name === "add-calendar-events") {
-        //             addCalendarEvents(req, res, conversation, choice, chatGPTApi, googleApi, oauth2Client);
-        //         } else if(choice.function_call && choice.function_call.name === "google-search") {
-        //             googleSearch(req, res, conversation, functionArgs, chatGPTApi, googleApi);
-        //         } 
-        //     } else {
+                if (choice.function_call.name === "fetch-calendar") {
+                    fetchCalendar(req, res, conversation, functionArgs, chatGPTApi, googleApi, oauth2Client);
+                } else if(choice.function_call && choice.function_call.name === "add-calendar-events") {
+                    await addCalendarEvents(req, res, conversation, choice, chatGPTApi, googleApi, oauth2Client);
+                } else if(choice.function_call && choice.function_call.name === "google-search") {
+                    googleSearch(req, res, conversation, functionArgs, chatGPTApi, googleApi);
+                } 
+            } else {
 
-        //         console.log("got response: ", choice);
-        //         //If it's not a function call, just send the GPT's regular response back
-        //         res.json({ response: choice });
-        //     }
-        // } else {
-        //     throw new Error('Invalid response structure from OpenAI API');
-        // }
+                console.log("got response: ", choice);
+                //If it's not a function call, just send the GPT's regular response back
+                res.json({ response: choice });
+            }
+        }
     } catch (e) {
         console.error('Error with OpenAI API: ', e);
         res.status(500).send('Error with OpenAI API.');

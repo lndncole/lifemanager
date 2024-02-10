@@ -16,6 +16,7 @@ module.exports = async function googleSearch(req, res, conversation, functionArg
                 snippet: item.snippet
             }));
             try {
+                console.log("search results", searchResults);
                 // Pass the extracted information to the chat GPT function
                 const gptResponse = await chatGPTApi.startChat([...conversation, {
                     role: 'function',

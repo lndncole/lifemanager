@@ -6,6 +6,7 @@ const userTimeZone = "America/Los_Angeles";
 module.exports = { startChat };
 
 async function startChat(conversation) {
+
   const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
   });
@@ -102,7 +103,7 @@ async function startChat(conversation) {
     const completion = await openai.beta.chat.completions.stream(conversationObject);
     return completion;
   } catch (e) {
-    console.error('Error connecting to OpenAI API - heres the error:', e);
+    console.error('Error connecting to OpenAI API: ', e);
   }
 }
 

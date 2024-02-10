@@ -76,18 +76,17 @@ const ChatGPT = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ conversation: [...conversation, newMessage] }),
       });
+
       const reader = response.body.getReader();
       const decoder = new TextDecoder('utf-8');
   
       while (true) {
+        setIsLoading(false);
         const { done, value } = await reader.read();
         if (done) break; // Exit the loop if the stream is finished
   
         const decodedChunk = decoder.decode(value, { stream: true });
   
-        // Process the decoded chunk to extract message content
-        // Here, adjust your logic to extract the content from the chunk
-
         const jsonPattern = /{[^{}]*}/g;
         let match;
       
@@ -105,9 +104,7 @@ const ChatGPT = () => {
               // Add the updated accumulated GPT response as the last message
               return [...updatedConversation, { role: 'assistant', content: accumulatedGptResponse }];
             });
-      
-            // After processing a match, you might want to do something with jsonObj
-            // For example, updating UI or state
+
           } catch (e) {
             console.error("Error parsing JSON chunk", e);
           }
@@ -115,101 +112,6 @@ const ChatGPT = () => {
       }
     } catch (e) {
       console.error("Error communicating with the GPT: ", e);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
-
-  const sendMessage1 = async () => {
-    setIsLoading(true);
-
-    const newMessage = { role: "user", content: userInput };
-    // Update local state first
-    setConversation(prevConversation => [...prevConversation, newMessage]);
-    setUserInput("");
-
-    // Prepare the conversation for the API call
-    const conversationForApi = [...conversation, newMessage];
-  
-    try{
-      const response = await fetch("/api/chatGPT", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ conversation: conversationForApi }),
-      });
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder('utf-8');
-      
-      // Accumulate chunks for processing
-      let accumulatedChunks = '';
-      
-      while(true) {
-        const { done, value } = await reader.read();
-        if (done) {
-          break;
-        }
-        // Decode each chunk
-        const decodedChunk = decoder.decode(value, {stream: true});
-        // Accumulate decoded chunk
-        accumulatedChunks += decodedChunk;
-      
-        // Handle accumulated chunks
-        // Use a RegExp to find JSON objects, assuming they are not nested
-        const jsonPattern = /{[^{}]*}/g;
-        let match;
-        let parsedData = [];
-      
-        while ((match = jsonPattern.exec(accumulatedChunks)) !== null) {
-          try {
-            const jsonObj = JSON.parse(match[0]);
-            parsedData.push(jsonObj);
-      
-            // After processing a match, you might want to do something with jsonObj
-            // For example, updating UI or state
-          } catch (e) {
-            console.error("Error parsing JSON chunk", e);
-          }
-        }
-      
-        // Assuming all JSON strings are parsed correctly, clear accumulatedChunks
-        // Or implement a more sophisticated method to only remove processed parts
-        accumulatedChunks = '';
-      
-        for (const chunk of parsedData) {
-          //use chunk.content to update the chat as if the GPT is chatting live
-          console.log(chunk.content);
-          if (chunk.content) {
-            // Update the conversation state to render this message
-            setConversation((prevConversation) => [
-              ...prevConversation,
-              { role: 'assistant', content: chunk.content },
-            ]);
-          }
-        }
-      }
-    
-      if (data && data.gptFunction) {
-        if(data.gptFunction == 'fetch-calendar') {
-          const googleFetchCalendarResponse = { role: 'assistant', content: data.calendarEvents, name: 'google-calendar-fetch'};
-          setConversation(currentConversation => [...currentConversation, googleFetchCalendarResponse]);
-        } else if(data.gptFunction == "add-calendar-events") {
-          const googleAddEventResponse = { role: 'assistant', content: data.response, name: 'google-calendar-add-event'};
-          setConversation(currentConversation => [...currentConversation, googleAddEventResponse]);
-        } else if(data.gptFunction == "google-search") {
-          const googleSearchResponse = { role: 'assistant', content: data.result, name: 'google-search'};
-          setConversation(currentConversation => [...currentConversation, googleSearchResponse]);
-        }
-      } else {
-        const aiResponse = { role: data.response.role, content: data.response.content };
-        setConversation(currentConversation => [...currentConversation, aiResponse]);
-      }
-    } catch(e) {
-      console.error("Error communicating with the GPT: ", e);
-    } finally {
-      setIsLoading(false); 
     }
   };
 
@@ -236,6 +138,7 @@ const ChatGPT = () => {
               </div>
             );
           })}
+          {isLoading && <div className="loading-indicator"><FaSpinner className="spinner" /></div>}
         </div>
         <div className="chat-input">
           <input
