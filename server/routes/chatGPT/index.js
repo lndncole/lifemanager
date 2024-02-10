@@ -35,10 +35,12 @@ async function chat(req, res, chatGPTApi, googleApi) {
             }
         }
 
-        if (gptFunctionCall) {
+        // Wait for chat to be completed and grab the chat object to send to functions and close the stream.
+        const chatCompletion = await completion.finalChatCompletion();
+        res.end("done");
 
-            //get completed chat object to send to functions
-            const chatCompletion = await completion.finalChatCompletion();
+        // If ChatGPT wants to call a function we 
+        if (gptFunctionCall) {
 
             //The response from the GPT
             const choice = chatCompletion.choices[0].message;
