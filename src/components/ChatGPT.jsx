@@ -90,11 +90,13 @@ const ChatGPT = () => {
         let match;
       
         while ((match = jsonPattern.exec(decodedChunk)) !== null) {
-          console.log(match);
+
           const isBlankMessage = match[0] === '{}';
-          if(isBlankMessage) {
+
+          if(!isBlankMessage) {
             setIsLoading(false);
           }
+
           try {
             const jsonObj = JSON.parse(match[0]);
 
