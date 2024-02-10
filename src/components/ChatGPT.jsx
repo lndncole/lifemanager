@@ -9,6 +9,10 @@ import '../styles/chatgpt.css';
 import { IoSparklesOutline } from "react-icons/io5";
 import { FaArrowUpLong, FaSpinner } from "react-icons/fa6";
 
+//Timezone stuff
+import moment from 'moment';
+import momentTz from 'moment-timezone';
+
 
 const ChatGPT = ({ isOpen, setIsOpen }) => {
   //Handling state
@@ -21,16 +25,18 @@ const ChatGPT = ({ isOpen, setIsOpen }) => {
 
    // Function to send a message to ChatGPT
    const sendInitialTimezoneMessage = async (timezone) => {
-    const message = `The user's timezone is ${timezone}.`;
+    const message = {role: "user", content: `My timezone is ${timezone}. It is ${moment()}`};
     // Here you can structure the message in a way your API expects
     // This is just an example and might need adjustment
+    setConversation(prevConversation => [...prevConversation, message]);
+
     try {
       const response = await fetch("/api/chatGPT", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ conversation: [{ role: "system", content: message }] }),
+        body: JSON.stringify({ conversation: [...conversation, message] }),
       });
-      console.log(response);
+
       // Handle the response if needed
     } catch (error) {
       console.error("Error sending timezone information: ", error);
@@ -158,17 +164,19 @@ const ChatGPT = ({ isOpen, setIsOpen }) => {
         }
         <div className="chat-messages">
           {conversation.map((msg, index) => {
-            const messageClass = msg.role !== 'user' ? 'ai' : 'user';
-            return (
-              <div key={index} className={`message ${messageClass}`} ref={index === conversation.length - 1 ? lastMessageRef : null}>
-                <ReactMarkdown 
-                  children={msg.content} 
-                  components={{
-                    a: ({node, ...props}) => <a {...props} target="_blank" rel="noopener noreferrer" />
-                  }} 
-                />
-              </div>
-            );
+            if(index !== 0) {
+              const messageClass = msg.role !== 'user' ? 'ai' : 'user';
+              return (
+                <div key={index} className={`message ${messageClass}`} ref={index === conversation.length - 1 ? lastMessageRef : null}>
+                  <ReactMarkdown 
+                    children={msg.content} 
+                    components={{
+                      a: ({node, ...props}) => <a {...props} target="_blank" rel="noopener noreferrer" />
+                    }} 
+                  />
+                </div>
+              );
+            }
           })}
           {isLoading && <div className="loading-indicator"><FaSpinner className="spinner" /></div>}
         </div>

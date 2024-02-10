@@ -13,7 +13,7 @@ const Home = () => {
   };
 
   const handleCalendarClick = () => {
-    navigate('/calendar');
+    navigate('/calendar');const moment = require('moment');
   }
 
   return (
