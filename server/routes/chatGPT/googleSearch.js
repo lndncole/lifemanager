@@ -15,7 +15,6 @@ module.exports = async function googleSearch(req, res, conversation, functionArg
                 link: item.link,
                 snippet: item.snippet
             }));
-            console.log("googleSearch: ", searchResults);
 
             try {
                 // Pass the extracted information to the chat GPT function
