@@ -10,9 +10,8 @@ import { IoSparklesOutline } from "react-icons/io5";
 import { FaArrowUpLong, FaSpinner } from "react-icons/fa6";
 
 
-const ChatGPT = () => {
+const ChatGPT = ({ isOpen, setIsOpen }) => {
   //Handling state
-  const [isOpen, setIsOpen] = useState(false);
   const [userInput, setUserInput] = useState("");
   const [conversation, setConversation] = useState([]);
   const [isLoading, setIsLoading] = useState(false); 

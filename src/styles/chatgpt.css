@@ -7,20 +7,21 @@
 /* Add this in your CSS file */
 .chat-container {
     width: 0;
-    height: auto;
+    height: 0;
     position: fixed;
     right: 0;
-    bottom: 25px;
+    bottom: 81px;
     z-index: 1;
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    transition: width 0.5s ease-in-out;
+    transition: height 0.5s ease-in-out, width 0.5s ease-in-out;
 }
 .chat-container.open {
     bottom: 0px;
     width: 55vw;
     max-width: 550px;
+    height: calc(100% - 124px);
 }
 
 .chat-tab {
