@@ -19,8 +19,6 @@ module.exports = async function addCalendarEvents(req, res, conversation, functi
                 }
             };
 
-            console.log("calendar add responses: ", googleCalendarResponses);
-
             try {
                 // Pass the oauth2Client and the constructed req object to the addCalendarEvent function
                 const googleCalendarAddEventResponse = await googleApi.addCalendarEvent(oauth2Client, req);
@@ -38,6 +36,8 @@ module.exports = async function addCalendarEvents(req, res, conversation, functi
         }
         //Event added, now pass the response from the Calendar back to the GPT
         try {
+
+            console.log("calendar add responses: ", googleCalendarResponses);
             // Pass the Google Calendar responses back to the GPT
             const gptResponse = await chatGPTApi.startChat([...conversation, {
                 role: 'function',
