@@ -1,45 +1,25 @@
-.home-container {
-    padding: 1% 2%;
-    height: auto;
-    padding-top: 8px;
-    padding-bottom: 76px;
-}
 
-.home-calendar-content-container {
+.home {
+    height: 100%;
     display: flex;
-    width: 100%;
+    justify-content: center;
+    align-items: center;
     gap: 8px;
 }
 
-.event-card-container {
-    height: 400px;
-    overflow: scroll;
+.home .chat-container {
+    position: fixed;
     width: 100%;
+    max-width: unset;
+    top: 82px;
 }
 
-.event-card {
-    padding: 5px 10px;
-    border: 1px solid rgb(204, 204, 204);
-    border-radius: 5px;
-    background-color: rgb(249, 249, 249);
-    font-size: 24px;
-}
 
 @media (max-width: 992px) {
-    .home-container {
-        padding-bottom: 112px;
+    .home .chat-container {
+        top: 93px;
     }
-    .home-calendar-content-container {
-        flex-direction: column;
-    }
-    .event-card-container {
-        width: 90%;
-        height: 500px;
-    }
-    .event-card {
-        font-size: 32px;
-    }
-    .fetched-calendar {
-        height: 500px;
+    .home .chat-window.open {
+        height: 88%;
     }
 }

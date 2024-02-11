@@ -23,9 +23,28 @@ async function chat(req, res, chatGPTApi, googleApi) {
         //Add to the chat with the GPT
         const completion = await chatGPTApi.startChat(conversation);
 
-        if (completion && completion.choices && completion.choices.length > 0) {
+        let gptFunctionCall = false;
+
+        for await (const chunk of completion) {
+            let gptResponse = chunk.choices[0].delta;
+
+            if(gptResponse.function_call) {
+                gptFunctionCall = true;
+            } else {
+                res.write(JSON.stringify(chunk));
+            }
+        }
+
+        // Wait for chat to be completed and grab the chat object to send to functions and close the stream.
+        const chatCompletion = await completion.finalChatCompletion();
+        res.end("done");
+
+        // If ChatGPT wants to call a function we 
+        if (gptFunctionCall) {
+
             //The response from the GPT
-            const choice = completion.choices[0].message;
+            const choice = chatCompletion.choices[0].message;
+
             //If the response is a function call
             if (choice.function_call) {
                 //Parse function args accordingly based on whether it's valid JSON or not
@@ -44,12 +63,7 @@ async function chat(req, res, chatGPTApi, googleApi) {
                 } else if(choice.function_call && choice.function_call.name === "google-search") {
                     googleSearch(req, res, conversation, functionArgs, chatGPTApi, googleApi);
                 } 
-            } else {
-                //If it's not a function call, just send the GPT's regular response back
-                res.json({ response: choice });
             }
-        } else {
-            throw new Error('Invalid response structure from OpenAI API');
         }
     } catch (e) {
         console.error('Error with OpenAI API: ', e);

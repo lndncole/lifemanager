@@ -9,16 +9,26 @@ import '../styles/chatgpt.css';
 import { IoSparklesOutline } from "react-icons/io5";
 import { FaArrowUpLong, FaSpinner } from "react-icons/fa6";
 
+//Timezone stuff
+import moment from 'moment';
 
-const ChatGPT = () => {
+
+const ChatGPT = ({ isOpen, setIsOpen }) => {
   //Handling state
-  const [isOpen, setIsOpen] = useState(false);
   const [userInput, setUserInput] = useState("");
   const [conversation, setConversation] = useState([]);
   const [isLoading, setIsLoading] = useState(false); 
   //Global variables
   const lastMessageRef = useRef(null);
   const chatWindowRef = useRef(null);
+
+  const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const timeZoneMessge = `My timezone is ${userTimezone}. It is ${moment()}`;
+
+  useEffect(() => {
+    sendMessage(timeZoneMessge);
+    // send a message to the GPT right away indicating my timeZone
+  }, []);
 
 
   useEffect(() => {
@@ -60,46 +70,69 @@ const ChatGPT = () => {
     }
   };
 
-  const sendMessage = async () => {
+  const sendMessage = async (userInputArgument) => {
+    let userInputToGpt = userInput ? userInput : userInputArgument;
     setIsLoading(true);
-
-    const newMessage = { role: "user", content: userInput };
-    // Update local state first
-    setConversation(prevConversation => [...prevConversation, newMessage]);
-    setUserInput("");
-
-    // Prepare the conversation for the API call
-    const conversationForApi = [...conversation, newMessage];
   
-    try{
+    const newMessage = { role: "user", content: userInputToGpt };
+    // Add user's message to the conversation immediately
+    setConversation(prevConversation => [...prevConversation, newMessage]);
+    setUserInput(""); // Clear the input field
+
+    let accumulatedGptResponse = ""; // Accumulator for GPT's ongoing response
+  
+    try {
       const response = await fetch("/api/chatGPT", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ conversation: conversationForApi }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ conversation: [...conversation, newMessage] }),
       });
-      const data = await response.json();
-    
-      if (data && data.gptFunction) {
-        if(data.gptFunction == 'fetch-calendar') {
-          const googleFetchCalendarResponse = { role: 'assistant', content: data.calendarEvents, name: 'google-calendar-fetch'};
-          setConversation(currentConversation => [...currentConversation, googleFetchCalendarResponse]);
-        } else if(data.gptFunction == "add-calendar-events") {
-          const googleAddEventResponse = { role: 'assistant', content: data.response, name: 'google-calendar-add-event'};
-          setConversation(currentConversation => [...currentConversation, googleAddEventResponse]);
-        } else if(data.gptFunction == "google-search") {
-          const googleSearchResponse = { role: 'assistant', content: data.result, name: 'google-search'};
-          setConversation(currentConversation => [...currentConversation, googleSearchResponse]);
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder('utf-8');
+  
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break; // Exit the loop if the stream is finished
+  
+        const decodedChunk = decoder.decode(value, { stream: true });
+  
+        const jsonPattern = /{[^{}]*}/g;
+        let match;
+      
+        while ((match = jsonPattern.exec(decodedChunk)) !== null) {
+
+          const isBlankMessage = match[0] === '{}';
+
+          if(!isBlankMessage) {
+            setIsLoading(false);
+          }
+
+          try {
+            const jsonObj = JSON.parse(match[0]);
+
+            if(jsonObj.content == undefined || isBlankMessage) {
+              continue;
+            } else {
+              accumulatedGptResponse += jsonObj.content;
+            }
+
+            setConversation(prevConversation => {
+              // Remove the last GPT message if it exists
+              const isLastMessageGpt = prevConversation.length && prevConversation[prevConversation.length - 1].role === 'assistant';
+              const updatedConversation = isLastMessageGpt ? prevConversation.slice(0, -1) : [...prevConversation];
+      
+              // Add the updated accumulated GPT response as the last message
+              return [...updatedConversation, { role: 'assistant', content: accumulatedGptResponse }];
+            });
+
+          } catch (e) {
+            console.error("Error parsing JSON chunk", e);
+          }
         }
-      } else {
-        const aiResponse = { role: data.response.role, content: data.response.content };
-        setConversation(currentConversation => [...currentConversation, aiResponse]);
       }
-    } catch(e) {
+    } catch (e) {
       console.error("Error communicating with the GPT: ", e);
-    } finally {
-      setIsLoading(false); 
     }
   };
 
@@ -113,20 +146,22 @@ const ChatGPT = () => {
           <button className="close-chat" onClick={toggleChat}>X</button>
         }
         <div className="chat-messages">
-        {conversation.map((msg, index) => {
-          const messageClass = msg.role !== 'user' ? 'ai' : 'user';
-          return (
-            <div key={index} className={`message ${messageClass}`} ref={index === conversation.length - 1 ? lastMessageRef : null}>
-              <ReactMarkdown 
-                children={msg.content} 
-                components={{
-                  a: ({node, ...props}) => <a {...props} target="_blank" rel="noopener noreferrer" />
-                }} 
-              />
-            </div>
-          );
-        })}
-        {isLoading && <div className="loading-indicator"><FaSpinner className="spinner" /></div>}
+          {conversation.map((msg, index) => {
+            if(index !== 0) {
+              const messageClass = msg.role !== 'user' ? 'ai' : 'user';
+              return (
+                <div key={index} className={`message ${messageClass}`} ref={index === conversation.length - 1 ? lastMessageRef : null}>
+                  <ReactMarkdown 
+                    children={msg.content} 
+                    components={{
+                      a: ({node, ...props}) => <a {...props} target="_blank" rel="noopener noreferrer" />
+                    }} 
+                  />
+                </div>
+              );
+            }
+          })}
+          {isLoading && <div className="loading-indicator"><FaSpinner className="spinner" /></div>}
         </div>
         <div className="chat-input">
           <input

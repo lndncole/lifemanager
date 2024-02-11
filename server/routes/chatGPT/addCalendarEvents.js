@@ -33,6 +33,7 @@ module.exports = async function addCalendarEvents(req, res, conversation, choice
                 googleCalendarResponses.push({ error: `Error adding event: ${event.summary}`, details: e.toString() });
             }
         }
+        //Event added, now pass the response from the Calendar back to the GPT
         try {
             // Pass the Google Calendar responses back to the GPT
             const gptResponse = await chatGPTApi.startChat([...conversation, {
@@ -40,17 +41,11 @@ module.exports = async function addCalendarEvents(req, res, conversation, choice
                 content: JSON.stringify(googleCalendarResponses),
                 name: 'add-calendar-events'
             }]);
-        
-            if (gptResponse && gptResponse.choices && gptResponse.choices.length > 0) {
-                const gptChoice = gptResponse.choices[0].message;
-                // Process and return GPT's response to the Calendar's response
-                res.json({
-                    gptFunction: 'add-calendar-events',
-                    response: gptChoice.content
-                });
-            } else {
-                throw new Error('No response received from GPT after Calendar confirmation.');
+
+            for await (const chunk of gptResponse) {
+                res.write(JSON.stringify(chunk));
             }
+
         } catch (e) {
             console.error("Error adding Google calendar event with lifeMNGR: ", e);
             res.status(500).send("Error adding Google calendar event with lifeMNGR.");

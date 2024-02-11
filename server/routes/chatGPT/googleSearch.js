@@ -15,6 +15,7 @@ module.exports = async function googleSearch(req, res, conversation, functionArg
                 link: item.link,
                 snippet: item.snippet
             }));
+
             try {
                 // Pass the extracted information to the chat GPT function
                 const gptResponse = await chatGPTApi.startChat([...conversation, {
@@ -23,15 +24,8 @@ module.exports = async function googleSearch(req, res, conversation, functionArg
                     name: 'google-search'
                 }]);
 
-                if (gptResponse && gptResponse.choices && gptResponse.choices.length > 0) {
-                    const gptChoice = gptResponse.choices[0].message;
-                    // Process and return GPT's response with the search results
-                    res.json({
-                        gptFunction: 'google-search',
-                        result: gptChoice.content
-                    });
-                } else {
-                    throw new Error('No response received from GPT after getting Google search results.');
+                for await (const chunk of gptResponse) {
+                    res.write(JSON.stringify(chunk));
                 }
             } catch(e) {
                 console.error("Error processing Google search results with OpenAI API: ", e)

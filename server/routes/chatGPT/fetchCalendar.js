@@ -2,10 +2,11 @@ module.exports = async function fetchCalendar(req, res, conversation, functionAr
     // Format dates to RFC3339 if necessary
     const timeMin = new Date(functionArgs.timeMin).toISOString();
     const timeMax = new Date(functionArgs.timeMax).toISOString();
+    const timeZone = functionArgs.userTimeZone;
 
     try {
         //Fetch calendar events from the Google Calendar
-        const events = await googleApi.getCalendar(oauth2Client, timeMin, timeMax);
+        const events = await googleApi.getCalendar(oauth2Client, timeMin, timeMax, timeZone);
 
         // Check if googleSearchResponse.items exists and has length
         if (events && events.length > 0) {
@@ -17,15 +18,8 @@ module.exports = async function fetchCalendar(req, res, conversation, functionAr
                     name: 'fetch-calendar'
                 }]);
 
-                if (gptResponse && gptResponse.choices && gptResponse.choices.length > 0) {
-                    const gptChoice = gptResponse.choices[0].message;
-                    // Process and return GPT's response with calendar events list
-                    res.json({
-                        gptFunction: 'fetch-calendar',
-                        calendarEvents: gptChoice.content
-                    });
-                } else {
-                    throw new Error('No response received from GPT after getting Calendar events.');
+                for await (const chunk of gptResponse) {
+                    res.write(JSON.stringify(chunk));
                 }
             } catch(e) {
                 console.error("Error processing Google search results with OpenAI API: ", e)
