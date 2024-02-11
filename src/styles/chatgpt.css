@@ -27,14 +27,11 @@
     background-color: aquamarine;
     color: black;
     padding: 10px;
-    border-top-left-radius: 10px;
-    border-bottom-left-radius: 10px;
     transition: background-color 0.75s, color 0.75s;
 }
 .chat-tab.open {
     background-color: black;
     color: white;
-    border-bottom-left-radius: 0px;
 }
 .chat-tab:not(.open):hover {
     background-color: black;
@@ -152,30 +149,11 @@
 }
 
 @media (max-width: 992px) {
-    .chat-container {
-        bottom: 120px;
-    }
-    .chat-container.open {
-        width: 85vw;
-        height: 100%;
-        max-width: unset;
-        bottom: -245px;
-    }
-    .chat-window.open {
-        height: 85%;
-    }
     .close-chat {
         font-size: 42px;
     }
-    .chat-tab {
-        width: 263px;
-        display: flex;
-        justify-content: space-between;
-    }
-    .chat-tab.open {
-        width: 100%;
-        display: unset;
-        justify-content: unset;
+    .chat-container.open {
+        height: calc(100% - 178px);
     }
     .chat-messages {
         height: calc(100% - 120px);

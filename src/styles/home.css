@@ -6,12 +6,3 @@
     align-items: center;
     gap: 8px;
 }
-
-@media (max-width: 992px) {
-    .home .chat-container {
-        top: 93px;
-    }
-    .home .chat-window.open {
-        height: 88%;
-    }
-}

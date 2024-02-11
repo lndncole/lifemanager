@@ -118,4 +118,7 @@ h1 {
     .form-input {
         font-size: 36px;
     }
+    .chat-spacer {
+        padding-top: 8%;
+    }
 }
