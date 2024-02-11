@@ -7,12 +7,13 @@ async function fetchCalendar(req, res, googleApi) {
 
     //If a default set of days isn't given then default to ten days
     const days = req.body.days ? req.body.days : 10;
+    const userTimeZone = req.body.userTimeZone;
 
     const oauth2Client = googleApi.createOAuthClient();
     oauth2Client.setCredentials(req.session.tokens);
 
     try {
-        const events = await googleApi.getCalendar(oauth2Client, null, null, days);
+        const events = await googleApi.getCalendar(oauth2Client, null, null, days, userTimeZone);
         res.json(events);
     } catch (error) {
         console.error('Error fetching calendar:', error);

@@ -48,7 +48,7 @@ router.post('/api/chatGPT', isAuthenticated, async (req, res) => {
 });
 
 //Fetch user's calendar
-router.get('/api/google/fetch-calendar', isAuthenticated, async (req, res) => {
+router.post('/api/google/fetch-calendar', isAuthenticated, async (req, res) => {
   await google.fetchCalendar(req, res, googleApi);
 });
 

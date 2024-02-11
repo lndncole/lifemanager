@@ -37,27 +37,32 @@ async function search(req) {
   }
 }
 
-async function addCalendarEvent(auth, req) {
+async function addCalendarEvent(auth, event) {
+  const calendar = google.calendar({ version: 'v3', auth });
   try {
-    const calendar = google.calendar({ version: 'v3', auth: auth });
-    const event = {
-      summary: req.body.summary,
-      start: req.body.start,
-      end: req.body.end,
-      description: req.body.description
-    };
-
     const response = await calendar.events.insert({
       calendarId: 'primary',
-      resource: event,
+      resource: {
+        summary: event.summary,
+        description: event.description,
+        start: {
+          dateTime: event.start,
+          timeZone: event.timeZone
+        },
+        end: {
+          dateTime: event.end,
+          timeZone: event.timeZone
+        }
+      }
     });
 
-    return response;
+    return response.data;
   } catch (error) {
-    console.error('Error adding and event to the calendar:', error);
-    throw error;
+    console.error('Failed to add calendar event:', error);
+    throw error; // Rethrow or handle as needed
   }
 }
+
 
 async function getUserInfo(auth) {
   try {
@@ -70,7 +75,7 @@ async function getUserInfo(auth) {
   }
 }
 
-async function getCalendar(oauth2Client, timeMin, timeMax, userTimeZone) {
+async function getCalendar(oauth2Client, timeMin, timeMax, days, userTimeZone) {
   try {
     const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
 
@@ -78,7 +83,7 @@ async function getCalendar(oauth2Client, timeMin, timeMax, userTimeZone) {
     if(!timeMin || !timeMax) {
       const now = moment.tz(userTimeZone);
       timeMin = now.startOf('day').toISOString();
-      timeMax = now.add(10, 'days').toISOString();
+      timeMax = now.add(days, 'days').toISOString();
     }
     
     let allEvents = [];

@@ -52,6 +52,8 @@ async function chat(req, res, chatGPTApi, googleApi) {
                 let functionArgs = 
                     isValidJSON(choice.function_call.arguments) ? JSON.parse(choice.function_call.arguments)
                         : choice.function_call.arguments;
+
+                console.log("function args: ", functionArgs);
                 
                 // Ensure oauth2Client is correctly authenticated
                 const oauth2Client = googleApi.createOAuthClient();

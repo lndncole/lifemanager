@@ -5,17 +5,14 @@ module.exports = async function addCalendarEvents(req, res, conversation, functi
         // Iterate through each event object and add it to the calendar
         const googleCalendarResponses = [];
         for (const event of events) {
-            // Format dates to RFC3339 if necessary
-            const startTime = new Date(event.start).toISOString();
-            const endTime = new Date(event.end).toISOString();
             
             // Create a request object for each event
             const req = {
                 body: {
                     summary: event.summary,
+                    description: event.description,
                     start: { dateTime: startTime },
-                    end: { dateTime: endTime },
-                    description: event.description
+                    end: { dateTime: endTime }
                 }
             };
 
@@ -40,7 +37,7 @@ module.exports = async function addCalendarEvents(req, res, conversation, functi
             console.log("calendar add responses: ", googleCalendarResponses);
             // Pass the Google Calendar responses back to the GPT
             const gptResponse = await chatGPTApi.startChat([...conversation, {
-                role: 'function',
+                role: 'system',
                 content: JSON.stringify(googleCalendarResponses),
                 name: 'add-calendar-events'
             }]);
@@ -48,6 +45,8 @@ module.exports = async function addCalendarEvents(req, res, conversation, functi
             for await (const chunk of gptResponse) {
                 res.write(JSON.stringify(chunk));
             }
+
+            console.log("GPT response to the Calendar being added: ", gptResponse);
 
         } catch (e) {
             console.error("Error adding Google calendar event with lifeMNGR: ", e);
