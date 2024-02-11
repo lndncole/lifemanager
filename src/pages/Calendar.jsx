@@ -30,8 +30,8 @@ const Calendar = () => {
   const moment = require('moment');
   const momentTz = require('moment-timezone');
   
-  // Assuming you want to use a specific time zone, e.g., 'America/Los_Angeles'
-  const userTimeZone = 'America/Los_Angeles';
+  // Get timezone from user's Browser
+  const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   
   // Getting the current date and time in the user's time zone
   const currentDate = momentTz.tz(userTimeZone);
@@ -53,11 +53,15 @@ const Calendar = () => {
   useEffect(() => {
     const fetchCalendarData = async () => {
       try {
+        const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
         const response = await fetch('/api/google/fetch-calendar', {
-          method: 'GET',
+          method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
+          body: JSON.stringify({
+            userTimeZone: userTimeZone
+          })
         });
     
         if (!response.ok) {

@@ -20,12 +20,13 @@ async function chat(req, res, chatGPTApi, googleApi) {
     }
 
     try {
+        console.log("Conversation going to the GPT: ", conversation[conversation.length-1], conversation[conversation.length-2], conversation[conversation.length-3])
         //Add to the chat with the GPT
-        const completion = await chatGPTApi.startChat(conversation);
+        const stream = await chatGPTApi.startChat(conversation);
 
         let gptFunctionCall = false;
 
-        for await (const chunk of completion) {
+        for await (const chunk of stream) {
             let gptResponse = chunk.choices[0].delta;
 
             if(gptResponse.function_call) {
@@ -36,8 +37,7 @@ async function chat(req, res, chatGPTApi, googleApi) {
         }
 
         // Wait for chat to be completed and grab the chat object to send to functions and close the stream.
-        const chatCompletion = await completion.finalChatCompletion();
-        res.end("done");
+        const chatCompletion = await stream.finalChatCompletion();
 
         // If ChatGPT wants to call a function we 
         if (gptFunctionCall) {
@@ -59,7 +59,7 @@ async function chat(req, res, chatGPTApi, googleApi) {
                 if (choice.function_call.name === "fetch-calendar") {
                     fetchCalendar(req, res, conversation, functionArgs, chatGPTApi, googleApi, oauth2Client);
                 } else if(choice.function_call && choice.function_call.name === "add-calendar-events") {
-                    addCalendarEvents(req, res, conversation, choice, chatGPTApi, googleApi, oauth2Client);
+                    addCalendarEvents(req, res, conversation, functionArgs, chatGPTApi, googleApi, oauth2Client);
                 } else if(choice.function_call && choice.function_call.name === "google-search") {
                     googleSearch(req, res, conversation, functionArgs, chatGPTApi, googleApi);
                 } 
