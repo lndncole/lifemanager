@@ -1,5 +1,6 @@
-module.exports = async function addCalendarEvents(req, res, conversation, choice, chatGPTApi, googleApi, oauth2Client) {
-    const events = JSON.parse(choice.function_call.arguments).events;
+module.exports = async function addCalendarEvents(req, res, conversation, functionArgs, chatGPTApi, googleApi, oauth2Client) {
+    const events = functionArgs.events;
+    console.log("GPT requested events to insert: ", events);
     try {
         // Iterate through each event object and add it to the calendar
         const googleCalendarResponses = [];
@@ -17,6 +18,8 @@ module.exports = async function addCalendarEvents(req, res, conversation, choice
                     description: event.description
                 }
             };
+
+            console.log("calendar add responses: ", googleCalendarResponses);
 
             try {
                 // Pass the oauth2Client and the constructed req object to the addCalendarEvent function
