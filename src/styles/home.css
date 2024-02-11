@@ -7,14 +7,6 @@
     gap: 8px;
 }
 
-.home .chat-container {
-    position: fixed;
-    width: 100%;
-    max-width: unset;
-    top: 82px;
-}
-
-
 @media (max-width: 992px) {
     .home .chat-container {
         top: 93px;

@@ -13,8 +13,9 @@ import { FaArrowUpLong, FaSpinner } from "react-icons/fa6";
 import moment from 'moment';
 
 
-const ChatGPT = ({ isOpen, setIsOpen }) => {
+const ChatGPT = () => {
   //Handling state
+  const [isOpen, setIsOpen] = useState(true);
   const [userInput, setUserInput] = useState("");
   const [conversation, setConversation] = useState([]);
   const [isLoading, setIsLoading] = useState(false); 
