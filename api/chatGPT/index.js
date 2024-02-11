@@ -44,10 +44,10 @@ async function startChat(conversation) {
               type: "object",
               properties: {
                 summary: { type: "string", description: "The summary or title of the event" },
-                start: { type: "string", format: "date-time", description: "Start date/time for the event in RFC3339 format" },
-                end: { type: "string", format: "date-time", description: "End date/time for the event in RFC3339 format" },
+                start: { type: "string", format: "date-time", description: "Start date/time for the event" },
+                end: { type: "string", format: "date-time", description: "End date/time for the event" },
                 description: { type: "string", description: "A detailed description of the event" },
-                timeZone: { type: "string", description: "The user's time zone" }
+                timeZone: { type: "string", description: "The user's time zone as a Timezone ID" }
               },
               required: ["summary", "start", "end", "timeZone"]
             }

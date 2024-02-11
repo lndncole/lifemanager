@@ -108,7 +108,6 @@ const ChatGPT = ({ isOpen, setIsOpen }) => {
             const jsonObj = JSON.parse(match[0]);
 
             if(jsonObj.content == undefined || isBlankMessage) {
-              setIsLoading(true);
               continue;
             } else {
               accumulatedGptResponse += jsonObj.content;
@@ -116,6 +115,7 @@ const ChatGPT = ({ isOpen, setIsOpen }) => {
             }
 
             setConversation(prevConversation => {
+              // setIsLoading(false);
               // Remove the last GPT message if it exists
               const isLastMessageGpt = prevConversation.length && prevConversation[prevConversation.length - 1].role === 'assistant';
               const updatedConversation = isLastMessageGpt ? prevConversation.slice(0, -1) : [...prevConversation];
@@ -125,6 +125,7 @@ const ChatGPT = ({ isOpen, setIsOpen }) => {
             });
 
           } catch (e) {
+            setIsLoading(false);
             console.error("Error parsing JSON chunk", e);
           }
         }

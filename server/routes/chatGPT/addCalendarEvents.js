@@ -1,24 +1,27 @@
 module.exports = async function addCalendarEvents(req, res, conversation, functionArgs, chatGPTApi, googleApi, oauth2Client) {
     const events = functionArgs.events;
-    console.log("GPT requested events to insert: ", events);
     try {
         // Iterate through each event object and add it to the calendar
         const googleCalendarResponses = [];
         for (const event of events) {
             
             // Create a request object for each event
-            const req = {
-                body: {
-                    summary: event.summary,
-                    description: event.description,
-                    start: { dateTime: startTime },
-                    end: { dateTime: endTime }
+            const eventDetails = {
+                summary: event.summary,
+                description: event.description,
+                start: { 
+                    dateTime: event.start,
+                    timeZone: event.timeZone 
+                },
+                end: { 
+                    dateTime: event.start,
+                    timeZone: event.timeZone
                 }
             };
 
             try {
                 // Pass the oauth2Client and the constructed req object to the addCalendarEvent function
-                const googleCalendarAddEventResponse = await googleApi.addCalendarEvent(oauth2Client, req);
+                const googleCalendarAddEventResponse = await googleApi.addCalendarEvent(oauth2Client, eventDetails);
                 // Check if googleCalendarAddEventResponse.items exists and has length
                 if (googleCalendarAddEventResponse && googleCalendarAddEventResponse.data) {
                     // Add response to array
@@ -33,11 +36,9 @@ module.exports = async function addCalendarEvents(req, res, conversation, functi
         }
         //Event added, now pass the response from the Calendar back to the GPT
         try {
-
-            console.log("calendar add responses: ", googleCalendarResponses);
             // Pass the Google Calendar responses back to the GPT
             const gptResponse = await chatGPTApi.startChat([...conversation, {
-                role: 'system',
+                role: 'user',
                 content: JSON.stringify(googleCalendarResponses),
                 name: 'add-calendar-events'
             }]);
@@ -45,8 +46,6 @@ module.exports = async function addCalendarEvents(req, res, conversation, functi
             for await (const chunk of gptResponse) {
                 res.write(JSON.stringify(chunk));
             }
-
-            console.log("GPT response to the Calendar being added: ", gptResponse);
 
         } catch (e) {
             console.error("Error adding Google calendar event with lifeMNGR: ", e);

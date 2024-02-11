@@ -37,28 +37,26 @@ async function search(req) {
   }
 }
 
-async function addCalendarEvent(auth, event) {
+async function addCalendarEvent(auth, eventDetails) {
   const calendar = google.calendar({ version: 'v3', auth });
   try {
+
+  const event = {
+    calendarId: 'primary',
+    summary: eventDetails.summary,
+    start: eventDetails.start,
+    end: eventDetails.end,
+    description: eventDetails.description
+  };
+
     const response = await calendar.events.insert({
       calendarId: 'primary',
-      resource: {
-        summary: event.summary,
-        description: event.description,
-        start: {
-          dateTime: event.start,
-          timeZone: event.timeZone
-        },
-        end: {
-          dateTime: event.end,
-          timeZone: event.timeZone
-        }
-      }
+      resource: event,
     });
 
-    return response.data;
+    return response;
   } catch (error) {
-    console.error('Failed to add calendar event:', error);
+    console.error('Failed to add calendar event: ', error);
     throw error; // Rethrow or handle as needed
   }
 }

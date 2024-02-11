@@ -38,7 +38,6 @@ async function chat(req, res, chatGPTApi, googleApi) {
 
         // Wait for chat to be completed and grab the chat object to send to functions and close the stream.
         const chatCompletion = await stream.finalChatCompletion();
-        res.end("done");
 
         // If ChatGPT wants to call a function we 
         if (gptFunctionCall) {
@@ -52,8 +51,6 @@ async function chat(req, res, chatGPTApi, googleApi) {
                 let functionArgs = 
                     isValidJSON(choice.function_call.arguments) ? JSON.parse(choice.function_call.arguments)
                         : choice.function_call.arguments;
-
-                console.log("function args: ", functionArgs);
                 
                 // Ensure oauth2Client is correctly authenticated
                 const oauth2Client = googleApi.createOAuthClient();
