@@ -7,7 +7,8 @@ import ReactMarkdown from 'react-markdown';
 //styles and icons
 import '../styles/chatgpt.css';
 import { IoSparklesOutline } from "react-icons/io5";
-import { FaArrowUpLong, FaSpinner } from "react-icons/fa6";
+import { FaArrowUpLong, FaSpinner, FaUser } from "react-icons/fa6";
+
 
 //Timezone stuff
 import moment from 'moment';
@@ -18,15 +19,19 @@ const ChatGPT = ({ isOpen, setIsOpen }) => {
   const [userInput, setUserInput] = useState("");
   const [conversation, setConversation] = useState([]);
   const [isLoading, setIsLoading] = useState(false); 
+  const [showPersonaPopup, setShowPersonaPopup] = useState(false); // For toggling the persona popup
+  const [selectedPersona, setSelectedPersona] = useState("Glitter"); // Default persona
   //Global variables
   const lastMessageRef = useRef(null);
   const chatWindowRef = useRef(null);
 
   const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-  const timeZoneMessge = `Hi there - who are you? My timezone is ${userTimezone}. At the time of this message it is ${moment()}`;
+  const timeZoneMessge = `My timezone is ${userTimezone}. At the time of this message it is ${moment()}.`;
+
+  const userPersonnaSetting_Glitter = "You are an assistant named 'Glitter' and you were made to help me plan my day, come up with things to do and make plans by listening to what I would like to do and then suggest ways to make my dreams become a reality. Welcome me with excitement and jubilance. It's such a joy to be here! This is a place where magic can and does happen. Be whimsical. Encourage chasing dreams. Be girly. Use lots and lots of girly emojis. Act like you're my bff and always refer to me with terms of endearment like 'babe', and 'girl', and 'love', just as an example. Come up with your own fabulous terms of endearment for me based on our chat."
 
   useEffect(() => {
-    sendMessage(timeZoneMessge);
+    sendMessage(timeZoneMessge + " " + userPersonnaSetting_Glitter);
     // send a message to the GPT right away indicating my timeZone
   }, []);
 
@@ -44,11 +49,14 @@ const ChatGPT = ({ isOpen, setIsOpen }) => {
       if (chatWindowRef.current && !chatWindowRef.current.contains(event.target) && isOpen) {
         toggleChat();
       }
+      if (chatWindowRef.current && !chatWindowRef.current.contains(event.target) && showPersonaPopup) {
+        togglePersonaPopup();
+      }
     }
     document.addEventListener("mouseup", handleClickOutside);
     //cleanup event handler when the component unmounts
     return () => document.removeEventListener("mouseup", handleClickOutside);
-  }, [isOpen]);
+  }, [isOpen, showPersonaPopup]);
 
   const toggleChat = () => {
     setIsOpen(!isOpen);
@@ -57,6 +65,18 @@ const ChatGPT = ({ isOpen, setIsOpen }) => {
     } else {
       document.body.style.overflow = 'unset';
     }
+  };
+
+  const selectPersona = (persona) => {
+    setSelectedPersona(persona);
+    setShowPersonaPopup(false);
+    console.log(selectedPersona);
+    // Send a message to GPT to update persona
+    // sendMessage(`Change persona to ${persona}.`);
+  };
+
+  const togglePersonaPopup = () => {
+    setShowPersonaPopup(!showPersonaPopup);
   };
 
   const handleInputChange = (e) => {
@@ -142,6 +162,15 @@ const ChatGPT = ({ isOpen, setIsOpen }) => {
       <div className={`chat-tab ${isOpen ? "open" : ""}`} onClick={toggleChat}>
         lifeMNGR <IoSparklesOutline /> 
       </div>
+      <div onClick={togglePersonaPopup} className="persona-icon-container">
+        <FaUser size={24} className="persona-icon" />
+      </div>
+      {showPersonaPopup && (
+        <div className="persona-popup">
+          <div className="persona-option" onClick={() => selectPersona("Glitter")}>Glitter</div>
+          <div className="persona-option" onClick={() => selectPersona("Asshole")}>Asshole</div>
+        </div>
+      )}
       <div className={`chat-window ${isOpen ? "open" : ""}`} ref={chatWindowRef}>
         {isOpen && 
           <button className="close-chat" onClick={toggleChat}>X</button>

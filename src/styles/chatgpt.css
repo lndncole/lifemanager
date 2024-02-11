@@ -154,6 +154,37 @@
     animation: spin 1s linear infinite;
 }
 
+.persona-icon-container {
+    position: fixed;
+    bottom: 0;
+    padding: 0 3% 0.5% 0;
+    cursor: pointer;
+    color: ghostwhite;
+}
+
+.persona-popup {
+    position: fixed;
+    bottom: 44px;
+    right: 0;
+    background-color: white;
+    box-shadow: 0px 0px 9px 0px rgba(0,0,0,0.5);
+    padding: 10px;
+    border-top-left-radius: 8px;
+    display: flex;
+    flex-direction: column;
+}
+
+.persona-option {
+    padding: 5px 10px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.persona-option:hover {
+    background-color: #f0f0f0;
+}
+  
+
 @media (max-width: 992px) {
     .chat-container {
         bottom: 120px;
@@ -196,5 +227,9 @@
     .chat-input button svg {
         height: 68px;
         width: 37px;
+    }
+    .persona-icon {
+        height: 32px;
+        width: 32px;
     }
 }
