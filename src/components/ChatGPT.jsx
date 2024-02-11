@@ -23,7 +23,7 @@ const ChatGPT = ({ isOpen, setIsOpen }) => {
   const chatWindowRef = useRef(null);
 
   const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-  const timeZoneMessge = `My timezone is ${userTimezone}. It is ${moment()}`;
+  const timeZoneMessge = `Hi there - who are you? My timezone is ${userTimezone}. At the time of this message it is ${moment()}`;
 
   useEffect(() => {
     sendMessage(timeZoneMessge);
@@ -66,15 +66,15 @@ const ChatGPT = ({ isOpen, setIsOpen }) => {
   const handleKeyPress = (e) => {
     // Check if the Enter key is pressed and user input is not empty
     if (isOpen && e.key === 'Enter' && userInput.trim()) {
-      sendMessage();
+      sendMessage(userInput);
     }
   };
 
   const sendMessage = async (userInputArgument) => {
-    let userInputToGpt = userInput ? userInput : userInputArgument;
+    if (!userInputArgument.trim()) return; // Prevent sending empty messages
     setIsLoading(true);
   
-    const newMessage = { role: "user", content: userInputToGpt };
+    const newMessage = { role: "user", content: userInputArgument };
     // Add user's message to the conversation immediately
     setConversation(prevConversation => [...prevConversation, newMessage]);
     setUserInput(""); // Clear the input field
@@ -104,17 +104,15 @@ const ChatGPT = ({ isOpen, setIsOpen }) => {
 
           const isBlankMessage = match[0] === '{}';
 
-          if(!isBlankMessage) {
-            setIsLoading(false);
-          }
-
           try {
             const jsonObj = JSON.parse(match[0]);
 
             if(jsonObj.content == undefined || isBlankMessage) {
+              setIsLoading(true);
               continue;
             } else {
               accumulatedGptResponse += jsonObj.content;
+              setIsLoading(false);
             }
 
             setConversation(prevConversation => {
@@ -133,6 +131,8 @@ const ChatGPT = ({ isOpen, setIsOpen }) => {
       }
     } catch (e) {
       console.error("Error communicating with the GPT: ", e);
+    } finally {
+      setIsLoading(false); // Ensure loading state is reset after request completion
     }
   };
 
@@ -171,7 +171,7 @@ const ChatGPT = ({ isOpen, setIsOpen }) => {
             onKeyDown={handleKeyPress} 
             placeholder="Type your message..."
           />
-          <button onClick={sendMessage}><FaArrowUpLong /></button>
+          <button onClick={() => sendMessage(userInput)}><FaArrowUpLong /></button>
         </div>
       </div>
     </div>
