@@ -155,11 +155,19 @@
 }
 
 .persona-icon-container {
+    display: flex;
+    align-items: center;
+    gap: 5px;
     position: fixed;
-    bottom: 0;
-    padding: 0 3% 0.5% 0;
+    bottom: -4px;
+    padding: 0.5% 3%;
     cursor: pointer;
     color: ghostwhite;
+}
+
+.persona-icon {
+    width: 17px;
+    width: 17px;
 }
 
 .persona-popup {
@@ -219,8 +227,8 @@
         bottom: 11px;
     }
     .persona-icon {
-        height: 32px;
-        width: 32px;
+        height: 31px;
+        width: 31px;
     }
     .persona-popup {
         bottom: 90px;
