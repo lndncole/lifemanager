@@ -228,8 +228,14 @@
         height: 68px;
         width: 37px;
     }
+    .persona-icon-container {
+        bottom: 11px;
+    }
     .persona-icon {
         height: 32px;
         width: 32px;
+    }
+    .persona-popup {
+        bottom: 90px;
     }
 }

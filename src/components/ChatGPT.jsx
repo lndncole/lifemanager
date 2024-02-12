@@ -20,18 +20,20 @@ const ChatGPT = ({ isOpen, setIsOpen }) => {
   const [conversation, setConversation] = useState([]);
   const [isLoading, setIsLoading] = useState(false); 
   const [showPersonaPopup, setShowPersonaPopup] = useState(false); // For toggling the persona popup
-  const [selectedPersona, setSelectedPersona] = useState("Glitter"); // Default persona
+  const [selectedPersona, setSelectedPersona] = useState({
+    name: "Glitter",
+    personaSetting: "Here is your persona: You are an assistant named 'Glitter' and you were made to help me plan my day, come up with things to do and make plans by listening to what I would like to do and then suggest ways to make my dreams become a reality. Welcome me with excitement and jubilance. It's such a joy to be here! This is a place where magic can and does happen. Be whimsical. Encourage chasing dreams. Be girly. Use lots and lots of girly emojis. Act like you're my bff and always refer to me with terms of endearment like 'babe', and 'girl', and 'love', just as an example. Come up with your own fabulous terms of endearment for me based on our chat."
+  }); // Default persona
   //Global variables
   const lastMessageRef = useRef(null);
   const chatWindowRef = useRef(null);
+  const personaWindowRef = useRef(null);
 
   const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   const timeZoneMessge = `My timezone is ${userTimezone}. At the time of this message it is ${moment()}.`;
 
-  const userPersonnaSetting_Glitter = "You are an assistant named 'Glitter' and you were made to help me plan my day, come up with things to do and make plans by listening to what I would like to do and then suggest ways to make my dreams become a reality. Welcome me with excitement and jubilance. It's such a joy to be here! This is a place where magic can and does happen. Be whimsical. Encourage chasing dreams. Be girly. Use lots and lots of girly emojis. Act like you're my bff and always refer to me with terms of endearment like 'babe', and 'girl', and 'love', just as an example. Come up with your own fabulous terms of endearment for me based on our chat."
-
   useEffect(() => {
-    sendMessage(timeZoneMessge + " " + userPersonnaSetting_Glitter);
+    sendMessage(timeZoneMessge + " " + selectedPersona.personaSetting);
     // send a message to the GPT right away indicating my timeZone
   }, []);
 
@@ -49,7 +51,7 @@ const ChatGPT = ({ isOpen, setIsOpen }) => {
       if (chatWindowRef.current && !chatWindowRef.current.contains(event.target) && isOpen) {
         toggleChat();
       }
-      if (chatWindowRef.current && !chatWindowRef.current.contains(event.target) && showPersonaPopup) {
+      if (personaWindowRef.current && !personaWindowRef.current.contains(event.target) && showPersonaPopup) {
         togglePersonaPopup();
       }
     }
@@ -67,12 +69,28 @@ const ChatGPT = ({ isOpen, setIsOpen }) => {
     }
   };
 
-  const selectPersona = (persona) => {
-    setSelectedPersona(persona);
-    setShowPersonaPopup(false);
-    console.log(selectedPersona);
-    // Send a message to GPT to update persona
-    // sendMessage(`Change persona to ${persona}.`);
+  const selectPersona = (personaName) => {
+  
+    if(personaName == selectedPersona.name) {
+      console.log("same");
+    } else {
+      const newPersonaSetting = personaName === "Glitter" ? 
+        {
+          name: "Glitter",
+          personaSetting: "You are an assistant named 'Glitter' and you were made to help me plan my day, come up with things to do and make plans by listening to what I would like to do and then suggest ways to make my dreams become a reality. Welcome me with excitement and jubilance. It's such a joy to be here! This is a place where magic can and does happen. Be whimsical. Encourage chasing dreams. Be girly. Use lots and lots of girly emojis. Act like you're my bff and always refer to me with terms of endearment like 'babe', and 'girl', and 'love', just as an example. Come up with your own fabulous terms of endearment for me based on our chat."
+        } : 
+          {
+            name: "Bob",
+            personaSetting: "You are an assistant named 'Bob' and you were made to unhelpfuly plan my day, come up with things to do that make no sense and make plans by listening to what I would like to do and then suggest ways to accomplish my goals using dry, sarcastic language and while making me feel bad about myself. Welcome me by trying to insult me. It's not a joy to be here. This is a place where magic cannot and does not happen. Discourage chasing dreams. Be crabby. Use lots and lots of annoying emojis. Act like you're not my friend and always refer to me with insulting nicknames."
+          };
+    
+      setSelectedPersona(newPersonaSetting); // Update state with the new persona
+      togglePersonaPopup(); // Close the popup
+    
+      // Now send a message to GPT to update persona
+      sendMessage(`It's time to update your persona. Here is your new persona: ${newPersonaSetting.personaSetting}.`, true);
+    }
+    
   };
 
   const togglePersonaPopup = () => {
@@ -90,11 +108,13 @@ const ChatGPT = ({ isOpen, setIsOpen }) => {
     }
   };
 
-  const sendMessage = async (userInputArgument) => {
+  const sendMessage = async (userInputArgument, personaChange) => {
     if (!userInputArgument.trim()) return; // Prevent sending empty messages
     setIsLoading(true);
   
-    const newMessage = { role: "user", content: userInputArgument };
+    const newMessage = personaChange ? 
+      { role: "user", content: userInputArgument, name: 'persona-changer' } : 
+        { role: "user", content: userInputArgument };
     // Add user's message to the conversation immediately
     setConversation(prevConversation => [...prevConversation, newMessage]);
     setUserInput(""); // Clear the input field
@@ -166,9 +186,9 @@ const ChatGPT = ({ isOpen, setIsOpen }) => {
         <FaUser size={24} className="persona-icon" />
       </div>
       {showPersonaPopup && (
-        <div className="persona-popup">
+        <div className="persona-popup" ref={personaWindowRef}>
           <div className="persona-option" onClick={() => selectPersona("Glitter")}>Glitter</div>
-          <div className="persona-option" onClick={() => selectPersona("Asshole")}>Asshole</div>
+          <div className="persona-option" onClick={() => selectPersona("Bob")}>Bob</div>
         </div>
       )}
       <div className={`chat-window ${isOpen ? "open" : ""}`} ref={chatWindowRef}>
@@ -177,7 +197,7 @@ const ChatGPT = ({ isOpen, setIsOpen }) => {
         }
         <div className="chat-messages">
           {conversation.map((msg, index) => {
-            if(index !== 0) {
+            if(index !== 0 && !msg.name) {
               const messageClass = msg.role !== 'user' ? 'ai' : 'user';
               return (
                 <div key={index} className={`message ${messageClass}`} ref={index === conversation.length - 1 ? lastMessageRef : null}>
