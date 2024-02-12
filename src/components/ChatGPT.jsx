@@ -28,6 +28,7 @@ const ChatGPT = ({ isOpen, setIsOpen }) => {
   const lastMessageRef = useRef(null);
   const chatWindowRef = useRef(null);
   const personaWindowRef = useRef(null);
+  const personaIconRef = useRef(null);
 
   const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   const timeZoneMessge = `My timezone is ${userTimezone}. At the time of this message it is ${moment()}.`;
@@ -48,9 +49,12 @@ const ChatGPT = ({ isOpen, setIsOpen }) => {
   useEffect(() => {
     // Close chat if clicked outside
     function handleClickOutside(event) {
-      if (chatWindowRef.current && !chatWindowRef.current.contains(event.target) && isOpen) {
-        toggleChat();
-      }
+      if (chatWindowRef.current && !chatWindowRef.current.contains(event.target) &&
+        (!personaWindowRef.current || !personaWindowRef.current.contains(event.target)) &&
+        (!personaIconRef.current || !personaIconRef.current.contains(event.target)) &&
+        isOpen) {
+      toggleChat();
+    }
       if (personaWindowRef.current && !personaWindowRef.current.contains(event.target) && showPersonaPopup) {
         togglePersonaPopup();
       }
@@ -58,7 +62,7 @@ const ChatGPT = ({ isOpen, setIsOpen }) => {
     document.addEventListener("mouseup", handleClickOutside);
     //cleanup event handler when the component unmounts
     return () => document.removeEventListener("mouseup", handleClickOutside);
-  }, [isOpen, showPersonaPopup]);
+  }, [isOpen, showPersonaPopup, personaIconRef]);
 
   const toggleChat = () => {
     setIsOpen(!isOpen);
@@ -72,7 +76,7 @@ const ChatGPT = ({ isOpen, setIsOpen }) => {
   const selectPersona = (personaName) => {
   
     if(personaName == selectedPersona.name) {
-      console.log("same");
+      alert("This persona is currently selected.");
     } else {
       const newPersonaSetting = personaName === "Glitter" ? 
         {
@@ -182,8 +186,8 @@ const ChatGPT = ({ isOpen, setIsOpen }) => {
       <div className={`chat-tab ${isOpen ? "open" : ""}`} onClick={toggleChat}>
         lifeMNGR <IoSparklesOutline /> 
       </div>
-      <div onClick={togglePersonaPopup} className="persona-icon-container">
-        <FaUser size={24} className="persona-icon" />
+      <div onClick={togglePersonaPopup} className="persona-icon-container" ref={personaIconRef}>
+        <FaUser size={24} className="persona-icon"/>
       </div>
       {showPersonaPopup && (
         <div className="persona-popup" ref={personaWindowRef}>
