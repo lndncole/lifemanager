@@ -38,6 +38,7 @@
     width: 40%;
     background-color: black;
     color: white;
+    border-bottom-left-radius: 0px;
 }
 .chat-tab:not(.open):hover {
     background-color: black;
