@@ -4,12 +4,13 @@
     100% { transform: rotate(360deg); }
 }
 
-/* Add this in your CSS file */
 .chat-container {
-    width: 100vw;
-    height: 0;
     position: fixed;
     right: 0;
+    top: 79px;
+    width: 0;
+    height: 0;
+
     z-index: 1;
     display: flex;
     flex-direction: column;
@@ -17,19 +18,24 @@
     transition: height 0.5s ease-in-out, width 0.5s ease-in-out;
 }
 .chat-container.open {
-    /* max-width: 550px; */
     height: calc(100% - 124px);
+    width: 100%;
 }
 
 .chat-tab {
-    width: 100%;
-    min-width: 170px;
+    display: flex;
+    width: 18%;
+    min-width: 201px;
     background-color: aquamarine;
     color: black;
     padding: 10px;
-    transition: background-color 0.75s, color 0.75s;
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+    gap: 8px;
+    transition: background-color 0.75s, color 0.75s, width 0.5s ease-in-out;
 }
 .chat-tab.open {
+    width: 40%;
     background-color: black;
     color: white;
 }
@@ -148,12 +154,57 @@
     animation: spin 1s linear infinite;
 }
 
+.persona-icon-container {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    position: fixed;
+    bottom: -4px;
+    padding: 0.5% 3%;
+    cursor: pointer;
+    color: ghostwhite;
+}
+
+.persona-icon {
+    width: 17px;
+    width: 17px;
+}
+
+.persona-popup {
+    position: fixed;
+    bottom: 44px;
+    right: 0;
+    background-color: white;
+    box-shadow: 0px 0px 9px 0px rgba(0,0,0,0.5);
+    padding: 10px;
+    border-top-left-radius: 8px;
+    display: flex;
+    flex-direction: column;
+}
+
+.persona-option {
+    padding: 5px 10px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.persona-option:hover {
+    background-color: #f0f0f0;
+}
+  
+
 @media (max-width: 992px) {
-    .close-chat {
-        font-size: 42px;
+    .chat-container {
+        top: 91px;
     }
     .chat-container.open {
-        height: calc(100% - 178px);
+        height: calc(100% - 184px);
+    }
+    .chat-window.open {
+        height: 100%;
+    }
+    .close-chat {
+        font-size: 42px;
     }
     .chat-messages {
         height: calc(100% - 120px);
@@ -171,5 +222,15 @@
     .chat-input button svg {
         height: 68px;
         width: 37px;
+    }
+    .persona-icon-container {
+        bottom: 11px;
+    }
+    .persona-icon {
+        height: 31px;
+        width: 31px;
+    }
+    .persona-popup {
+        bottom: 90px;
     }
 }

@@ -1,8 +1,12 @@
-
 .home {
     height: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 8px;
+}
+
+
+@media (max-width: 992px) {
+
 }
