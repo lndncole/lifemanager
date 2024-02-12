@@ -1,8 +1,6 @@
 // ai/openai.js
 const OpenAI = require("openai");
 
-module.exports = { startChat };
-
 async function startChat(conversation) {
 
   const openai = new OpenAI({
