@@ -3,9 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import '../styles/calendar.css';
 
-//Components
-import ChatGPT from '../components/ChatGPT';
-
 const Calendar = () => {
   //For adding events
   const [eventName, setEventName] = useState('');
@@ -186,6 +183,7 @@ const Calendar = () => {
   
   return (
     <>
+      <div class="chat-spacer"></div>
       <div class="f-col main-container">
           <div class="calendar-content-container">
               <div class="w-100 section">
@@ -287,8 +285,6 @@ const Calendar = () => {
             }
           </div>
       </div>
-
-      <ChatGPT isOpen={isOpen} setIsOpen={setIsOpen} />
     </>
   );
 };
