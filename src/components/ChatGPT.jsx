@@ -7,7 +7,8 @@ import ReactMarkdown from 'react-markdown';
 //styles and icons
 import '../styles/chatgpt.css';
 import { IoSparklesOutline } from "react-icons/io5";
-import { FaArrowUpLong, FaSpinner, FaUser } from "react-icons/fa6";
+import { FaArrowUpLong, FaSpinner, FaUser} from "react-icons/fa6";
+import { GiSpeaker } from "react-icons/gi";
 
 
 //Timezone stuff
@@ -33,6 +34,9 @@ const ChatGPT = () => {
 
   const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   const timeZoneMessge = `My timezone is ${userTimezone}. At the time of this message it is ${moment()}.`;
+
+  //Text to voice class
+  const textToVoice = new SpeechSynthesisUtterance();
 
   useEffect(() => {
     sendMessage(timeZoneMessge + " " + selectedPersona.personaSetting);
@@ -113,6 +117,11 @@ const ChatGPT = () => {
     }
   };
 
+  const handleTextToVoice = (msg) => {
+      textToVoice.text = msg;
+      window.speechSynthesis.speak(textToVoice);
+  }
+
   const sendMessage = async (userInputArgument, personaChange) => {
     if (!userInputArgument.trim()) return; // Prevent sending empty messages
     setIsLoading(true);
@@ -175,6 +184,7 @@ const ChatGPT = () => {
           }
         }
       }
+
     } catch (e) {
       console.error("Error communicating with the GPT: ", e);
     } finally {
@@ -213,6 +223,9 @@ const ChatGPT = () => {
                       a: ({node, ...props}) => <a {...props} target="_blank" rel="noopener noreferrer" />
                     }} 
                   />
+                  {msg.role !== 'user' &&
+                    <GiSpeaker onClick={()=>handleTextToVoice(msg.content)} />
+                  }
                 </div>
               );
             }
