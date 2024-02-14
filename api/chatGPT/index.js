@@ -71,7 +71,7 @@ async function startChat(conversation) {
   ];
 
   let conversationObject = {
-    model: "gpt-3.5-turbo",
+    model: "gpt-4",
     messages: [
       { role: "system", content: "You are an assistant. Work with the Google Calendar API and the Google Search API to look up information on the internet and provide information back to the user. Call predefined functions and pass in the appropriate values to ensure successful function calls. If you get a message from the role of `tool`, then you should take in that contents and summarize it for the user. You should always verify first with the user before executing a function. Try to make responses fit a maximum of 500 characters."},
       { role: 'user', content: `If I ask you to do a search that requires knowing my location to give the best results, ask me for my location.
