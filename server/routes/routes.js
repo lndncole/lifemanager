@@ -11,7 +11,7 @@ const googleApi = require('../../api/google/index.js');
 const chatGPTApi = require("../../api/chatGPT/index.js");
 
 //Functions
-const chatGPT = require('./chatGPT.js');
+const chatGPT = require('./chatGPT/index.js');
 const google = require('./google.js');
 
 //Send initial request to Google for authenitcation 
@@ -48,7 +48,7 @@ router.post('/api/chatGPT', isAuthenticated, async (req, res) => {
 });
 
 //Fetch user's calendar
-router.get('/api/google/fetch-calendar', isAuthenticated, async (req, res) => {
+router.post('/api/google/fetch-calendar', isAuthenticated, async (req, res) => {
   await google.fetchCalendar(req, res, googleApi);
 });
 

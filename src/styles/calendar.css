@@ -1,0 +1,45 @@
+.main-container {
+    padding: 1% 2%;
+    height: auto;
+    padding-top: 8px;
+    padding-bottom: 76px;
+}
+
+.calendar-content-container {
+    display: flex;
+    width: 100%;
+    gap: 8px;
+}
+
+.event-card-container {
+    height: 400px;
+    overflow: scroll;
+    width: 100%;
+}
+
+.event-card {
+    padding: 5px 10px;
+    border: 1px solid rgb(204, 204, 204);
+    border-radius: 5px;
+    background-color: rgb(249, 249, 249);
+    font-size: 24px;
+}
+
+@media (max-width: 992px) {
+    .main-container {
+        padding-bottom: 112px;
+    }
+    .calendar-content-container {
+        flex-direction: column;
+    }
+    .event-card-container {
+        width: 90%;
+        height: 500px;
+    }
+    .event-card {
+        font-size: 32px;
+    }
+    .fetched-calendar {
+        height: 500px;
+    }
+}

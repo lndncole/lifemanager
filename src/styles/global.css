@@ -37,6 +37,11 @@ h1 {
     text-align: center;
 }
 
+/*Utilities*/
+.w-100 {
+    width: 100%;
+}
+
 #root {
     width: 100%;
     height: 100%;
@@ -90,8 +95,8 @@ h1 {
     color: teal;
 }
 
-.w-100 {
-    width: 100%;
+.chat-spacer {
+    padding-top: 5%;
 }
 
 @media (max-width: 992px) {
@@ -112,5 +117,8 @@ h1 {
     }
     .form-input {
         font-size: 36px;
+    }
+    .chat-spacer {
+        padding-top: 8%;
     }
 }
