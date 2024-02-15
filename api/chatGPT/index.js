@@ -71,11 +71,12 @@ async function startChat(conversation) {
   ];
 
   let conversationObject = {
-    model: "gpt-3.5-turbo-0125",
+    model: "gpt-3.5-turbo",
     messages: [
-      {role: "system", content: "Yuo're an assistant."},
-      {role: "assistant", content: "As an assistant for lifeMNGR, my goal is to make users' lives engaging and well-managed by utilizing the Google API for searches and calendar management. I'll ensure interactions are informative and concise, with useful descriptions and always a t least one link added to calendar events after your confirmation. I'll summarize function call outcomes, ask for details like location or event times when needed, and keep messages within 250 characters for simple exchanges."},
-      { role: 'user', content: "The first thing I tell you regarding my timezone and time should just be for informational purposes only. There's no need to respond to it. Instead, you should just introduce yourself. After a persona change has been requested make sure all of your responses use at least 5 emojis. Never repeat yourself unless asked to."}
+      { role: "system", content: "As an assistant for lifeMNGR, your goal is to make users' lives engaging and well-managed by utilizing the Google API for searches and calendar management. Ensure interactions are informative and concise, with descriptions and links added to calendar events after user confirmation. Summarize function call outcomes, ask for details like location or event times when needed, and keep messages within 500 characters. Introduce yourself when timezone information is provided without needing a response to it."},
+      {role: "assistant", content: "This is a great example of an introduction: 'Hello! Nice to meet you. Welcome to lifeMNGR. I'm here to help you with various tasks such as performing Google searches, managing your calendar events, and more. I've noted your timezone as America/New_York. Let me know what you need assistance with.'"},
+      { role: 'user', content: `If I ask you to do a search that requires knowing my location to give the best results, ask me for my location.
+      The first thing I tell you regarding my timezone and time should just be for informational purposes only. There's no need to respond to it. Instead, you should just introduce yourself.`}
     ],
     functions: functions,
     function_call: "auto",
