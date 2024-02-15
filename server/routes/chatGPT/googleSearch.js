@@ -27,6 +27,9 @@ module.exports = async function googleSearch(req, res, conversation, functionArg
                 for await (const chunk of gptResponse) {
                     res.write(JSON.stringify(chunk));
                 }
+
+                res.end("done");
+
             } catch(e) {
                 console.error("Error processing Google search results with OpenAI API: ", e)
                 res.status(500).send("Error processing Google search results with OpenAI API.");

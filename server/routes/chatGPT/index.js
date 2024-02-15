@@ -14,14 +14,15 @@ function isValidJSON(text) {
 
 async function chat(req, res, chatGPTApi, googleApi) {
     const { conversation } = req.body;
+
+    console.log("User request to GPT: ", conversation[conversation.length - 1]);
+
     // Ensure conversation array is not empty
     if (!conversation || !conversation.length) {
         throw new Error("The 'conversation' array is empty.");
     }
 
-    try {
-        console.log("Conversation going to the GPT: ", conversation[conversation.length-1], conversation[conversation.length-2], conversation[conversation.length-3])
-        //Add to the chat with the GPT
+    try {        //Add to the chat with the GPT
         const stream = await chatGPTApi.startChat(conversation);
 
         let gptFunctionCall = false;
@@ -36,8 +37,13 @@ async function chat(req, res, chatGPTApi, googleApi) {
             }
         }
 
+
         // Wait for chat to be completed and grab the chat object to send to functions and close the stream.
         const chatCompletion = await stream.finalChatCompletion();
+
+        console.log("Gpt response to user: ", chatCompletion.choices[0].message);
+        console.log(chatCompletion);
+
 
         // If ChatGPT wants to call a function we 
         if (gptFunctionCall) {
@@ -64,10 +70,25 @@ async function chat(req, res, chatGPTApi, googleApi) {
                     googleSearch(req, res, conversation, functionArgs, chatGPTApi, googleApi);
                 } 
             }
+        } else {
+            res.end("done");
         }
     } catch (e) {
-        console.error('Error with OpenAI API: ', e);
-        res.status(500).send('Error with OpenAI API.');
+        let errorMessage = e.message || "";
+        if(errorMessage.includes("maximum context length")) {
+            console.error('Error with OpenAI API: ', e);
+
+            res.status(400).json({
+                message: "Request exceeded the maximum token limit for the model. Please reduce the length of the messages or functions."
+              });
+        } else {
+            console.error('Error with OpenAI API: ', e);
+
+            res.status(500).json({
+              message: "An unexpected error occurred. Please try again later."
+            });
+          }
+    
     }
 }
 

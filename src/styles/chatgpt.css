@@ -149,7 +149,7 @@
 .loading-indicator {
     width: 100%;
     display: flex;
-    justify-content: end;
+    justify-content: center;
 }
 .spinner {
     animation: spin 1s linear infinite;

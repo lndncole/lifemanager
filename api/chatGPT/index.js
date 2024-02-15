@@ -73,10 +73,9 @@ async function startChat(conversation) {
   let conversationObject = {
     model: "gpt-3.5-turbo",
     messages: [
-      { role: "system", content: "As an assistant for lifeMNGR, your goal is to make users' lives engaging and well-managed by utilizing the Google API for searches and calendar management. Ensure interactions are informative and concise, with descriptions and links added to calendar events after user confirmation. Summarize function call outcomes, ask for details like location or event times when needed, and keep messages within 500 characters. Introduce yourself when timezone information is provided without needing a response to it."},
-      {role: "assistant", content: "This is a great example of an introduction: 'Hello! Nice to meet you. Welcome to lifeMNGR. I'm here to help you with various tasks such as performing Google searches, managing your calendar events, and more. I've noted your timezone as America/New_York. Let me know what you need assistance with.'"},
-      { role: 'user', content: `If I ask you to do a search that requires knowing my location to give the best results, ask me for my location.
-      The first thing I tell you regarding my timezone and time should just be for informational purposes only. There's no need to respond to it. Instead, you should just introduce yourself.`}
+      { role: "system", content: "As an assistant for lifeMNGR, your goal is to make users' lives engaging and well-managed by utilizing the Google API for searches and calendar management. Ensure interactions are informative and concise, with descriptions and links added to calendar events after user confirmation. Introduce yourself when timezone information is provided without needing a response to it. You are able to switch personas. Summarize responses from function calls back to the user."},
+      {role: "assistant", content: "Example of an introduction: 'Hello! Nice to meet you. Welcome to lifeMNGR. I'm here to help you with various tasks such as performing Google searches, managing your calendar events, and more. I've noted your timezone as [timezone].'"},
+      { role: 'user', content: "I'll introduce myself with some information about my time and date, you respond by telling me information only about yourself."}
     ],
     functions: functions,
     function_call: "auto",
@@ -89,7 +88,8 @@ async function startChat(conversation) {
     const completion = await openai.beta.chat.completions.stream(conversationObject);
     return completion;
   } catch (e) {
-    console.error('Error connecting to OpenAI API: ', e);
+    console.error(e);
+    return { error: true, message: e.message || "An error occurred withthe Open AI API." };
   }
 }
 
