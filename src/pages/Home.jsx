@@ -7,7 +7,7 @@ const Home = () => {
   const navigate = useNavigate();
 
   const handleCalendarClick = () => {
-    navigate('/calendar');const moment = require('moment');
+    navigate('/calendar');
   }
 
   return (

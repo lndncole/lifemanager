@@ -49,10 +49,10 @@ async function addCalendarEvent(auth, eventDetails) {
     description: eventDetails.description
   };
 
-    const response = await calendar.events.insert({
-      calendarId: 'primary',
-      resource: event,
-    });
+  const response = await calendar.events.insert({
+    calendarId: 'primary',
+    resource: event,
+  });
 
     return response;
   } catch (error) {
@@ -61,6 +61,26 @@ async function addCalendarEvent(auth, eventDetails) {
   }
 }
 
+async function deleteCalendarEvent(auth, eventDetails) {
+  const calendar = google.calendar({ version: 'v3', auth });
+  try {
+
+  const event = {
+    calendarId: eventDetails.calendarId ? eventDetails.calendarId : 'primary',
+    eventId: eventDetails.eventId
+  };
+
+  const response = await calendar.events.delete({
+    calendarId: event.calendarId,
+    eventId: event.eventId,
+  });
+
+    return response;
+  } catch (error) {
+    console.error('Failed to add calendar event: ', error);
+    throw error; // Rethrow or handle as needed
+  }
+}
 
 async function getUserInfo(auth) {
   try {
@@ -110,4 +130,4 @@ async function getCalendar(oauth2Client, timeMin, timeMax, days, userTimeZone) {
   }
 }
 
-module.exports = { getCalendar, getUserInfo, createOAuthClient, addCalendarEvent, search };
+module.exports = { getCalendar, getUserInfo, createOAuthClient, addCalendarEvent, deleteCalendarEvent, search };

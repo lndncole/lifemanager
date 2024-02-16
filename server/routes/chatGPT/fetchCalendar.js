@@ -8,6 +8,8 @@ module.exports = async function fetchCalendar(req, res, conversation, functionAr
         //Fetch calendar events from the Google Calendar
         const events = await googleApi.getCalendar(oauth2Client, timeMin, timeMax, timeZone);
 
+        console.log("calendar retrieval: ", events);
+
         if (events && events.length > 0) {
             try {
                 // Pass the extracted information to the chat GPT function
