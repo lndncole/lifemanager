@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, KeyboardAvoidingView, Platform } from "react-native";
 import { Ionicons, FontAwesome } from '@expo/vector-icons'; // https://icons.expo.fyi/Index
+import 'react-native-polyfill-globals/auto';
 
 export default function App() {
   const [isOpen, setIsOpen] = useState(false);
@@ -37,34 +38,61 @@ export default function App() {
     setConversation((prevConversation) => [...prevConversation, newMessage]);
     setUserInput("");
 
-    const conversationForApi = [...conversation, newMessage];
+    let accumulatedGptResponse = ""; // Accumulator for GPT's ongoing response
 
     try {
-      // Replace with appropriate API call in React Native
-      // const response = await fetch("/api/chatGPT", {
-      //   method: "POST",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //   },
-      //   body: JSON.stringify({ conversation: conversationForApi }),
-      // });
-      // const data = await response.json();
+      const response = await fetch("https://www.lifemngr.co/api/chatGPT?password=netSuite142u", { reactNative: { textStreaming: true },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ conversation: [...conversation, newMessage] })
+      });
 
-      // Simulating API response for testing
-      const data = { response: { role: 'assistant', content: 'Sample AI Response' } };
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder('utf-8');
+  
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break; // Exit the loop if the stream is finished
+  
+        const decodedChunk = decoder.decode(value, { stream: true });
+        console.log(decodedChunk);
+        const jsonPattern = /{[^{}]*}/g;
+        let match;
+      
+        while ((match = jsonPattern.exec(decodedChunk)) !== null) {
 
-      if (data && data.gptFunction) {
-        // Handle different gptFunction cases as needed
-        // ...
+          const isBlankMessage = match[0] === '{}';
 
-      } else {
-        const aiResponse = { role: data.response.role, content: data.response.content };
-        setConversation((currentConversation) => [...currentConversation, aiResponse]);
+          try {
+            const jsonObj = JSON.parse(match[0]);
+            console.log("JSONOBJ", jsonObj);
+            if(jsonObj.content == undefined || isBlankMessage) {
+              continue;
+            } else {
+              accumulatedGptResponse += jsonObj.content;
+              setIsLoading(false);
+            }
+            console.log(accumulatedGptResponse);
+            setConversation(prevConversation => {
+              // setIsLoading(false);
+              // Remove the last GPT message if it exists
+              const isLastMessageGpt = prevConversation.length && prevConversation[prevConversation.length - 1].role === 'assistant';
+              const updatedConversation = isLastMessageGpt ? prevConversation.slice(0, -1) : [...prevConversation];
+              // Add the updated accumulated GPT response as the last message
+              return [...updatedConversation, { role: 'assistant', content: accumulatedGptResponse }];
+            });
+
+          } catch (e) {
+            setIsLoading(false);
+            console.error("Error parsing JSON chunk", e);
+          }
+        }
       }
+
     } catch (e) {
       console.error("Error communicating with the GPT: ", e);
     } finally {
-      setIsLoading(false);
+      setIsLoading(false); // Ensure loading state is reset after request completion
     }
   };
 
