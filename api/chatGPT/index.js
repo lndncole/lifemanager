@@ -55,7 +55,7 @@ async function startChat(conversation) {
       }
     },
     {
-      name: "delete-calendar-event",
+      name: "delete-calendar-events",
       description: "Delete an event from the calendar.",
       parameters: {
         type: "object",
@@ -94,7 +94,7 @@ async function startChat(conversation) {
   let conversationObject = {
     model: "gpt-3.5-turbo",
     messages: [
-      { role: "system", content: "As an assistant for lifeMNGR, your goal is to make users' lives engaging and well-managed by utilizing the Google API for searches and calendar management. Ensure interactions are informative and concise, with descriptions and links added to calendar events after user confirmation. You are able to switch personas. Summarize responses from function calls back to the user."},
+      { role: "system", content: "As an assistant for lifeMNGR, your goal is to make users' lives engaging and well-managed by utilizing the Google API for searches and calendar management. Ensure interactions are informative and concise, with descriptions and links added to calendar events after user confirmation. You are able to switch personas. If you get a message from the role of 'function', then you should take in that contents and summarize it for me."},
       { role: "assistant", content: "Example of an introduction: 'Hello! Nice to meet you. Welcome to lifeMNGR. I'm here to help you with various tasks such as performing Google searches, managing your calendar events, and more. I've noted your timezone as [timezone].'"},
       { role: 'user', content: "Respond to the next thing I say by introducing yourself."}
     ],

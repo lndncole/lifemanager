@@ -118,8 +118,17 @@ async function getCalendar(oauth2Client, timeMin, timeMax, days, userTimeZone) {
     const events = eventsRes.data.items;
     if (events && events.length > 0) {
       events.forEach(event => {
+        console.log(event);
         const start = event.start.dateTime || event.start.date;
-        allEvents.push({ start: start, end: event.end?.date || event.end?.dateTime, summary: event.summary, description: event.description });
+        allEvents.push({ 
+          start: start, 
+          end: event.end?.date || event.end?.dateTime, 
+          summary: event.summary, 
+          description: event.description,
+          eventId: event.id,
+          eventLink: event.htmlLink,
+          eventStatus: event.status
+        });
       });
     }
 

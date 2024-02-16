@@ -14,33 +14,34 @@ module.exports = async function deleteCalendarEvents(req, res, conversation, fun
 
             try {
                 // Pass the oauth2Client and the constructed req object to the addCalendarEvent function
-                const googleCalendarDeleteEventResponse = await googleApi.deleteCalendarEvents(oauth2Client, eventDetails);
+                const googleCalendarDeleteEventResponse = await googleApi.deleteCalendarEvent(oauth2Client, eventDetails);
                 // Check if googleCalendarDeleteEventResponse.items exists and has length
-                if (googleCalendarDeleteEventResponse && googleCalendarDeleteEventResponse.data) {
+                if (googleCalendarDeleteEventResponse && googleCalendarDeleteEventResponse.status && googleCalendarDeleteEventResponse.status == 204) {
                     // Add response to array
-                    googleCalendarResponses.push(googleCalendarDeleteEventResponse.data); 
+                    console.log(googleCalendarDeleteEventResponse);
+                    googleCalendarResponses.push({googleCalendarDeleteEventResponse: "successfully deleted event."}); 
                 } else {
-                    throw new Error('No data received from addCalendarEvent');
+                    throw new Error('No data received from deleteCalendarEvents');
                 }
             } catch (e) {
-                console.error(`Error adding event: ${event.summary}`, e);
-                googleCalendarResponses.push({ error: `Error adding event: ${event.summary}`, details: e.toString() });
+                console.error(`Error deleting event: ${event}`, e);
+                googleCalendarResponses.push({ error: `Error deleting event: ${event}`, details: e.toString() });
             }
         }
         //Event added, now pass the response from the Calendar back to the GPT
         try {
+
+            console.log("trying googleCalendarResponses: ", googleCalendarResponses);
             // Pass the Google Calendar responses back to the GPT
             const gptResponse = await chatGPTApi.startChat([...conversation, {
-                role: 'user',
+                role: 'assistant',
                 content: JSON.stringify(googleCalendarResponses),
                 name: 'delete-calendar-events'
             }]);
 
-            for await (const chunk of gptResponse) {
-                res.write(JSON.stringify(chunk));
-            }
-
-            res.end("done");
+            const wait = await gptResponse.finalChatCompletion();
+            console.log("final chat completion: ", wait.choices[0].message);
+            res.end(JSON.stringify({role: "assistant", content: "I've successfully deleted this event."}));
 
 
         } catch (e) {
