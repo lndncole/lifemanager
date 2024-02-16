@@ -4,12 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import '../styles/home.css';
 
 const Home = () => {
-  const [isOpen, setIsOpen] = useState(true); // State to manage Chat visibility
   const navigate = useNavigate();
-
-  const handleChatClick = () => {
-    setIsOpen(!isOpen); // Toggle chat visibility
-  };
 
   const handleCalendarClick = () => {
     navigate('/calendar');const moment = require('moment');
@@ -18,9 +13,6 @@ const Home = () => {
   return (
     <>
       <div className='home'>
-        <button onClick={handleChatClick}>
-          Chat
-        </button>
         <button onClick={handleCalendarClick}>
           Calendar
         </button>

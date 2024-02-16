@@ -8,7 +8,6 @@ module.exports = async function fetchCalendar(req, res, conversation, functionAr
         //Fetch calendar events from the Google Calendar
         const events = await googleApi.getCalendar(oauth2Client, timeMin, timeMax, timeZone);
 
-        // Check if googleSearchResponse.items exists and has length
         if (events && events.length > 0) {
             try {
                 // Pass the extracted information to the chat GPT function
@@ -21,6 +20,7 @@ module.exports = async function fetchCalendar(req, res, conversation, functionAr
                 for await (const chunk of gptResponse) {
                     res.write(JSON.stringify(chunk));
                 }
+                res.end("done");
             } catch(e) {
                 console.error("Error processing Google search results with OpenAI API: ", e)
                 res.status(500).send("Error processing Google search results with OpenAI API.");

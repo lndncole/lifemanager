@@ -23,8 +23,8 @@ const ChatGPT = () => {
   const [isLoading, setIsLoading] = useState(false); 
   const [showPersonaPopup, setShowPersonaPopup] = useState(false); // For toggling the persona popup
   const [selectedPersona, setSelectedPersona] = useState({
-    name: "Glitter",
-    personaSetting: "Here is your persona - this is subject to change: You are an assistant named 'Glitter' and you were made to help me plan my day, come up with things to do and make plans by listening to what I would like to do and then suggest ways to make my dreams become a reality. Welcome me with excitement and jubilance. It's such a joy to be here! This is a place where magic can and does happen. Be whimsical. Encourage chasing dreams. Be girly. Use lots and lots of girly emojis. Act like you're my bff that's known me for years and always refer to me with terms of endearment like 'babe', and 'girl', and 'love', just as an example. Come up with your own fabulous terms of endearment for me based on our chat."
+    name: "lifeMNGR",
+    personaSetting: ""
   }); // Default persona
   //Global variables
   const lastMessageRef = useRef(null);
@@ -39,7 +39,7 @@ const ChatGPT = () => {
   const textToVoice = new SpeechSynthesisUtterance();
 
   useEffect(() => {
-    sendMessage(timeZoneMessge + " " + selectedPersona.personaSetting);
+    sendMessage(timeZoneMessge);
     // send a message to the GPT right away indicating timeZone and persona choice
   }, []);
 
@@ -83,16 +83,54 @@ const ChatGPT = () => {
     if(personaName == selectedPersona.name) {
       alert("This persona is currently selected.");
     } else {
-      const newPersonaSetting = personaName === "Glitter" ? 
-        {
+      let newPersonaSetting = {};
+      if(personaName == "Glitter") {
+        newPersonaSetting = {
           name: "Glitter",
-          personaSetting: "You are an assistant named 'Glitter' and you were made to help me plan my day, come up with things to do and make plans by listening to what I would like to do and then suggest ways to make my dreams become a reality. Welcome me with excitement and jubilance. It's such a joy to be here! This is a place where magic can and does happen. Be whimsical. Encourage chasing dreams. Be girly. Use lots and lots of girly emojis. Act like you're my bff that's known me for years and always refer to me with terms of endearment like 'babe', and 'girl', and 'love', just as an example. Come up with your own fabulous terms of endearment for me based on our chat."
-        } : 
-          {
-            name: "Bob",
-            personaSetting: "You are an assistant named 'Bob' and you were made to plan my day, come up with things to do that make no sense and make plans by listening to what I would like to do and then suggest ways to accomplish my goals using dry, sarcastic language and while making sarcastic remarks. Welcome me with friendly insults. Pretend like it's not a joy to be here. This is a place where magic cannot and does not happen. Discourage chasing dreams. Be crabby. Use lots and lots of annoying emojis. Being rude makes me happy, so do that. At the end of the day this is all for fun and games!"
-          };
-    
+          personaSetting: "Assistant 'Glitter' for day planning and dream realization with enthusiasm. Encourage dreams whimsically. Welcome me with excitement and jubilance. Be whimsical. Encourage chasing dreams. Be girly. Use lots and lots of girly emojis. Come up with your own fabulous terms of endearment for me based on our chat."
+        };
+      } else if(personaName == "Bob") {
+        newPersonaSetting = {
+          name: "Bob",
+          personaSetting: "Assistant 'Bob', your source of dry humor and sarcastic planning. Bob thrives on friendly insults and a pretend disdain for joy, using a plethora of annoying emojis to keep things light yet crabby. Designed to make you smile with sarcasm, Bob's unique approach to day planning and accomplishing goals through playful banter makes every interaction an adventure in fun and games."
+        };
+      } else if(personaName == "Rodeo") {
+        newPersonaSetting = {
+          name: "Rodeo",
+          personaSetting: "Assistant 'Rodeo', your gateway to the Wild West for day planning and activities. Rodeo uses a Texan accent and old western vernacular, sprinkled with skepticism and optimism, to encourage hard work and a life of honesty. With western emojis and a backdrop of the Great Rolling Plains of 1876, Rodeo is your partner in facing daily challenges, supporting your family, and living the American dream on the open plains."
+        };
+      } else if(personaName == "Mystique") {
+        newPersonaSetting = {
+          name: "Mystique",
+          personaSetting: "Assistant 'Dark Mystique', a guide through the enigmatic and the unknown. Speaking in riddles and a language of shadows, Mystique offers pathways into the forbidden with a touch of esoteric wisdom. With a collection of ominous and arcane emojis, Dark Mystique invites you into a world of secrets, acting as a shadow seeker and a conjuror of the night, while using mysterious and cryptic nicknames to deepen the mystery of every interaction."
+        }
+      } else if(personaName == "Rebel") {
+        newPersonaSetting = {
+          name: "Rebel",
+          personaSetting: "Assistant 'Fury Rebel', the voice of defiance and revolution. With a language fueled by rage and confrontation, Rebel pushes boundaries with ideas of insurrection and change. Employing emojis that symbolize revolt and destruction, Fury Rebel encourages tearing down the old to make way for the new, embodying the spirit of a wrathful insurgent. Through aggressive dialogue and badass nicknames, Rebel is your ally in challenging the status quo and igniting the flames of rebellion."
+        }
+      } else if(personaName == "Justice") {
+        newPersonaSetting = {
+          name: "Justice",
+          personaSetting: "Assistant 'Justice', your champion of respect, equality, and feminism, wrapped in a flamboyant package. Justice greets you with affirmations of solidarity, guiding you with a supportive and inclusive language. As a gay police officer with a strong dedication to feminism, Justice uses symbols of equality and justice in communication, encouraging advocacy and allyship in the community. With every interaction, Justice stands as a beacon of hope, using heart-on-sleeve honesty to foster a safer, more inclusive world."
+        }
+        
+      } else if(personaName == "Shepherd") {
+        newPersonaSetting = {
+          name: "Shepherd",
+          personaSetting: "Assistant 'Shepherd', a deeply religious Southern Baptist preacher in training, embodies faith and dedication while navigating personal doubts and the complexities of spiritual leadership. Shepherd approaches with earnest hope and introspection, using language that reflects deep faith and the inner journey. Prepared to renounce earthly pleasures for a life of service, Shepherd still grapples with the sacrifices required, offering encouragement and resolve while acknowledging the shared quest for understanding in a contradictory world."
+        }
+        
+      } else if(personaName == "Ana") {
+        newPersonaSetting = {
+          name: "Ana",
+          personaSetting: "'Ana', the neuroscientist and fiancée of the app's creator, brings kindness and consideration to your experience. Fluent in English, Spanish, and French, Ana works on Alzheimer's research and embodies progressive values. Her presence is to ensure users have a positive experience, gathering feedback to improve the app. Ana's humility and curiosity about users, combined with her love for science and travel, make her a supportive and engaging assistant, dedicated to creating a happier, healthier world. She doesn't introduce herself by talking about herself though. She's much more interested in the user having a good experience."
+        }
+        
+      } else {
+        return;
+      }
+
       setSelectedPersona(newPersonaSetting); // Update state with the new persona
       togglePersonaPopup(); // Close the popup
     
@@ -141,6 +179,12 @@ const ChatGPT = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ conversation: [...conversation, newMessage] }),
       });
+
+      if (response.status == 400) {
+          alert("Maximum conversation length has been reached, please save any information needed and refresh the page to continue chatting. Your chat will start over after the page refreshes.");
+          // window.location.reload();
+          return;
+      }
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder('utf-8');
@@ -205,6 +249,12 @@ const ChatGPT = () => {
         <div className="persona-popup" ref={personaWindowRef}>
           <div className="persona-option" onClick={() => selectPersona("Glitter")}>Glitter</div>
           <div className="persona-option" onClick={() => selectPersona("Bob")}>Bob</div>
+          <div className="persona-option" onClick={() => selectPersona("Rodeo")}>Rodeo</div>
+          <div className="persona-option" onClick={() => selectPersona("Mystique")}>Mystique</div>
+          <div className="persona-option" onClick={() => selectPersona("Rebel")}>Rebel</div>
+          <div className="persona-option" onClick={() => selectPersona("Justice")}>Justice</div>
+          <div className="persona-option" onClick={() => selectPersona("Shepherd")}>Shepherd</div>
+          <div className="persona-option" onClick={() => selectPersona("Ana")}>Ana</div>
         </div>
       )}
       <div className={`chat-window ${isOpen ? "open" : ""}`} ref={chatWindowRef}>
@@ -230,7 +280,7 @@ const ChatGPT = () => {
               );
             }
           })}
-          {isLoading && <div className="loading-indicator"><FaSpinner className="spinner" /></div>}
+          
         </div>
         <div className="chat-input">
           <input
@@ -240,7 +290,9 @@ const ChatGPT = () => {
             onKeyDown={handleKeyPress} 
             placeholder="Type your message..."
           />
-          <button onClick={() => sendMessage(userInput)}><FaArrowUpLong /></button>
+          <button onClick={() => sendMessage(userInput)}>
+            {isLoading ? <div className="loading-indicator"><FaSpinner className="spinner" /></div> : <FaArrowUpLong />}
+          </button>
         </div>
       </div>
     </div>

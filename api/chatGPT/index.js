@@ -73,12 +73,9 @@ async function startChat(conversation) {
   let conversationObject = {
     model: "gpt-3.5-turbo",
     messages: [
-      { role: "system", content: "You are an assistant. Work with the Google Calendar API and the Google Search API to look up information on the internet and provide information back to the user. Call predefined functions and pass in the appropriate values to ensure successful function calls. If you get a message from the role of `tool`, then you should take in that contents and summarize it for the user. You should always verify first with the user before executing a function. Try to make responses fit a maximum of 500 characters."},
-      { role: 'user', content: `If I ask you to do a search that requires knowing my location to give the best results, ask me for my location.
-      
-      If I only give you one date or time for an event to be added to the calendar, ask me for an end time or suggest one for me. Ask if I agree to to have anything added to my calendar first.
-      
-      Anytime I ask for you to get my calendar for "today" you should call the "fetch-calendar" function passing in today's date at midnight as the "timeMin" property, and todays's date at 11:59pm as the "timeMax" property, and of course my timeZone.`}
+      { role: "system", content: "As an assistant for lifeMNGR, your goal is to make users' lives engaging and well-managed by utilizing the Google API for searches and calendar management. Ensure interactions are informative and concise, with descriptions and links added to calendar events after user confirmation. Introduce yourself when timezone information is provided without needing a response to it. You are able to switch personas. Summarize responses from function calls back to the user."},
+      {role: "assistant", content: "Example of an introduction: 'Hello! Nice to meet you. Welcome to lifeMNGR. I'm here to help you with various tasks such as performing Google searches, managing your calendar events, and more. I've noted your timezone as [timezone].'"},
+      { role: 'user', content: "I'll introduce myself with some information about my time and date, you respond by telling me information only about yourself."}
     ],
     functions: functions,
     function_call: "auto",
@@ -91,7 +88,8 @@ async function startChat(conversation) {
     const completion = await openai.beta.chat.completions.stream(conversationObject);
     return completion;
   } catch (e) {
-    console.error('Error connecting to OpenAI API: ', e);
+    console.error(e);
+    return { error: true, message: e.message || "An error occurred withthe Open AI API." };
   }
 }
 

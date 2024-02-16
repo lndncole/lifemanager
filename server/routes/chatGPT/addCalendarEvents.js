@@ -47,6 +47,9 @@ module.exports = async function addCalendarEvents(req, res, conversation, functi
                 res.write(JSON.stringify(chunk));
             }
 
+            res.end("done");
+
+
         } catch (e) {
             console.error("Error adding Google calendar event with lifeMNGR: ", e);
             res.status(500).send("Error adding Google calendar event with lifeMNGR.");
