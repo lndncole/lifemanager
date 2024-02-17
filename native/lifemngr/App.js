@@ -41,7 +41,7 @@ export default function App() {
     let accumulatedGptResponse = ""; // Accumulator for GPT's ongoing response
 
     try {
-      const response = await fetch("https://www.lifemngr.co/api/chatGPT?password=netSuite142u", { reactNative: { textStreaming: true },
+      const response = await fetch("https://www.lifemngr.co/api/chatGPT?password=", process.env.QUERY_STRING_PASSWORD, { reactNative: { textStreaming: true },
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ conversation: [...conversation, newMessage] })
