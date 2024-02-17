@@ -14,6 +14,11 @@ const chatGPTApi = require("../../api/chatGPT/index.js");
 const chatGPT = require('./chatGPT/index.js');
 const google = require('./google.js');
 
+//Test authentication
+router.get('/test', isAuthenticated, async (req, res) => {
+  res.send("Authenticated");
+});
+
 //Send initial request to Google for authenitcation 
 router.get('/authenticate', async (req, res) => {
   await google.authenticate(req, res, googleApi);
