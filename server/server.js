@@ -3,9 +3,6 @@ require('dotenv').config();
 //routes
 const routes = require('./routes/routes');
 
-//db
-const dbRoute = require('./db');
-
 //dependencies
 const cors = require('cors');
 const path = require('path');
@@ -34,7 +31,6 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(routes);
-app.use(dbRoute);
 app.use(bodyParser.json());
 
 //catch all for routes
