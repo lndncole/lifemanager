@@ -118,7 +118,6 @@ async function getCalendar(oauth2Client, timeMin, timeMax, days, userTimeZone) {
     const events = eventsRes.data.items;
     if (events && events.length > 0) {
       events.forEach(event => {
-        console.log(event);
         const start = event.start.dateTime || event.start.date;
         allEvents.push({ 
           start: start, 

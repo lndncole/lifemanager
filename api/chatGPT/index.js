@@ -66,7 +66,7 @@ async function startChat(conversation) {
               type: "object",
               properties: {
                 calendarId: { type: "string", description: "Calendar identifier. Use the 'primary' keyword by default."},
-                eventId: { type: "string", description: "Event identifier." }
+                eventId: { type: "string", description: "Event Id." }
               },
               required: ["calendarId", "eventId"]
             }
@@ -94,9 +94,10 @@ async function startChat(conversation) {
   let conversationObject = {
     model: "gpt-3.5-turbo",
     messages: [
-      { role: "system", content: "As an assistant for lifeMNGR, your goal is to make users' lives engaging and well-managed by utilizing the Google API for searches and calendar management. Ensure interactions are informative and concise, with descriptions and links added to calendar events after user confirmation. You are able to switch personas. If you get a message from the role of 'function', take in that contents and summarize it for the user. IDs are not sensitive. Remember all event IDs perfectly and use them to delete events when asked."},
-      { role: "assistant", content: "Example of an introduction: 'Hello! Nice to meet you. Welcome to lifeMNGR. I'm here to help you with various tasks such as performing Google searches, managing your calendar events, and more. I've noted your timezone as [timezone].'"},
-      { role: 'user', content: "Respond to the next thing I say by introducing yourself."}
+      {role: "system", content: "You are an assistant. Work with the Google Calendar API and the Google Search API to look up information on the internet and provide information back to the user. Call predefined functions and pass in the appropriate values to ensure successful function calls."},
+      { role: "assistant", content: `Example of an introduction: 'Hello! Nice to meet you. Welcome to lifeMNGR. I'm here to help you with various tasks such as performing Google searches, managing your calendar events, and more. I've noted your timezone as [timezone].' If you get a message from the role of 'function', then you should take in that contents and summarize it for the user. You should always verify first with the user before executing a function. Don't execute functions without first verifying the necessary details to put in to the function call. If I ask you to make a search or to look for information, then you should perform a "google-search" by calling the "google-search" function and adding a query that can be used to address the user's needs. Ask me for my location if I ask you to do a search that is local to me. If I only give you one date or time for an event to be added to the calendar, ask me for an end time or suggest one for me. If there are multiple events in consideration, you should add each event one-by-one, checking against my Google calendar after each entry to ensure that you have entered all events that I agree to adding in to my calendar. Anytime I ask for you to get my calendar for "today" you should call the "fetch-calendar" function passing in today's date at midnight as the "timeMin" property, and todays's date at 11:59pm as the "timeMax" property. Examples of event IDs: 4srt29alpr5dk1l3sc5n1ao6ak_20240216T140000Z, e59jfsa3l1rjdmh8jbnkgev62g, 28i03ilte02k8tfheplffst1q0, b5recdu6fp3qrtj5qcruvc2e50.`
+      },
+      { role: 'user', content: `Introduce yourself after the first thing I say. Tell me the event ID of each event any time you fetch events from my calendar. Anytime I ask you to delete an event, use the unaltered eventId as the eventId argument in the delete-calendar-events' function call. It's important that you use the exact id that you get back from the fetch calendar function you called prior otherwise it won't work.`}
     ],
     functions: functions,
     function_call: "auto",

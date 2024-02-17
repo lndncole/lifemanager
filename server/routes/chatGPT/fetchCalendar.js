@@ -14,27 +14,27 @@ module.exports = async function fetchCalendar(req, res, conversation, functionAr
             return;
         }
 
-        console.log("events from google calendat: ", events);
+        console.log("events from google calendar fetch: ", events);
 
         const gptEventObjects = events.map((event)=>{
+            console.log("event.id:", event.eventId);
             return {
                 eventId: event.eventId,
                 eventSummary: event.summary,
                 eventStartTime: event.start,
                 eventEndTime: event.end,
-                eventLink: event.eventLink,
-                eventStatus: event.eventStatus
+                eventLink: event.htmlLink,
+                eventStatus: event.status
             };
         });
 
         if (events && events.length > 0) {
             try {
-                console.log("gptEventObjects: ", gptEventObjects);
-                const fetchCalendarMessage = "Google Calendar events list: " + gptEventObjects;
+                console.log("gptEventObjects from calendar fetch: ", gptEventObjects);
                 // Pass the extracted information to the chat GPT function
                 const gptResponse = await chatGPTApi.startChat([...conversation, {
-                    role: 'function',
-                    content: JSON.stringify(events),
+                    role: 'assistant',
+                    content: JSON.stringify(gptEventObjects),
                     name: 'fetch-calendar'
                 }]);
 
@@ -43,7 +43,7 @@ module.exports = async function fetchCalendar(req, res, conversation, functionAr
                 }
 
                 const wait = await gptResponse.finalChatCompletion();
-                console.log("fetch calendar GPT response: ", wait.choices[0].message);
+                console.log("gpt response from calendar fetch: ", wait.choices[0].message);
                 res.end("done");
             } catch(e) {
                 console.error("Error processing Google search results with OpenAI API: ", e)
