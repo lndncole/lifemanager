@@ -48,7 +48,7 @@ router.get('/sign-out', (req, res) => {
 });
 
 //All chats to GPT
-router.post('/api/chatGPT', isAuthenticated, async (req, res) => {
+router.get('/api/chatGPT', isAuthenticated, async (req, res) => {
   await chatGPT.chat(req, res, chatGPTApi, googleApi);
 });
 
