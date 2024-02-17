@@ -48,10 +48,10 @@ async function addCalendarEvent(auth, eventDetails) {
     description: eventDetails.description
   };
 
-    const response = await calendar.events.insert({
-      calendarId: 'primary',
-      resource: event,
-    });
+  const response = await calendar.events.insert({
+    calendarId: 'primary',
+    resource: event,
+  });
 
     return response;
   } catch (error) {
@@ -60,6 +60,26 @@ async function addCalendarEvent(auth, eventDetails) {
   }
 }
 
+async function deleteCalendarEvent(auth, eventDetails) {
+  const calendar = google.calendar({ version: 'v3', auth });
+  try {
+
+  const event = {
+    calendarId: eventDetails.calendarId ? eventDetails.calendarId : 'primary',
+    eventId: eventDetails.eventId
+  };
+
+  const response = await calendar.events.delete({
+    calendarId: event.calendarId,
+    eventId: event.eventId,
+  });
+
+    return response;
+  } catch (error) {
+    console.error('Failed to add calendar event: ', error);
+    throw error; // Rethrow or handle as needed
+  }
+}
 
 async function getUserInfo(auth) {
   try {
@@ -98,7 +118,15 @@ async function getCalendar(oauth2Client, timeMin, timeMax, days, userTimeZone) {
     if (events && events.length > 0) {
       events.forEach(event => {
         const start = event.start.dateTime || event.start.date;
-        allEvents.push({ start: start, end: event.end?.date || event.end?.dateTime, summary: event.summary, description: event.description });
+        allEvents.push({ 
+          start: start, 
+          end: event.end?.date || event.end?.dateTime, 
+          summary: event.summary, 
+          description: event.description,
+          eventId: event.id,
+          eventLink: event.htmlLink,
+          eventStatus: event.status
+        });
       });
     }
 
@@ -109,4 +137,4 @@ async function getCalendar(oauth2Client, timeMin, timeMax, days, userTimeZone) {
   }
 }
 
-module.exports = { getCalendar, getUserInfo, createOAuthClient, addCalendarEvent, search };
+module.exports = { getCalendar, getUserInfo, createOAuthClient, addCalendarEvent, deleteCalendarEvent, search };

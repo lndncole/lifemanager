@@ -1,6 +1,7 @@
 //server/routes/chatGPT/index.js
 const fetchCalendar = require('./fetchCalendar.js');
 const addCalendarEvents = require('./addCalendarEvents.js');
+const deleteCalendarEvents = require('./deleteCalendarEvents.js');
 const googleSearch = require('./googleSearch.js');
 
 function isValidJSON(text) {
@@ -42,8 +43,6 @@ async function chat(req, res, chatGPTApi, googleApi) {
         const chatCompletion = await stream.finalChatCompletion();
 
         console.log("Gpt response to user: ", chatCompletion.choices[0].message);
-        console.log(chatCompletion);
-
 
         // If ChatGPT wants to call a function we 
         if (gptFunctionCall) {
@@ -64,9 +63,11 @@ async function chat(req, res, chatGPTApi, googleApi) {
 
                 if (choice.function_call.name === "fetch-calendar") {
                     fetchCalendar(req, res, conversation, functionArgs, chatGPTApi, googleApi, oauth2Client);
-                } else if(choice.function_call && choice.function_call.name === "add-calendar-events") {
+                } else if(choice.function_call.name === "add-calendar-events") {
                     addCalendarEvents(req, res, conversation, functionArgs, chatGPTApi, googleApi, oauth2Client);
-                } else if(choice.function_call && choice.function_call.name === "google-search") {
+                } else if(choice.function_call.name === "delete-calendar-events") {
+                    deleteCalendarEvents(req, res, conversation, functionArgs, chatGPTApi, googleApi, oauth2Client);
+                } else if(choice.function_call.name === "google-search") {
                     googleSearch(req, res, conversation, functionArgs, chatGPTApi, googleApi);
                 } 
             }
