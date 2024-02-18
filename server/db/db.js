@@ -4,72 +4,96 @@ const { MongoClient, ServerApiVersion } = require('mongodb');
 const uri = `mongodb+srv://${process.env.MONGO_UN}:${process.env.MONGO_PW}@lifemngr-website.bbhe50q.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
-const client = new MongoClient(uri, {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
-  }
-});
-
-async function run() {
+async function getMongoClient() {
+  const mongoClient = new MongoClient(uri, {
+    serverApi: {
+      version: ServerApiVersion.v1,
+      strict: true,
+      deprecationErrors: true,
+    }
+  });
   try {
-    // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
-
-    //Issuing commands to the admin db gives you global information
-    // Send a ping to confirm a successful connection
-    // await client.db("admin").command({ ping: 1 });
-    //List DB's / collections (db's are the same as collections)
-    // const databases = await client.db("admin").command( { listDatabases: 1 } );
-
-
-    //Create db - If the database doesn’t exist yet, it will be created.
-    const db = client.db('users');
-
-    //Create or select collection
-    const collection = db.collection('unser_info');
-
-
-    //Find entry in db
-    const name = 'John Smith';
-    // const foundEntry = await collection.find({ name }).toArray();
-    // console.log(foundEntry);
-
-
-    //Add entry to db 
-    const testData = {
-      name: 'John Smith',
-      email: 'john.smith@gmail.com',
-      profilePicUrl: 'www.google.com/profilepicurl/johnsmith'
-    };
-    // const insertOne = await collection.insertOne(testData);
-    // console.log(insertOne);
-
-
-    //Delete entry from db
-    const deletedEntry = await collection.deleteMany({ name });
-    console.log(deletedEntry);
-
-    //Update entry in db
-    // const updatedEntry = await collection.updateMany(
-    //   { name },
-    //   { $set: { birthdate: 'jan 4, 1987'} }
-    // );
-    // console.log(updatedEntry);
-
-
-
-
-
-
-
-
-  } finally {
-    // Ensures that the client will close when you finish/error
-    // await client.close();
+    await mongoClient.connect();
+    
+    return mongoClient;
+  } catch(e) {
+    console.error("Error connecting to mongo client: ", e);
+    // Close the client if there's an error
+    await mongoClient.close();
+    throw e; // Re-throw the error after cleanup
   }
 }
 
-run();
-module.exports = { run }
+async function query(command, dbObject, userDataObject, updateObject) {
+
+  const client = await getMongoClient();
+  //userDataObject is expected to be an object here with property of email, at the very least
+
+   //Create db - If the database doesn’t exist yet, it will be created.
+   const dbString = dbObject.db ? dbObject.db : 'users'; 
+   const collectionString = dbObject.collection ? dbObject.collection : 'unser_info'; 
+
+   //Connect to db, a db will be created if there isn't already a db for the passed in input 
+   const db = client.db(dbString);
+   //Create or select collection
+   const collection = db.collection(collectionString);
+
+   //Exmaple of what a userDataObjectObject looks like
+  //  const testData = {
+  //   name: 'John Smith',
+  //   email: 'john.smith@gmail.com',
+  //   profilePicUrl: 'www.google.com/profilepicurl/johnsmith'
+  // };
+
+  //Get user id (email)
+  const id = userDataObject.email;
+
+  let result;
+
+  switch (command) {
+    case "add":
+      result = await collection.insertOne(userDataObject);
+
+      break;
+    case "find":
+      result = await collection.find(id).toArray();
+
+      break;
+    case "update":
+      result = await collection.updateMany({ id }, { $set: updateObject });
+
+      break;
+    case "delete":
+      result = await collection.deleteMany(id);
+
+      break;
+    default:
+      return "opperation not found.";
+  }
+
+  //log result of query
+  console.log(result);
+
+  await client.close();
+}
+
+async function testConnection() {
+    try {
+      const client = await getMongoClient();
+
+      // Send a ping to confirm a successful connection
+      await client.db("admin").command({ ping: 1 });
+
+      //Issuing commands to the admin db gives you global information
+      //List DB's / collections (db's are the same as collections)
+      const databases = await client.db("admin").command( { listDatabases: 1 } );
+
+      console.log("Here are the databases in your Mongo DB: ", databases);
+
+      await client.close();
+    } catch(e) {
+      console.error("Error connecting to MongoDB: ", e);
+    }
+}
+
+module.exports = { query, testConnection }
