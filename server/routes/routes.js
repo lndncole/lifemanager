@@ -6,6 +6,9 @@ const router = express.Router();
 //Middleware
 const { isAuthenticated } = require('../middleware/middlewares');
 
+//DB
+const db = require('../db/db.js');
+
 //APIs
 const googleApi = require('../../api/google/index.js');
 const chatGPTApi = require("../../api/chatGPT/index.js");
@@ -26,12 +29,12 @@ router.get('/authenticate', async (req, res) => {
 
 //oAuth callback that get's hit when Google responds to user authentication request
 router.get('/oauth2callback', async (req, res) => {
-  await google.handleAuthenticationCallback(req, res, googleApi);
+  await google.handleAuthenticationCallback(req, res, googleApi, db);
 });
 
 //Get authorization status
 router.get('/get-auth', isAuthenticated, (req, res) => {
-    res.status(200).send(req.session.user);
+  res.status(200).send(req.session.user);
 });
 
 //Sign user out / end session

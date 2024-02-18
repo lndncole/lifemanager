@@ -48,7 +48,3 @@ if (port == null || port == "") {
 app.listen(port, () => {
  console.log(`Server running on port ${port}`);
 });
-
-//Test db connection
-const db = require('./db/db.js');
-db.testConnection();

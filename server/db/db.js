@@ -27,54 +27,82 @@ async function getMongoClient() {
 async function query(command, dbObject, userDataObject, updateObject) {
 
   const client = await getMongoClient();
-  //userDataObject is expected to be an object here with property of email, at the very least
 
-   //Create db - If the database doesn’t exist yet, it will be created.
-   const dbString = dbObject.db ? dbObject.db : 'users'; 
-   const collectionString = dbObject.collection ? dbObject.collection : 'unser_info'; 
+  try {
+    //userDataObject is expected to be an object here with property of email, at the very least
 
-   //Connect to db, a db will be created if there isn't already a db for the passed in input 
-   const db = client.db(dbString);
-   //Create or select collection
-   const collection = db.collection(collectionString);
+    //Create db - If the database doesn’t exist yet, it will be created.
+    const dbString = dbObject.db ? dbObject.db : 'users'; 
+    const collectionString = dbObject.collection ? dbObject.collection : 'unser_info'; 
 
-   //Exmaple of what a userDataObjectObject looks like
-  //  const testData = {
-  //   name: 'John Smith',
-  //   email: 'john.smith@gmail.com',
-  //   profilePicUrl: 'www.google.com/profilepicurl/johnsmith'
-  // };
+    //Connect to db, a db will be created if there isn't already a db for the passed in input 
+    const db = client.db(dbString);
+    //Create or select collection
+    const collection = db.collection(collectionString);
 
-  //Get user id (email)
-  const id = userDataObject.email;
+    //Exmaple of what a userDataObjectObject looks like
+    //  const testData = {
+    //   name: 'John Smith',
+    //   email: 'john.smith@gmail.com',
+    //   googlePicture: 'www.google.com/profilepicurl/johnsmith',
+    //   lastLoginTime: 2024-02-18T22:01:29.369+00:00
+    // };
 
-  let result;
+    //Get user id (email)
+    const id = userDataObject.email;
 
-  switch (command) {
-    case "add":
-      result = await collection.insertOne(userDataObject);
+    let result;
 
-      break;
-    case "find":
-      result = await collection.find(id).toArray();
+    switch (command) {
+      case "add":
+    
+      //Here I'm usng the findAndModify function with the "upsert" method to "true". This allows for a couple of things:
+      //- If the user doesn't exist, a record will be created for it.
+      //- If the user does exist, then only the things that changed will be modified, 
+      //In this case it will more than likely be the lastLoginTime
+      result = await client.db("users").command(
+          {
+            findAndModify: collectionString,
+            query: { email: id },
+            update: { 
+              //using one of Mongosh's keywords "set" with the "$" identifier 
+              $set: { 
+                name: userDataObject.name, 
+                googlePicture: userDataObject.googlePicture, 
+                lastLoginTime: new Date()
+              }},
+            new: true,
+            upsert: true
+          }
+       )
 
-      break;
-    case "update":
-      result = await collection.updateMany({ id }, { $set: updateObject });
+        break;
+      case "find":
+        result = await collection.find(id).toArray();
 
-      break;
-    case "delete":
-      result = await collection.deleteMany(id);
+        break;
+      case "update":
+        result = await collection.updateMany({ id }, { $set: updateObject });
 
-      break;
-    default:
-      return "opperation not found.";
+        break;
+      case "delete":
+        result = await collection.deleteMany(id);
+
+        break;
+      default:
+        return "opperation not found.";
+    }
+
+    //log result of query
+    console.log("Query result: ", result, "Query method: ", command);
+
+    return result;
+
+  } catch(e) {
+    console.log("Error querying the Mondo DB database: ", e);
+  } finally {
+    await client.close();
   }
-
-  //log result of query
-  console.log(result);
-
-  await client.close();
 }
 
 async function testConnection() {
