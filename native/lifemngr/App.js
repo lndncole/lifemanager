@@ -9,6 +9,9 @@ import ChatGPT from "./components/chatGPT"
 export default function App() {
 
   return (
-      <ChatGPT />
+    // Make view take up the whole screen
+    <View style={{ flex: 1 }}>
+        <ChatGPT />
+    </View>
   )
 }
