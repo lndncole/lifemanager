@@ -20,7 +20,6 @@ async function getMongoClient() {
     console.error("Error connecting to mongo client: ", e);
     // Close the client if there's an error
     await mongoClient.close();
-    throw e; // Re-throw the error after cleanup
   }
 }
 
@@ -53,7 +52,7 @@ async function query(command, dbObject, userDataObject, updateObject) {
 
     let result;
 
-    switch (command) {
+    switch (command.toLowerCase()) {
       case "add":
     
       //Here I'm usng the findAndModify function with the "upsert" method to "true". This allows for a couple of things:
