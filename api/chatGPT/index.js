@@ -143,6 +143,7 @@ async function startChat(conversation) {
             `${role.charAt(0).toUpperCase() + role.slice(1)}: ${content}`
           )
         })
+        return;
       } else {
         console.log("Run is not yet completed");
       }
@@ -157,32 +158,6 @@ async function startChat(conversation) {
         return;
       }
     }, 1000);
-
-    // run = openai.beta.threads.runs.retrieve(thread.id, run.id);
-
-    // while(true) {
-    //   if (run.status=="completed") {
-    //     let messages = openai.beta.threads.messages.list(thread.id)
-    //     let latest_message = messages.data[0]
-    //     // let text = latest_message.content[0].text.value
-    //     console.log(latest_message);
-    //     break;
-    //   }
-    // }
-
-
-    // if(run.status = 'complete') {
-    //   const listMessage = await openai.beta.threads.messages.list(
-    //     thread.id
-    //   );
-  
-  
-    //   console.log(listMessage.body.data[0].content);
-    //   return;
-    // }
-
-   
-
     
   } catch (e) {
     console.error(e);
