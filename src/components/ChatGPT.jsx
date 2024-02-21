@@ -170,7 +170,7 @@ const ChatGPT = () => {
           return;
       }
 
-      // console.log(response);
+      console.log("chatGPT response: ", response.body);
       return;
 
       try {

@@ -28,10 +28,10 @@ async function chat(req, res, chatGPTApi, googleApi) {
 
         console.log("thread response: ", thread);
 
-        if(thread) {
-            res.write(JSON.stringify(thread));
+        // if(thread) {
+            res.send(JSON.stringify(thread));
             res.end("done");
-        }
+        // }
 
 
 
