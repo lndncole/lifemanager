@@ -144,9 +144,6 @@ const ChatGPT = () => {
   }
 
   const sendMessage = async (userInputArgument, personaChange) => {
-
-    console.log("user input: ", userInputArgument);
-
     if (!userInputArgument.trim()) return; // Prevent sending empty messages
     setIsLoading(true);
   
@@ -164,30 +161,36 @@ const ChatGPT = () => {
         body: JSON.stringify(newMessage),
       });
 
-      if (response.status == 400) {
-          alert("Maximum conversation length has been reached, please save any information needed and refresh the page to continue chatting. Your chat will start over after the page refreshes.");
-          // window.location.reload();
-          return;
-      }
-
-      console.log("chatGPT response: ", response.body);
-      return;
-
-      try {
-       
-        setConversation(prevConversation => { // setIsLoading(false);
-          // Remove the last GPT message if it exists
-          const isLastMessageGpt = prevConversation.length && prevConversation[prevConversation.length - 1].role === 'assistant';
-          const updatedConversation = isLastMessageGpt ? prevConversation.slice(0, -1) : [...prevConversation];
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder('utf-8');
   
-          // Add the updated accumulated GPT response as the last message
-          return [...updatedConversation, { role: 'assistant', content: response }];
-        });
 
-      } catch (e) {
-        setIsLoading(false);
-        console.error("Error parsing JSON chunk", e);
-      }
+        const { value } = await reader.read();
+  
+        const decodedChunk = decoder.decode(value, { stream: true });
+  
+        const jsonPattern = /{[^{}]*}/g;
+        let match = jsonPattern.exec(decodedChunk);
+
+        let decodedResponse = JSON.parse(match[0]).value;
+
+        try {
+          setConversation(prevConversation => {
+            // setIsLoading(false);
+            // Remove the last GPT message if it exists
+            const isLastMessageGpt = prevConversation.length && prevConversation[prevConversation.length - 1].role === 'assistant';
+            const updatedConversation = isLastMessageGpt ? prevConversation.slice(0, -1) : [...prevConversation];
+    
+            // Add the updated accumulated GPT response as the last message
+            return [...updatedConversation, { role: 'assistant', content: decodedResponse }];
+          });
+
+        } catch (e) {
+          setIsLoading(false);
+          console.error("Error parsing JSON chunk", e);
+        }
+        
+      
 
     } catch (e) {
       console.error("Error communicating with the GPT: ", e);
