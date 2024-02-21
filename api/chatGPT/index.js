@@ -1,12 +1,15 @@
 // ai/openai.js
 const OpenAI = require("openai");
 
-async function startChat(conversation) {
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
-  const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-  });
 
+let assistant;
+let thread;
+
+async function initChat(){
   const tools = [
     {
       type: "function",
@@ -109,10 +112,23 @@ async function startChat(conversation) {
     tools: tools,
     //description: '(512 character limit)'
   };
+  if(!assistant) {
+    assistant = await openai.beta.assistants.create(conversationObject);
+  }
+  if(!thread) {
+    thread = await openai.beta.threads.create();
+  }
+}
+
+
+async function startChat(conversation) {
+
+ 
+  await initChat();
+  
 
   try {
-    const assistant = await openai.beta.assistants.create(conversationObject);
-    const thread = await openai.beta.threads.create();
+    
     await openai.beta.threads.messages.create(thread.id, conversation);
 
     let run = await openai.beta.threads.runs.create(thread.id, { assistant_id: assistant.id });
