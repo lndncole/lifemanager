@@ -14,35 +14,45 @@ function isValidJSON(text) {
 }
 
 async function chat(req, res, chatGPTApi, googleApi) {
-    const { conversation } = req.body;
+    const conversation = req.body;
 
-    console.log("User request to GPT: ", conversation[conversation.length - 1]);
+    console.log("User request to GPT: ", conversation);
 
     // Ensure conversation array is not empty
-    if (!conversation || !conversation.length) {
-        throw new Error("The 'conversation' array is empty.");
-    }
+    // if (!conversation || !conversation.length) {
+    //     throw new Error("The 'conversation' array is empty.");
+    // }
 
     try {        //Add to the chat with the GPT
-        const stream = await chatGPTApi.startChat(conversation);
+        const thread = await chatGPTApi.startChat(conversation);
 
-        let gptFunctionCall = false;
+        console.log("thread response: ", thread);
 
-        for await (const chunk of stream) {
-            let gptResponse = chunk.choices[0].delta;
-
-            if(gptResponse.function_call) {
-                gptFunctionCall = true;
-            } else {
-                res.write(JSON.stringify(chunk));
-            }
+        if(thread) {
+            res.write(JSON.stringify(thread));
+            res.end("done");
         }
 
 
-        // Wait for chat to be completed and grab the chat object to send to functions and close the stream.
-        const chatCompletion = await stream.finalChatCompletion();
 
-        console.log("Gpt response to user: ", chatCompletion.choices[0].message);
+
+        let gptFunctionCall = false;
+
+        // for await (const chunk of stream) {
+        //     let gptResponse = chunk.choices[0].delta;
+
+        //     if(gptResponse.function_call) {
+        //         gptFunctionCall = true;
+        //     } else {
+        //         res.write(JSON.stringify(chunk));
+        //     }
+        // }
+
+
+        // Wait for chat to be completed and grab the chat object to send to functions and close the stream.
+        // const chatCompletion = await stream.finalChatCompletion();
+
+        // console.log("Gpt response to user: ", chatCompletion.choices[0].message);
 
         // If ChatGPT wants to call a function we 
         if (gptFunctionCall) {
@@ -72,7 +82,7 @@ async function chat(req, res, chatGPTApi, googleApi) {
                 } 
             }
         } else {
-            res.end("done");
+
         }
     } catch (e) {
         let errorMessage = e.message || "";

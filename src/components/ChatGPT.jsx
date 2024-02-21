@@ -144,6 +144,9 @@ const ChatGPT = () => {
   }
 
   const sendMessage = async (userInputArgument, personaChange) => {
+
+    console.log("user input: ", userInputArgument);
+
     if (!userInputArgument.trim()) return; // Prevent sending empty messages
     setIsLoading(true);
   
@@ -153,14 +156,12 @@ const ChatGPT = () => {
     // Add user's message to the conversation immediately
     setConversation(prevConversation => [...prevConversation, newMessage]);
     setUserInput(""); // Clear the input field
-
-    let accumulatedGptResponse = ""; // Accumulator for GPT's ongoing response
   
     try {
       const response = await fetch("/api/chatGPT", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ conversation: [...conversation, newMessage] }),
+        body: JSON.stringify(newMessage),
       });
 
       if (response.status == 400) {
@@ -169,47 +170,23 @@ const ChatGPT = () => {
           return;
       }
 
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder('utf-8');
+      // console.log(response);
+      return;
+
+      try {
+       
+        setConversation(prevConversation => { // setIsLoading(false);
+          // Remove the last GPT message if it exists
+          const isLastMessageGpt = prevConversation.length && prevConversation[prevConversation.length - 1].role === 'assistant';
+          const updatedConversation = isLastMessageGpt ? prevConversation.slice(0, -1) : [...prevConversation];
   
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break; // Exit the loop if the stream is finished
-  
-        const decodedChunk = decoder.decode(value, { stream: true });
-  
-        const jsonPattern = /{[^{}]*}/g;
-        let match;
-      
-        while ((match = jsonPattern.exec(decodedChunk)) !== null) {
+          // Add the updated accumulated GPT response as the last message
+          return [...updatedConversation, { role: 'assistant', content: response }];
+        });
 
-          const isBlankMessage = match[0] === '{}';
-
-          try {
-            const jsonObj = JSON.parse(match[0]);
-
-            if(jsonObj.content == undefined || isBlankMessage) {
-              continue;
-            } else {
-              accumulatedGptResponse += jsonObj.content;
-              setIsLoading(false);
-            }
-
-            setConversation(prevConversation => {
-              // setIsLoading(false);
-              // Remove the last GPT message if it exists
-              const isLastMessageGpt = prevConversation.length && prevConversation[prevConversation.length - 1].role === 'assistant';
-              const updatedConversation = isLastMessageGpt ? prevConversation.slice(0, -1) : [...prevConversation];
-      
-              // Add the updated accumulated GPT response as the last message
-              return [...updatedConversation, { role: 'assistant', content: accumulatedGptResponse }];
-            });
-
-          } catch (e) {
-            setIsLoading(false);
-            console.error("Error parsing JSON chunk", e);
-          }
-        }
+      } catch (e) {
+        setIsLoading(false);
+        console.error("Error parsing JSON chunk", e);
       }
 
     } catch (e) {

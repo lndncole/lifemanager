@@ -111,49 +111,32 @@ async function startChat(conversation) {
   };
 
   try {
-
     const assistant = await openai.beta.assistants.create(conversationObject);
-    
     const thread = await openai.beta.threads.create();
+    await openai.beta.threads.messages.create(thread.id, conversation);
 
-    const message = await openai.beta.threads.messages.create(thread.id, {
-      role: "user",
-      content: "Hi how are you today?"
-    });
+    let run = await openai.beta.threads.runs.create(thread.id, { assistant_id: assistant.id });
 
-    let run = await openai.beta.threads.runs.create(
-      thread.id,
-      { assistant_id: assistant.id }
-    );
-
-    const checkStatusAndPrintMessages = async (threadId, runId) => {
+    const checkStatusAndReturnMessages = async (threadId, runId) => {
       let runStatus = await openai.beta.threads.runs.retrieve(threadId, runId);
 
-      if(runStatus.status == 'completed') {
+      if (runStatus.status === 'completed') {
         let messages = await openai.beta.threads.messages.list(threadId);
-        messages.data.forEach((msg)=> {
-          let role = msg.role;
-          let content = msg.content[0].text.value;
-          console.log(
-            `${role.charAt(0).toUpperCase() + role.slice(1)}: ${content}`
-          )
-        })
+        let lastMessage = messages.data[messages.data.length - 2].content[0];
+        let firstMessage = messages.data[0].content[0];
+
+        console.log("messages.length: ", messages.data.length);
+        console.log("Last message, response from chatGPT: ", lastMessage);
+        return firstMessage; 
       } else {
-        console.log("Run is not yet completed");
+        console.log("Run is not yet completed. Waiting...");
+        // Wait for a short period before checking the status again
+        await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 1 second
+        return checkStatusAndReturnMessages(threadId, runId); // Recursively call the function
       }
-    }
+    };
 
-    let time = 0;
-
-    setInterval(()=> {
-      checkStatusAndPrintMessages(thread.id, run.id);
-      time ++;
-      if(time == 20) {
-        return;
-      }
-    }, 1000);
-
-    
+    return await checkStatusAndReturnMessages(thread.id, run.id);
   } catch (e) {
     console.error(e);
     return { error: true, message: e.message || "An error occurred withthe Open AI API." };
@@ -161,7 +144,7 @@ async function startChat(conversation) {
 }
 
 
-startChat();
+// startChat();
 
 
 module.exports = { startChat };
