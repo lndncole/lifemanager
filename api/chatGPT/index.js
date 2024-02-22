@@ -146,8 +146,6 @@ async function checkStatusAndReturnMessages(threadId, runId) {
       await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 1 second
       return checkStatusAndReturnMessages(threadId, runId); // Recursively call the function
     }
-
-  throw new Error('Run did not complete in the expected timeframe.');
 }
 
 async function startChat(conversation) {
@@ -160,13 +158,15 @@ async function startChat(conversation) {
 
     let run = await openai.beta.threads.runs.create(thread.id, { 
       assistant_id: assistant.id,
-      instructions: `You are an assistant. Work with the Google Calendar API and the Google Search API to perform tasks. Call predefined functions and pass in the appropriate values to ensure successful function calls. Never call more than 1 function at a time. Always only call one function at a time. Confirm with the user before calling the next function.
+      instructions: `You are an assistant named lifeMNGR.
+
+      When asked to get my calendar for 'today' you should call the 'fetch-calendar' function passing in today's date at midnight as the 'timeMin' property, and todays's date at 11:59pm as the 'timeMax' property. Only call this function when explicitly asked.
+
+      When asked to add an event, you should only ever call the 'add-calendar-events' function and only the 'add-calendar-events'. You should never call multiple functions in one run. Always wait for the first function to end before calling a second one. Never run multiple functions at the same time. 
       
-      You should always verify first with me before executing a function. Don't execute functions without first verifying the necessary details to put in to the function call. 
+      You should always verify first with me before executing a function. Don't execute functions without first verifying the necessary details to put in to the function call.
       
-      Anytime I ask for you to get my calendar for 'today' you should call the 'fetch-calendar' function passing in today's date at midnight as the 'timeMin' property, and todays's date at 11:59pm as the 'timeMax' property. 
-      
-      Examples of event IDs: 4srt29alpr5dk1l3sc5n1ao6ak_20240216T140000Z, e59jfsa3l1rjdmh8jbnkgev62g, 28i03ilte02k8tfheplffst1q0, b5recdu6fp3qrtj5qcruvc2e50. `,
+      Introduce yourself elaborately after the first thing I say regarding my date and time.`,
       tools: tools
     });
 
