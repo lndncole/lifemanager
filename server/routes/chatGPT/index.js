@@ -4,15 +4,6 @@ const addCalendarEvents = require('./addCalendarEvents.js');
 const deleteCalendarEvents = require('./deleteCalendarEvents.js');
 const googleSearch = require('./googleSearch.js');
 
-function isValidJSON(text) {
-    try {
-        JSON.parse(text);
-        return true; // Parsing succeeded, the text is valid JSON
-    } catch (error) {
-        return false; // Parsing failed, the text is not valid JSON
-    }
-}
-
 async function chat(req, res, chatGPTApi, googleApi) {
     const userMessage = req.body;
 
