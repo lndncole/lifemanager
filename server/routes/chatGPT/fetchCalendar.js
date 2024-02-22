@@ -14,10 +14,8 @@ module.exports = async function fetchCalendar(req, res, thread, functionArgs, ch
         let gptEventObjects = {};
 
         if(JSON.stringify(events).trim() == "[]") {
-            gptEventObjects = [{googleRCalendaResponse: "You have no Events for the selected date range."}];
+            gptEventObjects.functionResponse = [{googleRCalendaResponse: "You have no Events for the selected date range."}];
         }
-
-        console.log("events from google calendar fetch: ", events);
 
         gptEventObjects.functionResponse = events.map((event)=>{
             return {
@@ -32,12 +30,8 @@ module.exports = async function fetchCalendar(req, res, thread, functionArgs, ch
 
         gptEventObjects.toolCallId = thread[0].id;
 
-        console.log("thread: ", thread);
-        console.log("gptEventObjects: ", gptEventObjects);
-
-        if (events && events.length > 0) {
+        if (gptEventObjects && gptEventObjects.functionResponse) {
             try {
-                console.log("gptEventObjects from calendar fetch: ", gptEventObjects);
                 // Pass the extracted information to the chat GPT function
                 const gptResponse = await chatGPTApi.resolveFunction(gptEventObjects);
 

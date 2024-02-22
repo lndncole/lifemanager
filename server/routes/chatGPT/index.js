@@ -14,19 +14,11 @@ function isValidJSON(text) {
 }
 
 async function chat(req, res, chatGPTApi, googleApi) {
-    const conversation = req.body;
+    const userMessage = req.body;
 
-    console.log("User request to GPT: ", conversation);
+    try {
+        const thread = await chatGPTApi.startChat(userMessage);
 
-    // Ensure conversation array is not empty
-    // if (!conversation || !conversation.length) {
-    //     throw new Error("The 'conversation' array is empty.");
-    // }
-
-    try {        //Add to the chat with the GPT
-        const thread = await chatGPTApi.startChat(conversation);
-
-        console.log("thread response: ", thread);
         let functionCall;
 
         if(!thread[0]) {
