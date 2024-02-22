@@ -11,8 +11,6 @@ module.exports = async function googleSearch(req, res, thread, functionArgs, cha
     try {    
         // Call Google Search api
         const googleSearchResponse = await googleApi.search(queryObject);
-
-        console.log(googleSearchResponse);
     
         // Check if googleSearchResponse.items exists and has length
         if (googleSearchResponse && googleSearchResponse.items && googleSearchResponse.items.length > 0) {
