@@ -11,13 +11,13 @@ module.exports = async function fetchCalendar(req, res, thread, functionArgs, ch
         //Fetch calendar events from the Google Calendar
         const events = await googleApi.getCalendar(oauth2Client, timeMin, timeMax, timeZone);
 
-        let gptEventObjects = {};
+        let gptFunctionObject = {};
 
         if(JSON.stringify(events).trim() == "[]") {
-            gptEventObjects.functionResponse = [{googleRCalendaResponse: "You have no Events for the selected date range."}];
+            gptFunctionObject.functionResponse = [{googleRCalendaResponse: "You have no Events for the selected date range."}];
         }
 
-        gptEventObjects.functionResponse = events.map((event)=>{
+        gptFunctionObject.functionResponse = events.map((event)=>{
             return {
                 eventId: event.eventId,
                 eventSummary: event.summary,
@@ -28,12 +28,12 @@ module.exports = async function fetchCalendar(req, res, thread, functionArgs, ch
             };
         });
 
-        gptEventObjects.toolCallId = thread[0].id;
+        gptFunctionObject.toolCallId = thread[0].id;
 
-        if (gptEventObjects && gptEventObjects.functionResponse) {
+        if (gptFunctionObject && gptFunctionObject.functionResponse) {
             try {
                 // Pass the extracted information to the chat GPT function
-                const gptResponse = await chatGPTApi.resolveFunction(gptEventObjects);
+                const gptResponse = await chatGPTApi.resolveFunction(gptFunctionObject);
 
                 res.send(gptResponse);
                 res.end("done");

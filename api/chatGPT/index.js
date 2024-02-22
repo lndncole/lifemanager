@@ -233,7 +233,11 @@ async function resolveFunction(obj) {
 
       console.log("Last message, response from chatGPT: ", firstMessage);
       return firstMessage; 
-    } else {
+    } else if(runStatus.status === 'queued') {
+      let messages = await openai.beta.threads.messages.list(threadId);
+      let firstMessage = messages.data[0].content[0];
+      console.log("queued message: ", firstMessage);
+    }else {
     
       let messages = await openai.beta.threads.messages.list(threadId);
       let firstMessage = messages.data[0].content[0];

@@ -1,6 +1,6 @@
 module.exports = async function addCalendarEvents(req, res, thread, functionArgs, chatGPTApi, googleApi, oauth2Client) {
     // Iterate through each event object and add it to the calendar
-    let gptEventObjects = {
+    let gptFunctionObject = {
         functionResponse:[]
     };
 
@@ -29,21 +29,21 @@ module.exports = async function addCalendarEvents(req, res, thread, functionArgs
                 // Check if googleCalendarAddEventResponse.items exists and has length
                 if (googleCalendarAddEventResponse && googleCalendarAddEventResponse.data) {
                     // Add response to array
-                    gptEventObjects.functionResponse.push(googleCalendarAddEventResponse.data); 
+                    gptFunctionObject.functionResponse.push(googleCalendarAddEventResponse.data); 
                 } else {
                     throw new Error('No data received from addCalendarEvent');
                 }
             } catch (e) {
                 console.error(`Error adding event: ${event.summary}`, e);
-                gptEventObjects.functionResponse.push({ error: `Error adding event: ${event.summary}`, details: e.toString() });
+                gptFunctionObject.functionResponse.push({ error: `Error adding event: ${event.summary}`, details: e.toString() });
             }
         }
 
-        gptEventObjects.toolCallId = thread[0].id;
+        gptFunctionObject.toolCallId = thread[0].id;
         //Event added, now pass the response from the Calendar back to the GPT
         try {
             // Pass the Google Calendar responses back to the GPT
-            const gptResponse = await chatGPTApi.resolveFunction(gptEventObjects);
+            const gptResponse = await chatGPTApi.resolveFunction(gptFunctionObject);
             
             res.send(gptResponse);
             res.end("done");
