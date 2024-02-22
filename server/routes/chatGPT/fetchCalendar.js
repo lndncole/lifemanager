@@ -41,15 +41,7 @@ module.exports = async function fetchCalendar(req, res, thread, functionArgs, ch
                 // Pass the extracted information to the chat GPT function
                 const gptResponse = await chatGPTApi.resolveFunction(gptEventObjects);
 
-                console.log("gptResponse: ", gptResponse);
-                return;
-
-                for await (const chunk of gptResponse) {
-                    res.write(JSON.stringify(chunk));
-                }
-
-                const wait = await gptResponse.finalChatCompletion();
-                console.log("gpt response from calendar fetch: ", wait.choices[0].message);
+                res.send(gptResponse);
                 res.end("done");
             } catch(e) {
                 console.error("Error processing Google search results with OpenAI API: ", e)
