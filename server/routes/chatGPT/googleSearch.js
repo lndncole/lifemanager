@@ -1,33 +1,34 @@
-module.exports = async function googleSearch(req, res, conversation, functionArgs, chatGPTApi, googleApi) {
+module.exports = async function googleSearch(req, res, thread, functionArgs, chatGPTApi, googleApi) {
+
+    let gptFunctionObject = {
+        functionResponse:[]
+    };
     // Assuming functionArgs.query is already defined and contains the query string
     const queryObject = {
-        q: functionArgs.query
+        q: JSON.parse(functionArgs).query
     };
     
     try {    
         // Call Google Search api
         const googleSearchResponse = await googleApi.search(queryObject);
+
+        console.log(googleSearchResponse);
     
         // Check if googleSearchResponse.items exists and has length
         if (googleSearchResponse && googleSearchResponse.items && googleSearchResponse.items.length > 0) {
             // Map through the items array to extract 'link' and 'snippet'
-            const searchResults = googleSearchResponse.items.map(item => ({
+            gptFunctionObject.functionResponse = [...googleSearchResponse.items.map(item => ({
                 link: item.link,
                 snippet: item.snippet
-            }));
+            }))];
+
+            gptFunctionObject.toolCallId = thread[0].id;
 
             try {
                 // Pass the extracted information to the chat GPT function
-                const gptResponse = await chatGPTApi.startChat([...conversation, {
-                    role: 'function',
-                    content: JSON.stringify(searchResults),
-                    name: 'google-search'
-                }]);
+                const gptResponse = await chatGPTApi.resolveFunction(gptFunctionObject);
 
-                for await (const chunk of gptResponse) {
-                    res.write(JSON.stringify(chunk));
-                }
-
+                res.send(gptResponse);
                 res.end("done");
 
             } catch(e) {
