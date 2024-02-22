@@ -147,11 +147,11 @@ const ChatGPT = () => {
     if (!userInputArgument.trim()) return; // Prevent sending empty messages
     setIsLoading(true);
   
-    const newMessage = personaChange ? 
-      { role: "user", content: userInputArgument, name: 'persona-changer' } : 
-        { role: "user", content: userInputArgument };
+    const newMessage = { role: "user", content: userInputArgument };
     // Add user's message to the conversation immediately
-    setConversation(prevConversation => [...prevConversation, newMessage]);
+    if(!personaChange) {
+      setConversation(prevConversation => [...prevConversation, newMessage]);
+    }
     setUserInput(""); // Clear the input field
   
     try {
@@ -178,11 +178,11 @@ const ChatGPT = () => {
           setConversation(prevConversation => {
             // setIsLoading(false);
             // Remove the last GPT message if it exists
-            const isLastMessageGpt = prevConversation.length && prevConversation[prevConversation.length - 1].role === 'assistant';
-            const updatedConversation = isLastMessageGpt ? prevConversation.slice(0, -1) : [...prevConversation];
+            // const isLastMessageGpt = prevConversation.length && prevConversation[prevConversation.length - 1].role === 'assistant';
+            // const updatedConversation = isLastMessageGpt ? prevConversation.slice(0, -1) : [...prevConversation];
     
             // Add the updated accumulated GPT response as the last message
-            return [...updatedConversation, { role: 'assistant', content: decodedResponse }];
+            return [...prevConversation, { role: 'assistant', content: decodedResponse }];
           });
 
         } catch (e) {
