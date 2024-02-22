@@ -1,4 +1,7 @@
-module.exports = async function fetchCalendar(req, res, conversation, functionArgs, chatGPTApi, googleApi, oauth2Client) {
+module.exports = async function fetchCalendar(req, res, thread, functionArgs, chatGPTApi, googleApi, oauth2Client) {
+
+    functionArgs = JSON.parse(functionArgs);
+
     // Format dates to RFC3339 if necessary
     const timeMin = new Date(functionArgs.timeMin).toISOString();
     const timeMax = new Date(functionArgs.timeMax).toISOString();
@@ -8,35 +11,38 @@ module.exports = async function fetchCalendar(req, res, conversation, functionAr
         //Fetch calendar events from the Google Calendar
         const events = await googleApi.getCalendar(oauth2Client, timeMin, timeMax, timeZone);
 
+        let gptEventObjects = {};
+
         if(JSON.stringify(events).trim() == "[]") {
-            res.write(JSON.stringify({content: "You have no events for this date."}));
-            res.end("done");
-            return;
+            gptEventObjects = [{googleRCalendaResponse: "You have no Events for the selected date range."}];
         }
 
         console.log("events from google calendar fetch: ", events);
 
-        const gptEventObjects = events.map((event)=>{
-            console.log("event.id:", event.eventId);
+        gptEventObjects.functionResponse = events.map((event)=>{
             return {
                 eventId: event.eventId,
                 eventSummary: event.summary,
                 eventStartTime: event.start,
                 eventEndTime: event.end,
-                eventLink: event.htmlLink,
-                eventStatus: event.status
+                eventLink: event.eventLink,
+                eventStatus: event.eventStatus
             };
         });
+
+        gptEventObjects.toolCallId = thread[0].id;
+
+        console.log("thread: ", thread);
+        console.log("gptEventObjects: ", gptEventObjects);
 
         if (events && events.length > 0) {
             try {
                 console.log("gptEventObjects from calendar fetch: ", gptEventObjects);
                 // Pass the extracted information to the chat GPT function
-                const gptResponse = await chatGPTApi.startChat([...conversation, {
-                    role: 'assistant',
-                    content: JSON.stringify(gptEventObjects),
-                    name: 'fetch-calendar'
-                }]);
+                const gptResponse = await chatGPTApi.resolveFunction(gptEventObjects);
+
+                console.log("gptResponse: ", gptResponse);
+                return;
 
                 for await (const chunk of gptResponse) {
                     res.write(JSON.stringify(chunk));
