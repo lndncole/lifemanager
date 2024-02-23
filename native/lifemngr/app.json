@@ -4,7 +4,6 @@
     "slug": "lifemngr",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/favicon.png",
     "userInterfaceStyle": "light",
     "splash": {
       "resizeMode": "contain",
@@ -14,16 +13,35 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "co.lifemngr.lifemngr",
+      "infoPlist": {
+        "CFBundleURLTypes": [
+          {
+            "CFBundleURLSchemes": ["com.googleusercontent.apps.823473139699-sv8avim8avqfp39mg9ve86paiq9ga54v"]
+          }
+        ],
+        "GIDClientID": "823473139699-sv8avim8avqfp39mg9ve86paiq9ga54v.apps.googleusercontent.com"
+      },
+      "config": {
+        "googleSignIn": {
+            "reservedClientId": "com.googleusercontent.apps.823473139699-sv8avim8avqfp39mg9ve86paiq9ga54v"
+        }
+      }
     },
     "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/favicon.png",
-        "backgroundColor": "#ffffff"
-      }
+      "package": "co.lifemngr.lifemngr"
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.823473139699-sv8avim8avqfp39mg9ve86paiq9ga54v"
+        }
+      ]
+    ]
   }
 }

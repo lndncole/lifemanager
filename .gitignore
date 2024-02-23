@@ -6,3 +6,6 @@ npm-debug.log
 token.json
 credentials.json
 .DS_Store
+native/lifemngr/android/
+
+native/lifemngr/ios/
