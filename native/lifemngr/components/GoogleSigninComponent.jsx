@@ -7,9 +7,6 @@ const GoogleSigninComponent = () => {
     const [isSigninInProgress, setSigninInProgress] = useState(false);
 
     try {
-        GoogleSignin.configure({
-            iosClientId: "823473139699-sv8avim8avqfp39mg9ve86paiq9ga54v.apps.googleusercontent.com",
-        })
         // GoogleSignin.configure({
         //     scopes: [
         //     "https://www.googleapis.com/auth/userinfo.profile",
@@ -50,8 +47,8 @@ const GoogleSigninComponent = () => {
             <GoogleSigninButton
                 size={GoogleSigninButton.Size.Wide}
                 color={GoogleSigninButton.Color.Dark}
-                onPress={this.signIn}
-                disabled={this.isSigninInProgress}
+                onPress={signIn}
+                disabled={isSigninInProgress}
             />
         </View>
     )     
