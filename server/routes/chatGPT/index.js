@@ -7,10 +7,10 @@ const googleSearch = require('./googleSearch.js');
 async function chat(req, res, chatGPTApi, googleApi) {
     const userMessage = req.body;
 
-    console.log(userMessage);
+    console.log("user message to GPT: ", userMessage);
 
     try {
-        const thread = await chatGPTApi.startChat(userMessage);
+        const thread = await chatGPTApi.startChat(userMessage, req.session.user);
 
         let functionCall;
 
