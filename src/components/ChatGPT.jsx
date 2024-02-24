@@ -161,6 +161,36 @@ const ChatGPT = () => {
       window.speechSynthesis.speak(textToVoice);
   }
 
+  const simulateTypingEffect = (decodedResponse) => {
+    const delay = 42; // milliseconds between characters
+    let index = 0; // Start with the first character
+  
+    const typeNextChar = () => {
+      if (index < decodedResponse.length) {
+        // Append the next character to the conversation
+        setConversation(prevConversation => {
+          const isLastMessageGpt = prevConversation.length && prevConversation[prevConversation.length - 1].role === 'assistant';
+          if (isLastMessageGpt) {
+            const updatedConversation = [...prevConversation];
+            const lastMessage = updatedConversation[updatedConversation.length - 1];
+            lastMessage.content += decodedResponse[index]; // Append the next character
+            index++; // Move to the next character
+            return updatedConversation;
+          } else {
+            index++; // Move to the next character
+            return [...prevConversation, { role: 'assistant', content: decodedResponse[index - 1] }];
+          }
+        });
+  
+        setTimeout(typeNextChar, delay); // Schedule the next character
+      } else {
+        setIsLoading(false); // Done typing
+      }
+    };
+  
+    typeNextChar(); // Start typing
+  };  
+
   const sendMessage = async (userInputArgument, personaChange) => {
     if (!userInputArgument.trim()) return; // Prevent sending empty messages
     setIsLoading(true);
@@ -193,15 +223,8 @@ const ChatGPT = () => {
         let decodedResponse = JSON.parse(match[0]).value;
 
         try {
-          setConversation(prevConversation => {
-            // setIsLoading(false);
-            // Remove the last GPT message if it exists
-            // const isLastMessageGpt = prevConversation.length && prevConversation[prevConversation.length - 1].role === 'assistant';
-            // const updatedConversation = isLastMessageGpt ? prevConversation.slice(0, -1) : [...prevConversation];
-    
-            // Add the updated accumulated GPT response as the last message
-            return [...prevConversation, { role: 'assistant', content: decodedResponse }];
-          });
+
+          simulateTypingEffect(decodedResponse);
 
         } catch (e) {
           setIsLoading(false);
@@ -268,14 +291,18 @@ const ChatGPT = () => {
             onKeyDown={handleKeyPress} 
             placeholder="Type your message..."
           />
-          <button onClick={() => sendMessage(userInput)}>
+         
             {isLoading ? 
-              <div className="loading-indicator">
-                <FaSpinner className="spinner" />
-              </div> : 
+              <button onClick={() => sendMessage(userInput)} className="disabled">
+                <div className="loading-indicator">
+                  <FaSpinner className="spinner" />
+                </div>
+              </button>
+               : 
+              <button onClick={() => sendMessage(userInput)}>
                 <FaArrowUpLong />
+              </button>
             }
-          </button>
         </div>
       </div>
     </div>

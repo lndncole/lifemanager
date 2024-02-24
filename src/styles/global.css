@@ -11,6 +11,25 @@ body {
     font-size: 24px;
     font-family: sans-serif;
 }
+#root {
+    width: 100%;
+    height: 100%;
+}
+
+.form-input {
+    width: 100%;
+    max-width: 66%;
+    font-size: 24px;
+}
+
+/* Begin Typography */
+h1, h2, h3, h4, h5, h6, h7, h8 {
+    margin: 0px;
+}
+h1 {
+    text-align: center;
+}
+/* End Typography */
 
 /* Start Buttons */
 button {
@@ -137,24 +156,11 @@ button:hover {
     background-color: #303030;
     opacity: 8%;
 }
-
 /* End Buttons */
-
-h1, h2, h3, h4, h5, h6, h7, h8 {
-    margin: 0px;
-}
-h1 {
-    text-align: center;
-}
 
 /*Utilities*/
 .w-100 {
     width: 100%;
-}
-
-#root {
-    width: 100%;
-    height: 100%;
 }
 
 .container {
@@ -176,14 +182,6 @@ h1 {
     gap: 16px;
 }
 
-.section {
-    border: 1px solid lightgray;
-    border-radius: 10px;
-    box-shadow: 0 4px 2px -2px gray;
-    padding: 1% 2%;
-    background-color: mintcream;
-}
-
 .full-screen {
     height: 84vh;
     width: 100%;
@@ -192,12 +190,11 @@ h1 {
     align-items: center;
 }
 
-.form-input {
-    width: 100%;
-    max-width: 66%;
-    font-size: 24px;
+.chat-spacer {
+    padding-top: 5%;
 }
 
+/* Cosmetic Utilities*/
 .link {
     transition: color 1s;
 }
@@ -205,9 +202,20 @@ h1 {
     color: teal;
 }
 
-.chat-spacer {
-    padding-top: 5%;
+.section {
+    border: 1px solid lightgray;
+    border-radius: 10px;
+    box-shadow: 0 4px 2px -2px gray;
+    padding: 1% 2%;
+    background-color: mintcream;
 }
+.disabled {
+    pointer-events: none !important;
+    background-color: lightgrey !important;
+}
+
+/* End Utitlities */
+
 
 @media (max-width: 992px) {
     body {
