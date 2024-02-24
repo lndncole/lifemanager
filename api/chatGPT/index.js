@@ -9,7 +9,6 @@ const openai = new OpenAI({
 let userObjectReference = {};
 let thread;
 let runId;
-let runTries = 0;
 
 const tools = [
   {
@@ -142,6 +141,8 @@ async function initChat(userObj) {
   }
 }
 
+// TODO: Figure out how to cancel response
+let runTries = 0;
 async function checkStatusAndReturnMessages(threadId, runId) {
 
   const runCheck = await openai.beta.threads.runs.retrieve(threadId, runId);
@@ -152,6 +153,7 @@ async function checkStatusAndReturnMessages(threadId, runId) {
       let firstMessage = messages.data[0].content[0];
 
       console.log("Last message COMPLETE, response from chatGPT: ", firstMessage);
+      runTries = 0;
       return firstMessage; 
     } else if (runStatus === 'requires_action') {
       const retrieveRun = await openai.beta.threads.runs.retrieve(
@@ -160,7 +162,7 @@ async function checkStatusAndReturnMessages(threadId, runId) {
       );
 
       const toolCalls = retrieveRun.required_action.submit_tool_outputs.tool_calls;
-
+      runTries = 0;
       return toolCalls;
     } else {
       //If we try ten times and it doesn't work, we need to cancel the run
@@ -169,6 +171,8 @@ async function checkStatusAndReturnMessages(threadId, runId) {
           threadId,
           runId
         );
+
+        runTries = 0;
         return;
       }
       runTries++;
