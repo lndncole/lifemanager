@@ -1,7 +1,9 @@
 module.exports = async function googleSearch(req, res, thread, functionArgs, chatGPTApi, googleApi) {
 
     let gptFunctionObject = {
-        functionResponse:[]
+        functionResponse:[],
+        threadId: thread.threadId,
+        runId: thread.runId
     };
     // Assuming functionArgs.query is already defined and contains the query string
     const queryObject = {
@@ -20,7 +22,7 @@ module.exports = async function googleSearch(req, res, thread, functionArgs, cha
                 snippet: item.snippet
             }))];
 
-            gptFunctionObject.toolCallId = thread[0].id;
+            gptFunctionObject.toolCallId = thread.toolCalls[0].id;
 
             try {
                 // Pass the extracted information to the chat GPT function

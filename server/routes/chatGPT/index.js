@@ -12,19 +12,21 @@ async function chat(req, res, chatGPTApi, googleApi) {
     try {
         const thread = await chatGPTApi.startChat(userMessage, req.session.user);
 
+        console.log(thread);
+
         let functionCall;
 
-        if(!thread[0]) {
+        if(thread.toolCalls) {
+            functionCall = true;
+        } else {
             res.send(JSON.stringify(thread));
             res.end("done");
-        } else if(thread[0] && thread[0].function) {
-            functionCall = true;
         }
 
         //If the response is a function call
         if (functionCall) {
             //Parse function args accordingly based on whether it's valid JSON or not
-            const functionDefinition = thread[0].function;
+            const functionDefinition = thread.toolCalls[0].function;
             const functionArgs = functionDefinition.arguments;
 
             console.log("functionArgs: ", functionArgs);

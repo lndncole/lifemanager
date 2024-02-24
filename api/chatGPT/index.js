@@ -122,8 +122,6 @@ let conversationObject = {
 };
 
 async function initChat(userObj) {
-  
-  let userInstance = userObjectReference[userObj.email];
 
   if(!userObjectReference[userObj.email]) {
 
@@ -152,7 +150,6 @@ async function checkStatusAndReturnMessages(threadId, runId) {
       let messages = await openai.beta.threads.messages.list(threadId);
       let firstMessage = messages.data[0].content[0];
 
-      console.log("Last message COMPLETE, response from chatGPT: ", firstMessage);
       runTries = 0;
       return firstMessage; 
     } else if (runStatus === 'requires_action') {
@@ -161,9 +158,16 @@ async function checkStatusAndReturnMessages(threadId, runId) {
         runId
       );
 
+      let toolCallsObj = {};
+
       const toolCalls = retrieveRun.required_action.submit_tool_outputs.tool_calls;
+      toolCallsObj.toolCalls = toolCalls;
+      toolCallsObj.threadId = threadId;
+      toolCallsObj.runId = runId;
+
       runTries = 0;
-      return toolCalls;
+      console.log("toolCalls", toolCallsObj);
+      return toolCallsObj;
     } else {
       //If we try ten times and it doesn't work, we need to cancel the run
       if(runTries == 10) {
@@ -203,24 +207,23 @@ async function startChat(conversation, userObject) {
   }
 }
 
-async function resolveFunction(obj) {
-  console.log("OBJ: ", obj);
+async function resolveFunction(gptFunctionObject) {
 
   try {
     const output = await openai.beta.threads.runs.submitToolOutputs(
-      thread.id,
-      runId,
+      gptFunctionObject.threadId,
+      gptFunctionObject.runId,
       {
         tool_outputs: [
           {
-            tool_call_id: obj.toolCallId,
-            output: JSON.stringify(obj.functionResponse),
+            tool_call_id: gptFunctionObject.toolCallId,
+            output: JSON.stringify(gptFunctionObject.functionResponse),
           },
         ],
       }
     );
 
-    return await checkStatusAndReturnMessages(thread.id, runId);  
+    return await checkStatusAndReturnMessages(gptFunctionObject.threadId, gptFunctionObject.runId);
 
   } catch(e) {
     console.error("There was an error resolving the function call: ", e);

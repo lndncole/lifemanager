@@ -1,7 +1,11 @@
 module.exports = async function fetchCalendar(req, res, thread, functionArgs, chatGPTApi, googleApi, oauth2Client) {
 
-    functionArgs = JSON.parse(functionArgs);
+    let gptFunctionObject = {
+        threadId: thread.threadId,
+        runId: thread.runId,
+    };
 
+    functionArgs = JSON.parse(functionArgs);
     // Format dates to RFC3339 if necessary
     const timeMin = new Date(functionArgs.timeMin).toISOString();
     const timeMax = new Date(functionArgs.timeMax).toISOString();
@@ -10,8 +14,6 @@ module.exports = async function fetchCalendar(req, res, thread, functionArgs, ch
     try {
         //Fetch calendar events from the Google Calendar
         const events = await googleApi.getCalendar(oauth2Client, timeMin, timeMax, timeZone);
-
-        let gptFunctionObject = {};
 
         if(JSON.stringify(events).trim() == "[]") {
             gptFunctionObject.functionResponse = [{googleRCalendaResponse: "You have no Events for the selected date range."}];
@@ -28,7 +30,7 @@ module.exports = async function fetchCalendar(req, res, thread, functionArgs, ch
             };
         });
 
-        gptFunctionObject.toolCallId = thread[0].id;
+        gptFunctionObject.toolCallId = thread.toolCalls[0].id;
 
         if (gptFunctionObject && gptFunctionObject.functionResponse) {
             try {

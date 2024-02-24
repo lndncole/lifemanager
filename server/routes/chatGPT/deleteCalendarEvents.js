@@ -1,7 +1,9 @@
 module.exports = async function deleteCalendarEvents(req, res, thread, functionArgs, chatGPTApi, googleApi, oauth2Client) {
     
     let gptFunctionObject = {
-        functionResponse:[]
+        functionResponse:[],
+        threadId: thread.threadId,
+        runId: thread.runId,
     };
     
     const events = JSON.parse(functionArgs).events;
@@ -33,7 +35,7 @@ module.exports = async function deleteCalendarEvents(req, res, thread, functionA
             }
         }
 
-        gptFunctionObject.toolCallId = thread[0].id;
+        gptFunctionObject.toolCallId = thread.toolCalls[0].id;
 
         //Event added, now pass the response from the Calendar back to the GPT
         try {

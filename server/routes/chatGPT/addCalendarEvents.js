@@ -1,7 +1,9 @@
 module.exports = async function addCalendarEvents(req, res, thread, functionArgs, chatGPTApi, googleApi, oauth2Client) {
     // Iterate through each event object and add it to the calendar
     let gptFunctionObject = {
-        functionResponse:[]
+        functionResponse:[],
+        threadId: thread.threadId,
+        runId: thread.runId,
     };
 
     try {
@@ -39,7 +41,7 @@ module.exports = async function addCalendarEvents(req, res, thread, functionArgs
             }
         }
 
-        gptFunctionObject.toolCallId = thread[0].id;
+        gptFunctionObject.toolCallId = thread.toolCalls[0].id;
         //Event added, now pass the response from the Calendar back to the GPT
         try {
             // Pass the Google Calendar responses back to the GPT
