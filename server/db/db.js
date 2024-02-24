@@ -92,9 +92,6 @@ async function query(command, dbObject, userDataObject, updateObject) {
         return "opperation not found.";
     }
 
-    //log result of query
-    console.log("Query result: ", result, "Query method: ", command);
-
     return result;
 
   } catch(e) {

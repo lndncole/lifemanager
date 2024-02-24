@@ -122,7 +122,9 @@ let conversationObject = {
   //description: '(512 character limit)'
 };
 
-async function initChat(userObj){
+async function initChat(userObj) {
+  
+  let userInstance = userObjectReference[userObj.email];
 
   if(!userObjectReference[userObj.email]) {
 
@@ -179,8 +181,6 @@ async function checkStatusAndReturnMessages(threadId, runId) {
 }
 
 async function startChat(conversation, userObject) {
-
-  console.log("user Object being passed to chat GPT: ", userObject);
 
   await initChat(userObject);
   
