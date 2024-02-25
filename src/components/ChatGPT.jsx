@@ -161,9 +161,17 @@ const ChatGPT = () => {
       window.speechSynthesis.speak(textToVoice);
   }
 
-  const simulateTypingEffect = (decodedResponse) => {
-    const delay = 42; // milliseconds between characters
+  const simulateTypingEffect = (decodedResponse, personaChange = false) => {
+    const delay = 18; // milliseconds between characters
     let index = 0; // Start with the first character
+
+    if(personaChange) {
+      setConversation(prevConversation => {
+
+      return [...prevConversation, { role: 'assistant', content: '' }];
+  
+      })
+    }
   
     const typeNextChar = () => {
       if (index < decodedResponse.length) {
@@ -194,13 +202,14 @@ const ChatGPT = () => {
   const sendMessage = async (userInputArgument, personaChange) => {
     if (!userInputArgument.trim()) return; // Prevent sending empty messages
     setIsLoading(true);
-  
+
     const newMessage = { role: "user", content: userInputArgument };
+  
     // Add user's message to the conversation immediately
     if(!personaChange) {
       setConversation(prevConversation => [...prevConversation, newMessage]);
+      setUserInput(""); // Clear the input field
     }
-    setUserInput(""); // Clear the input field
   
     try {
       const response = await fetch("/api/chatGPT", {
@@ -224,7 +233,7 @@ const ChatGPT = () => {
 
         try {
 
-          simulateTypingEffect(decodedResponse);
+          simulateTypingEffect(decodedResponse, personaChange);
 
         } catch (e) {
           setIsLoading(false);
