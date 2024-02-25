@@ -6,21 +6,20 @@ const router = express.Router();
 //Middleware
 const { isAuthenticated } = require('../middleware/middlewares');
 
-//Api router functions
-const apiRoutes = require('./apiRoutes.js');
-router.use('/api', isAuthenticated, apiRoutes);
-
 //DB
 const db = require('../db/db.js');
 
 //APIs
 const googleApi = require('../../api/google/index.js');
+
+//Google router functions
 const google = require('./google.js');
 
-//Test authentication
-router.get('/test', isAuthenticated, async (req, res) => {
-  res.send("Authenticated");
-});
+//Api router functions for use at '/api' route 
+const apiRoutes = require('./apiRoutes.js');
+
+//Create api route, pass in router functions
+router.use('/api', isAuthenticated, apiRoutes);
 
 //Send initial request to Google for authenitcation 
 router.get('/authenticate', async (req, res) => {
