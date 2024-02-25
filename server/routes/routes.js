@@ -49,21 +49,4 @@ router.get('/sign-out', (req, res) => {
   });
 });
 
-
-
-// //All chats to GPT
-// router.post('/api/chatGPT', isAuthenticated, async (req, res) => {
-//   await chatGPT.chat(req, res, chatGPTApi, googleApi);
-// });
-
-// //Fetch user's calendar
-// router.post('/api/google/fetch-calendar', isAuthenticated, async (req, res) => {
-//   await google.fetchCalendar(req, res, googleApi);
-// });
-
-// //Add event to calendar
-// router.post('/api/google/add-calendar-events', isAuthenticated, async (req, res) => {
-//   await google.addCalendarEvents(req, res, googleApi);
-// });
-
 module.exports = router;
