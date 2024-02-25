@@ -12,7 +12,7 @@ async function chat(req, res, chatGPTApi, googleApi) {
     try {
         const thread = await chatGPTApi.startChat(userMessage, req.session.user);
 
-        console.log(thread);
+        console.log("GPT response to user in /server/routes/chatGPT/index.js", thread);
 
         let functionCall;
 

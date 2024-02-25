@@ -7,8 +7,6 @@ const openai = new OpenAI({
 
 
 let userObjectReference = {};
-let thread;
-let runId;
 
 const tools = [
   {
