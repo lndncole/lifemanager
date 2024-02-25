@@ -70,12 +70,20 @@ async function handleAuthenticationCallback(req, res, googleApi, db) {
                     picture: userInfo.picture
                 };
 
-                //log user for debugging 
-                console.log("user: ", req.session.user);
-
                 try {
-                    const userAddResponse = await db.query('add', {db: 'users', collection: 'user_info'}, {email: userInfo.email, name: userInfo.name, googlePicture: userInfo.picture, lastLoginTime: new Date()}, null);
-                    console.log("Add user response from Mongo DB: ", userAddResponse);
+                    await db.query('add', 
+                        {
+                            db: 'users', 
+                            collection: 'user_info'
+                        }, 
+                        {
+                            email: userInfo.email, 
+                            name: userInfo.name, 
+                            googlePicture: userInfo.picture, 
+                            lastLoginTime: new Date()
+                        }, 
+                        null
+                    );
                 } catch(e) {
                     console.error('No response from Mongo DB after trying to add user: ', e);
                 }
@@ -83,8 +91,8 @@ async function handleAuthenticationCallback(req, res, googleApi, db) {
                 console.error('User info not found');
                 // Handle the case where user info is not found
             }
-        } catch (userInfoError) {
-            console.error('Error retrieving user info:', userInfoError);
+        } catch (e) {
+            console.error('Error retrieving user info:', e);
             // Handle the error, e.g., by sending a response or logging
         }
 

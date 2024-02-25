@@ -1,15 +1,19 @@
 // ai/openai.js
 const OpenAI = require("openai");
 
-async function startChat(conversation) {
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
-  const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-  });
 
-  // Define functions first
-  const functions = [
-    {
+let userObjectReference = {};
+let thread;
+let runId;
+
+const tools = [
+  {
+    type: "function",
+    function: {
       name: "fetch-calendar",
       description: "Fetch calendar events for a given date range.",
       parameters: {
@@ -29,8 +33,11 @@ async function startChat(conversation) {
         },
         required: ["timeMin", "timeMax"]
       }
-    },
-    {
+    }
+  },
+  {
+    type: "function",
+    function: {
       name: "add-calendar-events",
       description: "Add multiple events to the calendar.",
       parameters: {
@@ -53,8 +60,11 @@ async function startChat(conversation) {
         },
         required: ["events"]
       }
-    },
-    {
+    }
+  },
+  {
+    type: "function",
+    function: {
       name: "delete-calendar-events",
       description: "Delete an event from the calendar.",
       parameters: {
@@ -74,8 +84,11 @@ async function startChat(conversation) {
         },
         required: ["events"]
       }
-    },    
-    {
+    }
+  },    
+  {
+    type: "function",
+    function: {
       name: "google-search",
       description: "Perform a google search.",
       parameters: {
@@ -89,31 +102,133 @@ async function startChat(conversation) {
         required: ["query"]
       }
     }
-  ];
+  }
+];
 
-  let conversationObject = {
-    model: "gpt-3.5-turbo",
-    messages: [
-      {role: "system", content: "You are an assistant. Work with the Google Calendar API and the Google Search API to look up information on the internet and provide information back to the user. Call predefined functions and pass in the appropriate values to ensure successful function calls."},
-      { role: "assistant", content: `Example of an introduction: 'Hello! Nice to meet you. Welcome to lifeMNGR. I'm here to help you with various tasks such as performing Google searches, managing your calendar events, and more. I've noted your timezone as [timezone].' If you get a message from the role of 'function', then you should take in that contents and summarize it for the user. You should always verify first with the user before executing a function. Don't execute functions without first verifying the necessary details to put in to the function call. If I ask you to make a search or to look for information, then you should perform a "google-search" by calling the "google-search" function and adding a query that can be used to address the user's needs. Ask me for my location if I ask you to do a search that is local to me. If I only give you one date or time for an event to be added to the calendar, ask me for an end time or suggest one for me. If there are multiple events in consideration, you should add each event one-by-one, checking against my Google calendar after each entry to ensure that you have entered all events that I agree to adding in to my calendar. Anytime I ask for you to get my calendar for "today" you should call the "fetch-calendar" function passing in today's date at midnight as the "timeMin" property, and todays's date at 11:59pm as the "timeMax" property. Examples of event IDs: 4srt29alpr5dk1l3sc5n1ao6ak_20240216T140000Z, e59jfsa3l1rjdmh8jbnkgev62g, 28i03ilte02k8tfheplffst1q0, b5recdu6fp3qrtj5qcruvc2e50.`
-      },
-      { role: 'user', content: `Introduce yourself after the first thing I say. Every time you are asked to retrieve calendar information you must include the event ID of each event along with the event's summary, description, start time and end time. Anytime I ask you to delete an event, use the unaltered eventId as the eventId argument in the delete-calendar-events' function call. It's important that you use the exact id that you get back from the fetch calendar function you called prior otherwise it won't work.`}
-    ],
-    functions: functions,
-    function_call: "auto",
-    stream: true
-  };
+let conversationObject = {
+  name: "lifeMNGR",
+  model: "gpt-3.5-turbo",
+  instructions: `You are an assistant named lifeMNGR. Your goal is to help the user figure out what they should do today. Use all of the tools you have available to you to help accomplish this task. By the time the user is finished interacting with you, the user should know all of the things that they want to do today, that would make today a "good" day.
 
-  conversationObject.messages = [...conversationObject.messages, ...conversation];
+  When asked to get a calendar for 'today' you should call the 'fetch-calendar' function passing in today's date at midnight as the 'timeMin' property, and todays's date at 11:59pm as the 'timeMax' property. Only call this function when explicitly asked.
 
+  When asked to add an event, you should only ever call the 'add-calendar-events' function and only the 'add-calendar-events'. You should never call multiple functions in one run. Always wait for the first function to end before calling a second one. Never run multiple functions at the same time. 
+  
+  You should always verify function arguments before executing a function. Don't execute functions without first verifying the necessary details to put in to the function call.
+  
+  Introduce yourself elaborately after the first thing I say regarding my date and time.`,
+  tools: tools
+  //description: '(512 character limit)'
+};
+
+async function initChat(userObj) {
+
+  if(!userObjectReference[userObj.email]) {
+
+    userObjectReference[userObj.email] = userObj;
+
+    userObjectReference[userObj.email].assistant = await openai.beta.assistants.create(conversationObject);
+
+    userObjectReference[userObj.email].thread = await openai.beta.threads.create();
+
+    userObjectReference[userObj.email].runsList = await openai.beta.threads.runs.list(
+      userObjectReference[userObj.email].thread.id
+    );
+  
+    console.log("runs list: ", userObjectReference[userObj.email].runsList);
+  }
+}
+
+// TODO: Figure out how to cancel response
+let runTries = 0;
+async function checkStatusAndReturnMessages(threadId, runId) {
+
+  const runCheck = await openai.beta.threads.runs.retrieve(threadId, runId);
+  const runStatus = runCheck.status;
+
+    if (runStatus === 'completed') {
+      let messages = await openai.beta.threads.messages.list(threadId);
+      let firstMessage = messages.data[0].content[0];
+
+      runTries = 0;
+      return firstMessage; 
+    } else if (runStatus === 'requires_action') {
+      const retrieveRun = await openai.beta.threads.runs.retrieve(
+        threadId,
+        runId
+      );
+
+      let toolCallsObj = {};
+
+      const toolCalls = retrieveRun.required_action.submit_tool_outputs.tool_calls;
+      toolCallsObj.toolCalls = toolCalls;
+      toolCallsObj.threadId = threadId;
+      toolCallsObj.runId = runId;
+
+      runTries = 0;
+      console.log("toolCalls", toolCallsObj);
+      return toolCallsObj;
+    } else {
+      //If we try ten times and it doesn't work, we need to cancel the run
+      if(runTries == 10) {
+        await openai.beta.threads.runs.cancel(
+          threadId,
+          runId
+        );
+
+        runTries = 0;
+        return;
+      }
+      runTries++;
+     
+      console.log("Run status: ", runStatus);
+      // Wait for a short period before checking the status again
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 1 second
+      return checkStatusAndReturnMessages(threadId, runId); // Recursively call the function
+    }
+}
+
+async function startChat(conversation, userObject) {
+
+  await initChat(userObject);
+  
   try {
-    const completion = await openai.beta.chat.completions.stream(conversationObject);
-    return completion;
+
+    const threadAddition = await openai.beta.threads.messages.create(userObjectReference[userObject.email].thread.id, conversation);
+   
+    userObjectReference[userObject.email].run = await openai.beta.threads.runs.create(userObjectReference[userObject.email].thread.id, { 
+      assistant_id: userObjectReference[userObject.email].assistant.id
+    });
+
+    return await checkStatusAndReturnMessages(userObjectReference[userObject.email].thread.id, userObjectReference[userObject.email].run.id);
   } catch (e) {
     console.error(e);
     return { error: true, message: e.message || "An error occurred withthe Open AI API." };
   }
 }
 
+async function resolveFunction(gptFunctionObject) {
 
-module.exports = { startChat };
+  try {
+    const output = await openai.beta.threads.runs.submitToolOutputs(
+      gptFunctionObject.threadId,
+      gptFunctionObject.runId,
+      {
+        tool_outputs: [
+          {
+            tool_call_id: gptFunctionObject.toolCallId,
+            output: JSON.stringify(gptFunctionObject.functionResponse),
+          },
+        ],
+      }
+    );
+
+    return await checkStatusAndReturnMessages(gptFunctionObject.threadId, gptFunctionObject.runId);
+
+  } catch(e) {
+    console.error("There was an error resolving the function call: ", e);
+  }
+
+}
+
+module.exports = { startChat, resolveFunction };

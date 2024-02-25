@@ -1,10 +1,16 @@
-module.exports = async function addCalendarEvents(req, res, conversation, functionArgs, chatGPTApi, googleApi, oauth2Client) {
-    const events = functionArgs.events;
+module.exports = async function addCalendarEvents(req, res, thread, functionArgs, chatGPTApi, googleApi, oauth2Client) {
+    // Iterate through each event object and add it to the calendar
+    let gptFunctionObject = {
+        functionResponse:[],
+        threadId: thread.threadId,
+        runId: thread.runId,
+    };
+
     try {
-        // Iterate through each event object and add it to the calendar
-        const googleCalendarResponses = [];
+
+        const events = JSON.parse(functionArgs).events;
+        
         for (const event of events) {
-            
             // Create a request object for each event
             const eventDetails = {
                 summary: event.summary,
@@ -25,30 +31,24 @@ module.exports = async function addCalendarEvents(req, res, conversation, functi
                 // Check if googleCalendarAddEventResponse.items exists and has length
                 if (googleCalendarAddEventResponse && googleCalendarAddEventResponse.data) {
                     // Add response to array
-                    googleCalendarResponses.push(googleCalendarAddEventResponse.data); 
+                    gptFunctionObject.functionResponse.push(googleCalendarAddEventResponse.data); 
                 } else {
                     throw new Error('No data received from addCalendarEvent');
                 }
             } catch (e) {
                 console.error(`Error adding event: ${event.summary}`, e);
-                googleCalendarResponses.push({ error: `Error adding event: ${event.summary}`, details: e.toString() });
+                gptFunctionObject.functionResponse.push({ error: `Error adding event: ${event.summary}`, details: e.toString() });
             }
         }
+
+        gptFunctionObject.toolCallId = thread.toolCalls[0].id;
         //Event added, now pass the response from the Calendar back to the GPT
         try {
             // Pass the Google Calendar responses back to the GPT
-            const gptResponse = await chatGPTApi.startChat([...conversation, {
-                role: 'user',
-                content: JSON.stringify(googleCalendarResponses),
-                name: 'add-calendar-events'
-            }]);
-
-            for await (const chunk of gptResponse) {
-                res.write(JSON.stringify(chunk));
-            }
-
+            const gptResponse = await chatGPTApi.resolveFunction(gptFunctionObject);
+            
+            res.send(gptResponse);
             res.end("done");
-
 
         } catch (e) {
             console.error("Error adding Google calendar event with lifeMNGR: ", e);

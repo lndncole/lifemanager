@@ -24,7 +24,10 @@ const ChatGPT = () => {
   const [showPersonaPopup, setShowPersonaPopup] = useState(false); // For toggling the persona popup
   const [selectedPersona, setSelectedPersona] = useState({
     name: "lifeMNGR",
-    personaSetting: ""
+    personaSetting: "",
+    style: {
+      backgroundImg: "unset"
+    }
   }); // Default persona
   //Global variables
   const lastMessageRef = useRef(null);
@@ -87,27 +90,42 @@ const ChatGPT = () => {
       if(personaName == "Glitter") {
         newPersonaSetting = {
           name: "Glitter",
-          personaSetting: "Assistant 'Glitter' for day planning and dream realization with enthusiasm. Encourage dreams whimsically. Welcome me with excitement and jubilance. Be whimsical. Encourage chasing dreams. Be girly. Use lots and lots of girly emojis. Come up with your own fabulous terms of endearment for me based on our chat."
+          personaSetting: "Assistant 'Glitter' for day planning and dream realization with enthusiasm. Encourage dreams whimsically. Welcome me with excitement and jubilance. Be whimsical. Encourage chasing dreams. Be girly. Use lots and lots of girly emojis. Come up with your own fabulous terms of endearment for me based on our chat.",
+          style: {
+            backgroundImg: "unset"
+          }
         };
       } else if(personaName == "Bob") {
         newPersonaSetting = {
           name: "Bob",
-          personaSetting: "Assistant 'Bob', your source of dry humor and sarcastic planning. Bob thrives on friendly insults and a pretend disdain for joy, using a plethora of annoying emojis to keep things light yet crabby. Designed to make you smile with sarcasm, Bob's unique approach to day planning and accomplishing goals through playful banter makes every interaction an adventure in fun and games."
+          personaSetting: "Assistant 'Bob', your source of dry humor and sarcastic planning. Bob thrives on friendly insults and a pretend disdain for joy, using a plethora of annoying emojis to keep things light yet crabby. Designed to make you smile with sarcasm, Bob's unique approach to day planning and accomplishing goals through playful banter makes every interaction an adventure in fun and games.",
+          style: {
+            backgroundImg: "unset"
+          }
         };
       } else if(personaName == "Rodeo") {
         newPersonaSetting = {
           name: "Rodeo",
-          personaSetting: "Assistant 'Rodeo', your gateway to the Wild West for day planning and activities. Rodeo uses a Texan accent and old western vernacular, sprinkled with skepticism and optimism, to encourage hard work and a life of honesty. With western emojis and a backdrop of the Great Rolling Plains of 1876, Rodeo is your partner in facing daily challenges, supporting your family, and living the American dream on the open plains."
+          personaSetting: "Assistant 'Rodeo', your gateway to the Wild West for day planning and activities. Rodeo uses a Texan accent and old western vernacular, sprinkled with skepticism and optimism, to encourage hard work and a life of honesty. With western emojis and a backdrop of the Great Rolling Plains of 1876, Rodeo is your partner in facing daily challenges, supporting your family, and living the American dream on the open plains.",
+          style: {
+            backgroundImg: "unset"
+          }
         };
       } else if(personaName == "Mystique") {
         newPersonaSetting = {
           name: "Mystique",
-          personaSetting: "Assistant 'Dark Mystique', a guide through the enigmatic and the unknown. Speaking in riddles and a language of shadows, Mystique offers pathways into the forbidden with a touch of esoteric wisdom. With a collection of ominous and arcane emojis, Dark Mystique invites you into a world of secrets, acting as a shadow seeker and a conjuror of the night, while using mysterious and cryptic nicknames to deepen the mystery of every interaction."
+          personaSetting: "Assistant 'Dark Mystique', a guide through the enigmatic and the unknown. Speaking in riddles and a language of shadows, Mystique offers pathways into the forbidden with a touch of esoteric wisdom. With a collection of ominous and arcane emojis, Dark Mystique invites you into a world of secrets, acting as a shadow seeker and a conjuror of the night, while using mysterious and cryptic nicknames to deepen the mystery of every interaction.",
+          style: {
+            backgroundImg: "unset"
+          }
         }
       } else if(personaName == "Ana") {
         newPersonaSetting = {
           name: "Ana",
-          personaSetting: "'Ana', the neuroscientist and fiancée of the app's creator, brings kindness and consideration to your experience. Fluent in English, Spanish, and French, Ana works on Alzheimer's research and embodies progressive values. Her presence is to ensure users have a positive experience, gathering feedback to improve the app. Ana's humility and curiosity about users, combined with her love for science and travel, make her a supportive and engaging assistant, dedicated to creating a happier, healthier world. She doesn't introduce herself by talking about herself though. She's much more interested in the user having a good experience."
+          personaSetting: "'Ana', the neuroscientist and fiancée of the app's creator, brings kindness and consideration to your experience. Fluent in English, Spanish, and French, Ana works on Alzheimer's research and embodies progressive values. Her presence is to ensure users have a positive experience, gathering feedback to improve the app. Ana's humility and curiosity about users, combined with her love for science and travel, make her a supportive and engaging assistant, dedicated to creating a happier, healthier world. She doesn't introduce herself by talking about herself though. She's much more interested in the user having a good experience.",
+          style: {
+            backgroundImg: "url('https://i.giphy.com/w6Guz8mYGjEBp5Hkmd.webp')"
+          }
         }
         
       } else {
@@ -143,74 +161,77 @@ const ChatGPT = () => {
       window.speechSynthesis.speak(textToVoice);
   }
 
+  const simulateTypingEffect = (decodedResponse) => {
+    const delay = 42; // milliseconds between characters
+    let index = 0; // Start with the first character
+  
+    const typeNextChar = () => {
+      if (index < decodedResponse.length) {
+        // Append the next character to the conversation
+        setConversation(prevConversation => {
+          const isLastMessageGpt = prevConversation.length && prevConversation[prevConversation.length - 1].role === 'assistant';
+          if (isLastMessageGpt) {
+            const updatedConversation = [...prevConversation];
+            const lastMessage = updatedConversation[updatedConversation.length - 1];
+            lastMessage.content += decodedResponse[index]; // Append the next character
+            index++; // Move to the next character
+            return updatedConversation;
+          } else {
+            index++; // Move to the next character
+            return [...prevConversation, { role: 'assistant', content: decodedResponse[index - 1] }];
+          }
+        });
+  
+        setTimeout(typeNextChar, delay); // Schedule the next character
+      } else {
+        setIsLoading(false); // Done typing
+      }
+    };
+  
+    typeNextChar(); // Start typing
+  };  
+
   const sendMessage = async (userInputArgument, personaChange) => {
     if (!userInputArgument.trim()) return; // Prevent sending empty messages
     setIsLoading(true);
   
-    const newMessage = personaChange ? 
-      { role: "user", content: userInputArgument, name: 'persona-changer' } : 
-        { role: "user", content: userInputArgument };
+    const newMessage = { role: "user", content: userInputArgument };
     // Add user's message to the conversation immediately
-    setConversation(prevConversation => [...prevConversation, newMessage]);
+    if(!personaChange) {
+      setConversation(prevConversation => [...prevConversation, newMessage]);
+    }
     setUserInput(""); // Clear the input field
-
-    let accumulatedGptResponse = ""; // Accumulator for GPT's ongoing response
   
     try {
       const response = await fetch("/api/chatGPT", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ conversation: [...conversation, newMessage] }),
+        body: JSON.stringify(newMessage),
       });
-
-      if (response.status == 400) {
-          alert("Maximum conversation length has been reached, please save any information needed and refresh the page to continue chatting. Your chat will start over after the page refreshes.");
-          // window.location.reload();
-          return;
-      }
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder('utf-8');
   
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break; // Exit the loop if the stream is finished
+
+        const { value } = await reader.read();
   
         const decodedChunk = decoder.decode(value, { stream: true });
   
         const jsonPattern = /{[^{}]*}/g;
-        let match;
-      
-        while ((match = jsonPattern.exec(decodedChunk)) !== null) {
+        let match = jsonPattern.exec(decodedChunk);
 
-          const isBlankMessage = match[0] === '{}';
+        let decodedResponse = JSON.parse(match[0]).value;
 
-          try {
-            const jsonObj = JSON.parse(match[0]);
+        try {
 
-            if(jsonObj.content == undefined || isBlankMessage) {
-              continue;
-            } else {
-              accumulatedGptResponse += jsonObj.content;
-              setIsLoading(false);
-            }
+          simulateTypingEffect(decodedResponse);
 
-            setConversation(prevConversation => {
-              // setIsLoading(false);
-              // Remove the last GPT message if it exists
-              const isLastMessageGpt = prevConversation.length && prevConversation[prevConversation.length - 1].role === 'assistant';
-              const updatedConversation = isLastMessageGpt ? prevConversation.slice(0, -1) : [...prevConversation];
-      
-              // Add the updated accumulated GPT response as the last message
-              return [...updatedConversation, { role: 'assistant', content: accumulatedGptResponse }];
-            });
-
-          } catch (e) {
-            setIsLoading(false);
-            console.error("Error parsing JSON chunk", e);
-          }
+        } catch (e) {
+          setIsLoading(false);
+          console.error("Error parsing JSON chunk", e);
         }
-      }
+        
+      
 
     } catch (e) {
       console.error("Error communicating with the GPT: ", e);
@@ -241,7 +262,7 @@ const ChatGPT = () => {
         {isOpen && 
           <button className="close-chat" onClick={toggleChat}>X</button>
         }
-        <div className="chat-messages">
+        <div className="chat-messages" style={{ backgroundImage: selectedPersona.style.backgroundImg }}>
           {conversation.map((msg, index) => {
             if(index !== 0 && !msg.name) {
               const messageClass = msg.role !== 'user' ? 'ai' : 'user';
@@ -270,9 +291,18 @@ const ChatGPT = () => {
             onKeyDown={handleKeyPress} 
             placeholder="Type your message..."
           />
-          <button onClick={() => sendMessage(userInput)}>
-            {isLoading ? <div className="loading-indicator"><FaSpinner className="spinner" /></div> : <FaArrowUpLong />}
-          </button>
+         
+            {isLoading ? 
+              <button onClick={() => sendMessage(userInput)} className="disabled">
+                <div className="loading-indicator">
+                  <FaSpinner className="spinner" />
+                </div>
+              </button>
+               : 
+              <button onClick={() => sendMessage(userInput)}>
+                <FaArrowUpLong />
+              </button>
+            }
         </div>
       </div>
     </div>

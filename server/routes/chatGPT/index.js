@@ -4,76 +4,48 @@ const addCalendarEvents = require('./addCalendarEvents.js');
 const deleteCalendarEvents = require('./deleteCalendarEvents.js');
 const googleSearch = require('./googleSearch.js');
 
-function isValidJSON(text) {
-    try {
-        JSON.parse(text);
-        return true; // Parsing succeeded, the text is valid JSON
-    } catch (error) {
-        return false; // Parsing failed, the text is not valid JSON
-    }
-}
-
 async function chat(req, res, chatGPTApi, googleApi) {
-    const { conversation } = req.body;
+    const userMessage = req.body;
 
-    console.log("User request to GPT: ", conversation[conversation.length - 1]);
+    console.log("user message to GPT: ", userMessage);
 
-    // Ensure conversation array is not empty
-    if (!conversation || !conversation.length) {
-        throw new Error("The 'conversation' array is empty.");
-    }
+    try {
+        const thread = await chatGPTApi.startChat(userMessage, req.session.user);
 
-    try {        //Add to the chat with the GPT
-        const stream = await chatGPTApi.startChat(conversation);
+        console.log(thread);
 
-        let gptFunctionCall = false;
+        let functionCall;
 
-        for await (const chunk of stream) {
-            let gptResponse = chunk.choices[0].delta;
-
-            if(gptResponse.function_call) {
-                gptFunctionCall = true;
-            } else {
-                res.write(JSON.stringify(chunk));
-            }
-        }
-
-
-        // Wait for chat to be completed and grab the chat object to send to functions and close the stream.
-        const chatCompletion = await stream.finalChatCompletion();
-
-        console.log("Gpt response to user: ", chatCompletion.choices[0].message);
-
-        // If ChatGPT wants to call a function we 
-        if (gptFunctionCall) {
-
-            //The response from the GPT
-            const choice = chatCompletion.choices[0].message;
-
-            //If the response is a function call
-            if (choice.function_call) {
-                //Parse function args accordingly based on whether it's valid JSON or not
-                let functionArgs = 
-                    isValidJSON(choice.function_call.arguments) ? JSON.parse(choice.function_call.arguments)
-                        : choice.function_call.arguments;
-                
-                // Ensure oauth2Client is correctly authenticated
-                const oauth2Client = googleApi.createOAuthClient();
-                oauth2Client.setCredentials(req.session.tokens);
-
-                if (choice.function_call.name === "fetch-calendar") {
-                    fetchCalendar(req, res, conversation, functionArgs, chatGPTApi, googleApi, oauth2Client);
-                } else if(choice.function_call.name === "add-calendar-events") {
-                    addCalendarEvents(req, res, conversation, functionArgs, chatGPTApi, googleApi, oauth2Client);
-                } else if(choice.function_call.name === "delete-calendar-events") {
-                    deleteCalendarEvents(req, res, conversation, functionArgs, chatGPTApi, googleApi, oauth2Client);
-                } else if(choice.function_call.name === "google-search") {
-                    googleSearch(req, res, conversation, functionArgs, chatGPTApi, googleApi);
-                } 
-            }
+        if(thread.toolCalls) {
+            functionCall = true;
         } else {
+            res.send(JSON.stringify(thread));
             res.end("done");
         }
+
+        //If the response is a function call
+        if (functionCall) {
+            //Parse function args accordingly based on whether it's valid JSON or not
+            const functionDefinition = thread.toolCalls[0].function;
+            const functionArgs = functionDefinition.arguments;
+
+            console.log("functionArgs: ", functionArgs);
+            
+            // Ensure oauth2Client is correctly authenticated
+            const oauth2Client = googleApi.createOAuthClient();
+            oauth2Client.setCredentials(req.session.tokens);
+
+            if (functionDefinition.name === "fetch-calendar") {
+                fetchCalendar(req, res, thread, functionArgs, chatGPTApi, googleApi, oauth2Client);
+            } else if(functionDefinition.name === "add-calendar-events") {
+                addCalendarEvents(req, res, thread, functionArgs, chatGPTApi, googleApi, oauth2Client);
+            } else if(functionDefinition.name === "delete-calendar-events") {
+                deleteCalendarEvents(req, res, thread, functionArgs, chatGPTApi, googleApi, oauth2Client);
+            } else if(functionDefinition.name === "google-search") {
+                googleSearch(req, res, thread, functionArgs, chatGPTApi, googleApi);
+            } 
+        }
+
     } catch (e) {
         let errorMessage = e.message || "";
         if(errorMessage.includes("maximum context length")) {
