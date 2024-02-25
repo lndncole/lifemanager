@@ -1,8 +1,6 @@
 //api/index.js
-const process = require('process');
 const {google} = require('googleapis');
 const moment = require('moment-timezone');
-const userTimeZone = "America/Los_Angeles";
 
 
 const env = process.env.NODE_ENV == 'production' ? 'production' : 'development';
@@ -38,25 +36,48 @@ async function search(req) {
   }
 }
 
-async function addCalendarEvent(auth, req) {
+async function addCalendarEvent(auth, eventDetails) {
+  const calendar = google.calendar({ version: 'v3', auth });
   try {
-    const calendar = google.calendar({ version: 'v3', auth: auth });
-    const event = {
-      summary: req.body.summary,
-      start: req.body.start,
-      end: req.body.end,
-      description: req.body.description,
-    };
 
-    const response = await calendar.events.insert({
-      calendarId: 'primary',
-      resource: event,
-    });
+  const event = {
+    calendarId: 'primary',
+    summary: eventDetails.summary,
+    start: eventDetails.start,
+    end: eventDetails.end,
+    description: eventDetails.description
+  };
+
+  const response = await calendar.events.insert({
+    calendarId: 'primary',
+    resource: event,
+  });
 
     return response;
   } catch (error) {
-    console.error('Error adding and event to the calendar:', error);
-    throw error;
+    console.error('Failed to add calendar event: ', error);
+    throw error; // Rethrow or handle as needed
+  }
+}
+
+async function deleteCalendarEvent(auth, eventDetails) {
+  const calendar = google.calendar({ version: 'v3', auth });
+  try {
+
+  const event = {
+    calendarId: eventDetails.calendarId ? eventDetails.calendarId : 'primary',
+    eventId: eventDetails.eventId
+  };
+
+  const response = await calendar.events.delete({
+    calendarId: event.calendarId,
+    eventId: event.eventId,
+  });
+
+    return response;
+  } catch (error) {
+    console.error('Failed to add calendar event: ', error);
+    throw error; // Rethrow or handle as needed
   }
 }
 
@@ -71,7 +92,7 @@ async function getUserInfo(auth) {
   }
 }
 
-async function getCalendar(oauth2Client, timeMin, timeMax) {
+async function getCalendar(oauth2Client, timeMin, timeMax, days, userTimeZone) {
   try {
     const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
 
@@ -79,7 +100,7 @@ async function getCalendar(oauth2Client, timeMin, timeMax) {
     if(!timeMin || !timeMax) {
       const now = moment.tz(userTimeZone);
       timeMin = now.startOf('day').toISOString();
-      timeMax = now.add(10, 'days').toISOString();
+      timeMax = now.add(days, 'days').toISOString();
     }
     
     let allEvents = [];
@@ -97,7 +118,15 @@ async function getCalendar(oauth2Client, timeMin, timeMax) {
     if (events && events.length > 0) {
       events.forEach(event => {
         const start = event.start.dateTime || event.start.date;
-        allEvents.push({ start: start, end: event.end?.date || event.end?.dateTime, summary: event.summary, description: event.description });
+        allEvents.push({ 
+          start: start, 
+          end: event.end?.date || event.end?.dateTime, 
+          summary: event.summary, 
+          description: event.description,
+          eventId: event.id,
+          eventLink: event.htmlLink,
+          eventStatus: event.status
+        });
       });
     }
 
@@ -108,4 +137,4 @@ async function getCalendar(oauth2Client, timeMin, timeMax) {
   }
 }
 
-module.exports = { getCalendar, getUserInfo, createOAuthClient, addCalendarEvent, search };
+module.exports = { getCalendar, getUserInfo, createOAuthClient, addCalendarEvent, deleteCalendarEvent, search };

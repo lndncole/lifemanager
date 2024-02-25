@@ -6,13 +6,21 @@ const router = express.Router();
 //Middleware
 const { isAuthenticated } = require('../middleware/middlewares');
 
+//Api router functions
+const apiRoutes = require('./apiRoutes.js');
+router.use('/api', isAuthenticated, apiRoutes);
+
+//DB
+const db = require('../db/db.js');
+
 //APIs
 const googleApi = require('../../api/google/index.js');
-const chatGPTApi = require("../../api/chatGPT/index.js");
-
-//Functions
-const chatGPT = require('./chatGPT.js');
 const google = require('./google.js');
+
+//Test authentication
+router.get('/test', isAuthenticated, async (req, res) => {
+  res.send("Authenticated");
+});
 
 //Send initial request to Google for authenitcation 
 router.get('/authenticate', async (req, res) => {
@@ -21,12 +29,12 @@ router.get('/authenticate', async (req, res) => {
 
 //oAuth callback that get's hit when Google responds to user authentication request
 router.get('/oauth2callback', async (req, res) => {
-  await google.handleAuthenticationCallback(req, res, googleApi);
+  await google.handleAuthenticationCallback(req, res, googleApi, db);
 });
 
 //Get authorization status
 router.get('/get-auth', isAuthenticated, (req, res) => {
-    res.status(200).send(req.session.user);
+  res.status(200).send(req.session.user);
 });
 
 //Sign user out / end session
@@ -42,19 +50,21 @@ router.get('/sign-out', (req, res) => {
   });
 });
 
-//All chats to GPT
-router.post('/api/chatGPT', isAuthenticated, async (req, res) => {
-  await chatGPT.chat(req, res, chatGPTApi, googleApi);
-});
 
-//Fetch user's calendar
-router.get('/api/google/fetch-calendar', isAuthenticated, async (req, res) => {
-  await google.fetchCalendar(req, res, googleApi);
-});
 
-//Add event to calendar
-router.post('/api/google/add-calendar-events', isAuthenticated, async (req, res) => {
-  await google.addCalendarEvents(req, res, googleApi);
-});
+// //All chats to GPT
+// router.post('/api/chatGPT', isAuthenticated, async (req, res) => {
+//   await chatGPT.chat(req, res, chatGPTApi, googleApi);
+// });
+
+// //Fetch user's calendar
+// router.post('/api/google/fetch-calendar', isAuthenticated, async (req, res) => {
+//   await google.fetchCalendar(req, res, googleApi);
+// });
+
+// //Add event to calendar
+// router.post('/api/google/add-calendar-events', isAuthenticated, async (req, res) => {
+//   await google.addCalendarEvents(req, res, googleApi);
+// });
 
 module.exports = router;

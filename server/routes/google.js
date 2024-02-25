@@ -7,12 +7,13 @@ async function fetchCalendar(req, res, googleApi) {
 
     //If a default set of days isn't given then default to ten days
     const days = req.body.days ? req.body.days : 10;
+    const userTimeZone = req.body.userTimeZone;
 
     const oauth2Client = googleApi.createOAuthClient();
     oauth2Client.setCredentials(req.session.tokens);
 
     try {
-        const events = await googleApi.getCalendar(oauth2Client, null, null, days);
+        const events = await googleApi.getCalendar(oauth2Client, null, null, days, userTimeZone);
         res.json(events);
     } catch (error) {
         console.error('Error fetching calendar:', error);
@@ -33,7 +34,7 @@ async function addCalendarEvents(req, res, googleApi) {
   }
 }
 
-async function handleAuthenticationCallback(req, res, googleApi) {
+async function handleAuthenticationCallback(req, res, googleApi, db) {
     try {
         //Get the authorization code that's passed back to us from Google 
         const qs = new url.URL(req.url, domain).searchParams;
@@ -63,20 +64,35 @@ async function handleAuthenticationCallback(req, res, googleApi) {
             const userInfo = await googleApi.getUserInfo(oauth2Client);
             
             if (userInfo) {
-            req.session.user = {
-                email: userInfo.email,
-                name: userInfo.name,
-                picture: userInfo.picture
-            };
-            
-            //log user for debugging 
-            console.log("user: ", req.session.user);
+                req.session.user = {
+                    email: userInfo.email,
+                    name: userInfo.name,
+                    picture: userInfo.picture
+                };
+
+                try {
+                    await db.query('add', 
+                        {
+                            db: 'users', 
+                            collection: 'user_info'
+                        }, 
+                        {
+                            email: userInfo.email, 
+                            name: userInfo.name, 
+                            googlePicture: userInfo.picture, 
+                            lastLoginTime: new Date()
+                        }, 
+                        null
+                    );
+                } catch(e) {
+                    console.error('No response from Mongo DB after trying to add user: ', e);
+                }
             } else {
-            console.error('User info not found');
-            // Handle the case where user info is not found
+                console.error('User info not found');
+                // Handle the case where user info is not found
             }
-        } catch (userInfoError) {
-            console.error('Error retrieving user info:', userInfoError);
+        } catch (e) {
+            console.error('Error retrieving user info:', e);
             // Handle the error, e.g., by sending a response or logging
         }
 
