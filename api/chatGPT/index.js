@@ -164,11 +164,11 @@ async function checkStatusAndReturnMessages(threadId, runId) {
       toolCallsObj.runId = runId;
 
       runTries = 0;
-      console.log("toolCalls", toolCallsObj);
+      console.log("toolCalls from api/chatGPT/index.j: ", toolCallsObj);
       return toolCallsObj;
     } else {
-      //If we try ten times and it doesn't work, we need to cancel the run
-      if(runTries == 10) {
+      //If we try for 3 minutes and it doesn't work, we need to cancel the run
+      if(runTries == 180) {
         await openai.beta.threads.runs.cancel(
           threadId,
           runId
@@ -180,8 +180,8 @@ async function checkStatusAndReturnMessages(threadId, runId) {
       runTries++;
      
       console.log("Run status: ", runStatus);
-      // Wait for a short period before checking the status again
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 1 second
+      // Wait for one second before checking the status again
+      await new Promise(resolve => setTimeout(resolve, 1000));
       return checkStatusAndReturnMessages(threadId, runId); // Recursively call the function
     }
 }
