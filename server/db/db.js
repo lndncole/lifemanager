@@ -81,7 +81,30 @@ async function query(command, dbObject, userDataObject, updateObject) {
 
         break;
       case "update":
-        result = await collection.updateMany({ id }, { $set: updateObject });
+        result = await collection.updateMany({ email: id },
+          { $set: updateObject,
+            $currentDate: { lastModified: true } 
+          }
+        );
+
+        break;
+
+      case "aggregate": 
+        let key = Object.keys(updateObject)[0];
+        let memory = updateObject[key];
+        // Create the $addFields stage dynamically
+        let addFieldsStage = {
+          $addFields: {}
+        };
+
+        // Use bracket notation to set the dynamic field name and its value
+        addFieldsStage.$addFields["memories." + key] = memory;
+
+        result = await collection.aggregate( [
+          {
+            addFieldsStage
+          }
+        ] );
 
         break;
       case "delete":
@@ -100,6 +123,43 @@ async function query(command, dbObject, userDataObject, updateObject) {
     await client.close();
   }
 }
+
+async function addMemories(memoriesToAdd) {
+  const client = await getMongoClient(); // Assumes getMongoClient is a function that connects to MongoDB
+  try {
+    const db = client.db('users'); // Access the 'users' database
+    const collection = db.collection('user_info'); // Access the 'user_info' collection
+    const email = 'landon.metcalfweb@gmail.com'; // Specify the user's email to update
+
+    // Loop through each memory to prepare it for the update operation
+    const memoriesUpdates = memoriesToAdd.map((memory, i) => {
+      const timestamp = new Date().toISOString();
+      const memoryKey = `${timestamp}_${i}`; // Create a unique key for the memory
+      return { key: memoryKey, value: memory }; // Construct the memory object
+    });
+
+    // Prepare the update operation to add all the new memories to the array
+    const updateOperation = {
+      $push: { memories: { $each: memoriesUpdates } }
+    };
+
+    // Execute the update operation for the user
+    await collection.updateOne({ email: email }, updateOperation);
+
+    console.log("Memories successfully added.");
+  } catch (e) {
+    console.error("Error adding memory:", e);
+  } finally {
+    await client.close(); // Ensure to close the client connection
+  }
+}
+
+// Example memories to add
+const memories = ['I like turtles', 'I live in seattle.'];
+
+addMemories(memories);
+
+
 
 async function testConnection() {
     try {
