@@ -88,25 +88,6 @@ async function query(command, dbObject, userDataObject, updateObject) {
         );
 
         break;
-
-      case "aggregate": 
-        let key = Object.keys(updateObject)[0];
-        let memory = updateObject[key];
-        // Create the $addFields stage dynamically
-        let addFieldsStage = {
-          $addFields: {}
-        };
-
-        // Use bracket notation to set the dynamic field name and its value
-        addFieldsStage.$addFields["memories." + key] = memory;
-
-        result = await collection.aggregate( [
-          {
-            addFieldsStage
-          }
-        ] );
-
-        break;
       case "delete":
         result = await collection.deleteMany(id);
 
@@ -124,18 +105,28 @@ async function query(command, dbObject, userDataObject, updateObject) {
   }
 }
 
-async function addMemories(memoriesToAdd) {
-  const client = await getMongoClient(); // Assumes getMongoClient is a function that connects to MongoDB
+async function createMemories(req, memoriesToAdd) {
+
+  console.log(memoriesToAdd);
+  return "tell the user we're testing right now, to be patient.";
+
+  const user = req.session.user;
+
+  const client = await getMongoClient();
+
   try {
-    const db = client.db('users'); // Access the 'users' database
-    const collection = db.collection('user_info'); // Access the 'user_info' collection
-    const email = 'landon.metcalfweb@gmail.com'; // Specify the user's email to update
+    const db = client.db('users');
+    const collection = db.collection('user_info');
+    // Specify the user's email to select the user that's being updated
+    const email = user.email; 
 
     // Loop through each memory to prepare it for the update operation
-    const memoriesUpdates = memoriesToAdd.map((memory, i) => {
+    const memoriesUpdates = memoriesToAdd.memories.map((memory) => {
+      // Get the time
       const timestamp = new Date().toISOString();
-      const memoryKey = `${timestamp}_${i}`; // Create a unique key for the memory
-      return { key: memoryKey, value: memory }; // Construct the memory object
+      const timeStamp = `${timestamp}`;
+      // Make and return the memory object
+      return { time: timeStamp, summary: memory.summary };
     });
 
     // Prepare the update operation to add all the new memories to the array
@@ -144,22 +135,20 @@ async function addMemories(memoriesToAdd) {
     };
 
     // Execute the update operation for the user
-    await collection.updateOne({ email: email }, updateOperation);
+    const updateResponse = await collection.updateOne({ email: email }, updateOperation);
 
-    console.log("Memories successfully added.");
+    console.log("Memories successfully added: ", updateResponse);
+
+
+    return updateResponse;
+
   } catch (e) {
-    console.error("Error adding memory:", e);
+    console.error("Error adding memory: ", e);
+    return `Error adding memory: ${e}`;
   } finally {
-    await client.close(); // Ensure to close the client connection
+    await client.close();
   }
 }
-
-// Example memories to add
-const memories = ['I like turtles', 'I live in seattle.'];
-
-addMemories(memories);
-
-
 
 async function testConnection() {
     try {
@@ -180,4 +169,4 @@ async function testConnection() {
     }
 }
 
-module.exports = { query, testConnection }
+module.exports = { testConnection, query, createMemories }

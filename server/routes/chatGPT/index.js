@@ -4,6 +4,9 @@ const addCalendarEvents = require('./addCalendarEvents.js');
 const deleteCalendarEvents = require('./deleteCalendarEvents.js');
 const googleSearch = require('./googleSearch.js');
 
+//DB
+const db = require('../../db/db.js');
+
 async function chat(req, res, chatGPTApi, googleApi) {
     const userMessage = req.body;
 
@@ -11,8 +14,6 @@ async function chat(req, res, chatGPTApi, googleApi) {
 
     try {
         const thread = await chatGPTApi.startChat(userMessage, req.session.user);
-
-        console.log(thread);
 
         let functionCall;
 
@@ -43,7 +44,22 @@ async function chat(req, res, chatGPTApi, googleApi) {
                 deleteCalendarEvents(req, res, thread, functionArgs, chatGPTApi, googleApi, oauth2Client);
             } else if(functionDefinition.name === "google-search") {
                 googleSearch(req, res, thread, functionArgs, chatGPTApi, googleApi);
-            } 
+            } else if(functionDefinition.name === "create-memories") {
+                const memoriesCreationResponse = await db.createMemories(req, functionArgs);
+
+                console.log("memoriesCreationResponse: ", memoriesCreationResponse);
+
+                let gptFunctionObject = {
+                    functionResponse:[memoriesCreationResponse],
+                    threadId: thread.threadId,
+                    runId: thread.runId,
+                    toolCallId: thread.toolCalls[0].id
+                };
+
+                const gptFunctionResolveResponse = await chatGPTApi.resolveFunction(gptFunctionObject);
+                res.send(gptFunctionResolveResponse);
+                res.end("done");
+            }
         }
 
     } catch (e) {
