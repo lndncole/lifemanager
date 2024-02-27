@@ -107,8 +107,9 @@ async function query(command, dbObject, userDataObject, updateObject) {
 
 async function createMemories(req, memoriesToAdd) {
 
-  console.log(memoriesToAdd);
-  return "tell the user we're testing right now, to be patient.";
+  const memoriesObject = JSON.parse(memoriesToAdd);
+  console.log(memoriesObject);
+  // return "tell the user we're testing right now, to be patient.";
 
   const user = req.session.user;
 
@@ -121,7 +122,7 @@ async function createMemories(req, memoriesToAdd) {
     const email = user.email; 
 
     // Loop through each memory to prepare it for the update operation
-    const memoriesUpdates = memoriesToAdd.memories.map((memory) => {
+    const memoriesUpdates = memoriesObject.memories.map((memory) => {
       // Get the time
       const timestamp = new Date().toISOString();
       const timeStamp = `${timestamp}`;
