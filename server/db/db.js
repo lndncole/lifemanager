@@ -28,8 +28,6 @@ async function query(command, dbObject, userDataObject, updateObject) {
   const client = await getMongoClient();
 
   try {
-    //userDataObject is expected to be an object here with property of email, at the very least
-
     //Create db - If the database doesn’t exist yet, it will be created.
     const dbString = dbObject.db ? dbObject.db : 'users'; 
     const collectionString = dbObject.collection ? dbObject.collection : 'unser_info'; 
@@ -39,7 +37,8 @@ async function query(command, dbObject, userDataObject, updateObject) {
     //Create or select collection
     const collection = db.collection(collectionString);
 
-    //Exmaple of what a userDataObjectObject looks like
+    //userDataObject is expected to be an object here with property of email, at the very least
+    //Exmaple of what a userDataObject looks like
     //  const testData = {
     //   name: 'John Smith',
     //   email: 'john.smith@gmail.com',
