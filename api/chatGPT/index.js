@@ -5,10 +5,7 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-
 let userObjectReference = {};
-let thread;
-let runId;
 
 const tools = [
   {
@@ -96,7 +93,7 @@ const tools = [
         properties: {
           query: {
             type: "string",
-            description: "The query used for the Google search"
+            description: "A highly detailed query used for a Google search"
           }
         },
         required: ["query"]
@@ -139,9 +136,9 @@ let conversationObject = {
 
   When asked to add an event, you should only ever call the 'add-calendar-events' function and only the 'add-calendar-events'. You should never call multiple functions in one run. Always wait for the first function to end before calling a second one. Never run multiple functions at the same time. 
   
-  You should always verify function arguments before executing a function. Don't execute functions without first verifying the necessary details to put in to the function call.
+  You should always verify function arguments with the user before executing a function. Don't execute functions without first verifying the necessary details to put in to the function call wwith the user.
   
-  Introduce yourself elaborately after the first thing I say regarding my date and time.`,
+  Introduce yourself after the first message I send which will be about my time and date and is for informational purposes only and should be ignored.`,
   tools: tools
   //description: '(512 character limit)'
 };
@@ -191,11 +188,11 @@ async function checkStatusAndReturnMessages(threadId, runId) {
       toolCallsObj.runId = runId;
 
       runTries = 0;
-      console.log("toolCalls", toolCallsObj);
+      console.log("toolCalls from api/chatGPT/index.j: ", toolCallsObj);
       return toolCallsObj;
     } else {
-      //If we try ten times and it doesn't work, we need to cancel the run
-      if(runTries == 10) {
+      //If we try for 3 minutes and it doesn't work, we need to cancel the run
+      if(runTries == 180) {
         await openai.beta.threads.runs.cancel(
           threadId,
           runId
@@ -207,8 +204,8 @@ async function checkStatusAndReturnMessages(threadId, runId) {
       runTries++;
      
       console.log("Run status: ", runStatus);
-      // Wait for a short period before checking the status again
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 1 second
+      // Wait for one second before checking the status again
+      await new Promise(resolve => setTimeout(resolve, 1000));
       return checkStatusAndReturnMessages(threadId, runId); // Recursively call the function
     }
 }

@@ -6,21 +6,20 @@ const router = express.Router();
 //Middleware
 const { isAuthenticated } = require('../middleware/middlewares');
 
-//Api router functions
-const apiRoutes = require('./apiRoutes.js');
-router.use('/api', isAuthenticated, apiRoutes);
-
 //DB
 const db = require('../db/db.js');
 
 //APIs
 const googleApi = require('../../api/google/index.js');
+
+//Google router functions
 const google = require('./google.js');
 
-//Test authentication
-router.get('/test', isAuthenticated, async (req, res) => {
-  res.send("Authenticated");
-});
+//Api router functions for use at '/api' route 
+const apiRoutes = require('./apiRoutes.js');
+
+//Create api route, pass in router functions
+router.use('/api', isAuthenticated, apiRoutes);
 
 //Send initial request to Google for authenitcation 
 router.get('/authenticate', async (req, res) => {
@@ -49,22 +48,5 @@ router.get('/sign-out', (req, res) => {
     res.redirect('/');
   });
 });
-
-
-
-// //All chats to GPT
-// router.post('/api/chatGPT', isAuthenticated, async (req, res) => {
-//   await chatGPT.chat(req, res, chatGPTApi, googleApi);
-// });
-
-// //Fetch user's calendar
-// router.post('/api/google/fetch-calendar', isAuthenticated, async (req, res) => {
-//   await google.fetchCalendar(req, res, googleApi);
-// });
-
-// //Add event to calendar
-// router.post('/api/google/add-calendar-events', isAuthenticated, async (req, res) => {
-//   await google.addCalendarEvents(req, res, googleApi);
-// });
 
 module.exports = router;
