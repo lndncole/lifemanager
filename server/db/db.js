@@ -88,7 +88,7 @@ async function query(command, dbObject, userDataObject, updateObject) {
 
         break;
       case "delete":
-        result = await collection.deleteMany(id);
+        result = await collection.deleteMany({ email: id });
 
         break;
       default:
@@ -107,8 +107,8 @@ async function query(command, dbObject, userDataObject, updateObject) {
 async function createMemories(req, memoriesToAdd) {
 
   const memoriesObject = JSON.parse(memoriesToAdd);
-  console.log(memoriesObject);
-  // return "tell the user we're testing right now, to be patient.";
+
+  console.log("memories to add: ", memoriesObject);
 
   const user = req.session.user;
 
@@ -139,7 +139,6 @@ async function createMemories(req, memoriesToAdd) {
 
     console.log("Memories successfully added: ", updateResponse);
 
-
     return updateResponse;
 
   } catch (e) {
@@ -150,23 +149,4 @@ async function createMemories(req, memoriesToAdd) {
   }
 }
 
-async function testConnection() {
-    try {
-      const client = await getMongoClient();
-
-      // Send a ping to confirm a successful connection
-      await client.db("admin").command({ ping: 1 });
-
-      //Issuing commands to the admin db gives you global information
-      //List DB's / collections (db's are the same as collections)
-      const databases = await client.db("admin").command( { listDatabases: 1 } );
-
-      console.log("Here are the databases in your Mongo DB: ", databases);
-
-      await client.close();
-    } catch(e) {
-      console.error("Error connecting to MongoDB: ", e);
-    }
-}
-
-module.exports = { testConnection, query, createMemories }
+module.exports = { query, createMemories }

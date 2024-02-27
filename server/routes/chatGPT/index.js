@@ -13,55 +13,91 @@ async function chat(req, res, chatGPTApi, googleApi) {
     console.log("user message from front end to GPT: ", userMessage);
 
     try {
-        const thread = await chatGPTApi.startChat(userMessage, req.session.user);
-
-        console.log("GPT response to user in /server/routes/chatGPT/index.js", thread);
+        const thread = await chatGPTApi.startChat(req, res, userMessage);
       
         let functionCall;
 
-        if(thread.toolCalls) {
+        if(thread && thread.toolCalls) {
             functionCall = true;
-        } else {
-            res.send(JSON.stringify(thread));
-            res.end("done");
-        }
+        } 
 
         //If the response is a function call
         if (functionCall) {
-            //Parse function args accordingly based on whether it's valid JSON or not
-            const functionDefinition = thread.toolCalls[0].function;
-            const functionArgs = functionDefinition.arguments;
 
-            console.log("functionArgs: ", functionArgs);
+            async function executeGptFunction() {
             
-            // Ensure oauth2Client is correctly authenticated
-            const oauth2Client = googleApi.createOAuthClient();
-            oauth2Client.setCredentials(req.session.tokens);
+                let functionResponseObjects = [];
 
-            if (functionDefinition.name === "fetch-calendar") {
-                fetchCalendar(req, res, thread, functionArgs, chatGPTApi, googleApi, oauth2Client);
-            } else if(functionDefinition.name === "add-calendar-events") {
-                addCalendarEvents(req, res, thread, functionArgs, chatGPTApi, googleApi, oauth2Client);
-            } else if(functionDefinition.name === "delete-calendar-events") {
-                deleteCalendarEvents(req, res, thread, functionArgs, chatGPTApi, googleApi, oauth2Client);
-            } else if(functionDefinition.name === "google-search") {
-                googleSearch(req, res, thread, functionArgs, chatGPTApi, googleApi);
-            } else if(functionDefinition.name === "create-memories") {
-                const memoriesCreationResponse = await db.createMemories(req, functionArgs);
+                const toolCalls = thread.toolCalls.map(async (toolCall) => {
+                    //Parse function args accordingly based on whether it's valid JSON or not
+                    const functionDefinition = toolCall.function;
+                    const functionArgs = functionDefinition.arguments;
+    
+                    console.log("functionArgs: ", functionArgs);
+                    
+                    // Ensure oauth2Client is correctly authenticated
+                    const oauth2Client = googleApi.createOAuthClient();
+                    oauth2Client.setCredentials(req.session.tokens);
 
-                console.log("memoriesCreationResponse: ", memoriesCreationResponse);
+                    let gptFunctionObject = {
+                        threadId: thread.threadId,
+                        runId: thread.runId,
+                        toolCallId: toolCall.id
+                    };
+                
+                    if (functionDefinition.name === "fetch-calendar") {
+                        
+                        gptFunctionObject.functionResponse = await fetchCalendar(req, res, functionArgs, googleApi, oauth2Client);
+    
+                        console.log("gptFunctionObject.functionResponse", gptFunctionObject.functionResponse);
+    
+                        if (gptFunctionObject.functionResponse) {
+                            functionResponseObjects.push(gptFunctionObject);
+                        }
+                        
+                    } else if(functionDefinition.name === "add-calendar-events") {
+                        addCalendarEvents(req, res, thread, functionArgs, chatGPTApi, googleApi, oauth2Client);
+                    } else if(functionDefinition.name === "delete-calendar-events") {
+                        deleteCalendarEvents(req, res, thread, functionArgs, chatGPTApi, googleApi, oauth2Client);
+                    } else if(functionDefinition.name === "google-search") {
+                        googleSearch(req, res, thread, functionArgs, chatGPTApi, googleApi);
+                    } else if(functionDefinition.name === "create-memories") {
+                        const memoriesCreationResponse = await db.createMemories(req, functionArgs);
+    
+                        console.log("memoriesCreationResponse: ", memoriesCreationResponse);
+    
+                        let gptFunctionObject = {
+                            functionResponse:[memoriesCreationResponse],
+                            threadId: thread.threadId,
+                            runId: thread.runId,
+                            toolCallId: toolCall.id
+                        };
+    
+                        const gptFunctionResolveResponse = await chatGPTApi.resolveFunction(gptFunctionObject, res);
 
-                let gptFunctionObject = {
-                    functionResponse:[memoriesCreationResponse],
-                    threadId: thread.threadId,
-                    runId: thread.runId,
-                    toolCallId: thread.toolCalls[0].id
-                };
+                    }
+                });
 
-                const gptFunctionResolveResponse = await chatGPTApi.resolveFunction(gptFunctionObject);
-                res.send(gptFunctionResolveResponse);
-                res.end("done");
+                await Promise.all(toolCalls);
+
+                console.log("functionResponseObjects.length: ",  functionResponseObjects);
+
+                if(functionResponseObjects.length) {
+                    try {
+                        console.log(JSON.stringify("functionResponseObjects: ", functionResponseObjects));
+                        // Pass the extracted information to the chat GPT function
+                        const gptResponse = await chatGPTApi.resolveFunction(functionResponseObjects, res);
+        
+                        res.end("done");
+                    } catch(e) {
+                        console.error("Error processing Google search results with OpenAI API: ", e)
+                        res.status(500).send("Error processing Google search results with OpenAI API.");
+                    }
+                }
             }
+
+            executeGptFunction();
+            
         }
 
     } catch (e) {

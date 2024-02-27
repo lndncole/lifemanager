@@ -161,9 +161,8 @@ async function initChat(userObj) {
   }
 }
 
-// TODO: Figure out how to cancel response
 let runTries = 0;
-async function checkStatusAndReturnMessages(threadId, runId) {
+async function checkStatusAndReturnMessages(threadId, runId, res) {
 
   const runCheck = await openai.beta.threads.runs.retrieve(threadId, runId);
   const runStatus = runCheck.status;
@@ -173,7 +172,8 @@ async function checkStatusAndReturnMessages(threadId, runId) {
       let firstMessage = messages.data[0].content[0];
 
       runTries = 0;
-      return firstMessage; 
+      res.send(JSON.stringify(firstMessage)); 
+      res.end("done");
     } else if (runStatus === 'requires_action') {
       const retrieveRun = await openai.beta.threads.runs.retrieve(
         threadId,
@@ -206,11 +206,15 @@ async function checkStatusAndReturnMessages(threadId, runId) {
       console.log("Run status: ", runStatus);
       // Wait for one second before checking the status again
       await new Promise(resolve => setTimeout(resolve, 1000));
-      return checkStatusAndReturnMessages(threadId, runId); // Recursively call the function
+      return checkStatusAndReturnMessages(threadId, runId, res); // Recursively call the function
     }
 }
 
-async function startChat(conversation, userObject) {
+async function startChat(req, res, conversation) {
+
+  console.log(res);
+
+  const userObject = req.session.user;
 
   await initChat(userObject);
   
@@ -222,30 +226,39 @@ async function startChat(conversation, userObject) {
       assistant_id: userObjectReference[userObject.email].assistant.id
     });
 
-    return await checkStatusAndReturnMessages(userObjectReference[userObject.email].thread.id, userObjectReference[userObject.email].run.id);
+    return await checkStatusAndReturnMessages(userObjectReference[userObject.email].thread.id, userObjectReference[userObject.email].run.id, res);
   } catch (e) {
     console.error(e);
     return { error: true, message: e.message || "An error occurred withthe Open AI API." };
   }
 }
 
-async function resolveFunction(gptFunctionObject) {
+async function resolveFunction(gptFunctionObjects, res) {
+
+  console.log("RESSSS: ", res);
+
+  console.log("gptFunctionObjects: ", gptFunctionObjects);
+
+  const threadId = gptFunctionObjects[0].threadId;
+  const runId = gptFunctionObjects[0].runId;
+
+  const toolOutputs = gptFunctionObjects.map((gptFunctionObject) => {
+    return {
+      tool_call_id: gptFunctionObject.toolCallId,
+      output: JSON.stringify(gptFunctionObject.functionResponse),
+    }
+  });
 
   try {
     const output = await openai.beta.threads.runs.submitToolOutputs(
-      gptFunctionObject.threadId,
-      gptFunctionObject.runId,
+      threadId,
+      runId,
       {
-        tool_outputs: [
-          {
-            tool_call_id: gptFunctionObject.toolCallId,
-            output: JSON.stringify(gptFunctionObject.functionResponse),
-          },
-        ],
+        tool_outputs: toolOutputs,
       }
     );
 
-    return await checkStatusAndReturnMessages(gptFunctionObject.threadId, gptFunctionObject.runId);
+    await checkStatusAndReturnMessages(threadId, runId, res);
 
   } catch(e) {
     console.error("There was an error resolving the function call: ", e);
