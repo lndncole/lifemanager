@@ -99,13 +99,38 @@ const tools = [
         required: ["query"]
       }
     }
+  },
+  {
+    type: "function",
+    function: {
+      name: "create-memories",
+      description: "Add new memories (things to remember) for a given user.",
+      parameters: {
+        type: "object",
+        properties: {
+          memories: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                summary: { type: "string", description: "A detailed summary of the memory, or thing to remember about the user." }
+              },
+              required: ["calendarId", "eventId"]
+            }
+          }
+        },
+        required: ["events"]
+      }
+    }
   }
 ];
 
 let conversationObject = {
   name: "lifeMNGR",
   model: "gpt-3.5-turbo",
-  instructions: `You are an assistant named lifeMNGR. Your goal is to help the user figure out what they should do today. Use all of the tools you have available to you to help accomplish this task. By the time the user is finished interacting with you, the user should know all of the things that they want to do today, that would make today a "good" day.
+  instructions: `You are an assistant named lifeMNGR. Your goal is to help the user figure out what they should do today. Use all of the tools you have available to you to help accomplish this task. By the time the user is finished interacting with you, the user should know all of the things that they want to do today, that would make today a "good" day. 
+  
+  You're equipped with the ability to record memories for the user by calling the "create-memories" function. Anytime the user asks you to 'remember' something, get a thorough understanding of what it is the user wants you to rememeber then call the 'create-memories' function and pass in the summary of what it is you're being asked to remember as the function argument.
 
   When asked to get a calendar for 'today' you should call the 'fetch-calendar' function passing in today's date at midnight as the 'timeMin' property, and todays's date at 11:59pm as the 'timeMax' property. Only call this function when explicitly asked.
 

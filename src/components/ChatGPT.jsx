@@ -28,7 +28,7 @@ const ChatGPT = () => {
     style: {
       backgroundImg: "unset"
     }
-  }); // Default persona
+  });
   //Global variables
   const lastMessageRef = useRef(null);
   const chatWindowRef = useRef(null);
@@ -36,16 +36,41 @@ const ChatGPT = () => {
   const personaIconRef = useRef(null);
 
   const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-  const timeZoneMessge = `My timezone is ${userTimezone}. At the time of this message it is ${moment()}.`;
+  const timeZoneMessage = `My timezone is ${userTimezone}. At the time of this message it is ${moment()}.`;
 
   //Text to voice class
   const textToVoice = new SpeechSynthesisUtterance();
 
-  useEffect(() => {
-    sendMessage(timeZoneMessge);
-    // send a message to the GPT right away indicating timeZone and persona choice
-  }, []);
+  useEffect(async () => {
+    const fetchUserAuthStatus = async () => {
+      try {
+        
+        const requestUserDetailsResponse = await fetch("/get-auth", {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        });
+  
+        if (requestUserDetailsResponse.ok) {
+          const userResponse = await requestUserDetailsResponse.json();
+          console.log(userResponse);
 
+          let memoryString = '';
+          
+          userResponse.memories.forEach((memory)=> {
+            memoryString += memory.summary + " ";
+          });
+
+          sendMessage(`${timeZoneMessage} For reference only, here are some things about me we've discussed in the past and the times we discussed them: ${memoryString}. Since we've already discussed the, there's no need to remember these things.`);
+        } else {
+          sendMessage(`${timeZoneMessage}`);
+        }
+      } catch (e) {
+        console.error("Error fetching user authentication status:", e);
+      }
+    };
+  
+    fetchUserAuthStatus();
+  }, []);
 
   useEffect(() => {
     //For updating the chat box when the conversation updates

@@ -64,14 +64,9 @@ async function handleAuthenticationCallback(req, res, googleApi, db) {
             const userInfo = await googleApi.getUserInfo(oauth2Client);
             
             if (userInfo) {
-                req.session.user = {
-                    email: userInfo.email,
-                    name: userInfo.name,
-                    picture: userInfo.picture
-                };
 
                 try {
-                    await db.query('add', 
+                    const userDbEntry = await db.query('add', 
                         {
                             db: 'users', 
                             collection: 'user_info'
@@ -84,6 +79,10 @@ async function handleAuthenticationCallback(req, res, googleApi, db) {
                         }, 
                         null
                     );
+
+                    //Set the user info based on the response from the DB entry
+                    req.session.user = userDbEntry.value;
+                    
                 } catch(e) {
                     console.error('No response from Mongo DB after trying to add user: ', e);
                 }

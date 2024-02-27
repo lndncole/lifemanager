@@ -28,8 +28,6 @@ async function query(command, dbObject, userDataObject, updateObject) {
   const client = await getMongoClient();
 
   try {
-    //userDataObject is expected to be an object here with property of email, at the very least
-
     //Create db - If the database doesn’t exist yet, it will be created.
     const dbString = dbObject.db ? dbObject.db : 'users'; 
     const collectionString = dbObject.collection ? dbObject.collection : 'unser_info'; 
@@ -39,7 +37,8 @@ async function query(command, dbObject, userDataObject, updateObject) {
     //Create or select collection
     const collection = db.collection(collectionString);
 
-    //Exmaple of what a userDataObjectObject looks like
+    //userDataObject is expected to be an object here with property of email, at the very least
+    //Exmaple of what a userDataObject looks like
     //  const testData = {
     //   name: 'John Smith',
     //   email: 'john.smith@gmail.com',
@@ -81,7 +80,11 @@ async function query(command, dbObject, userDataObject, updateObject) {
 
         break;
       case "update":
-        result = await collection.updateMany({ id }, { $set: updateObject });
+        result = await collection.updateMany({ email: id },
+          { $set: updateObject,
+            $currentDate: { lastModified: true } 
+          }
+        );
 
         break;
       case "delete":
@@ -96,6 +99,52 @@ async function query(command, dbObject, userDataObject, updateObject) {
 
   } catch(e) {
     console.log("Error querying the Mondo DB database: ", e);
+  } finally {
+    await client.close();
+  }
+}
+
+async function createMemories(req, memoriesToAdd) {
+
+  const memoriesObject = JSON.parse(memoriesToAdd);
+  console.log(memoriesObject);
+  // return "tell the user we're testing right now, to be patient.";
+
+  const user = req.session.user;
+
+  const client = await getMongoClient();
+
+  try {
+    const db = client.db('users');
+    const collection = db.collection('user_info');
+    // Specify the user's email to select the user that's being updated
+    const email = user.email; 
+
+    // Loop through each memory to prepare it for the update operation
+    const memoriesUpdates = memoriesObject.memories.map((memory) => {
+      // Get the time
+      const timestamp = new Date().toISOString();
+      const timeStamp = `${timestamp}`;
+      // Make and return the memory object
+      return { time: timeStamp, summary: memory.summary };
+    });
+
+    // Prepare the update operation to add all the new memories to the array
+    const updateOperation = {
+      $push: { memories: { $each: memoriesUpdates } }
+    };
+
+    // Execute the update operation for the user
+    const updateResponse = await collection.updateOne({ email: email }, updateOperation);
+
+    console.log("Memories successfully added: ", updateResponse);
+
+
+    return updateResponse;
+
+  } catch (e) {
+    console.error("Error adding memory: ", e);
+    return `Error adding memory: ${e}`;
   } finally {
     await client.close();
   }
@@ -120,4 +169,4 @@ async function testConnection() {
     }
 }
 
-module.exports = { query, testConnection }
+module.exports = { testConnection, query, createMemories }
