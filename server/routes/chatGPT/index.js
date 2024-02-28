@@ -1,8 +1,8 @@
 //server/routes/chatGPT/index.js
-const fetchCalendar = require('./fetchCalendar.js');
-const addCalendarEvents = require('./addCalendarEvents.js');
-const deleteCalendarEvents = require('./deleteCalendarEvents.js');
-const googleSearch = require('./googleSearch.js');
+const fetchCalendar = require('../../../api/chatGPT/helpers/fetchCalendar.js');
+const addCalendarEvents = require('../../../api/chatGPT/helpers/addCalendarEvents.js');
+const deleteCalendarEvents = require('../../../api/chatGPT/helpers/deleteCalendarEvents.js');
+const googleSearch = require('../../../api/chatGPT/helpers/googleSearch.js');
 
 //DB
 const db = require('../../db/db.js');

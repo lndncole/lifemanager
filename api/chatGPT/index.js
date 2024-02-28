@@ -3,10 +3,10 @@ const OpenAI = require("openai");
 
 
 //server/routes/chatGPT/index.js
-const fetchCalendar = require('../../server/routes/chatGPT/fetchCalendar.js');
-const addCalendarEvents = require('../../server/routes/chatGPT/addCalendarEvents.js');
-const deleteCalendarEvents = require('../../server/routes/chatGPT/deleteCalendarEvents.js');
-const googleSearch = require('../../server/routes/chatGPT/googleSearch.js');
+const fetchCalendar = require('./helpers/fetchCalendar.js');
+const addCalendarEvents = require('./helpers/addCalendarEvents.js');
+const deleteCalendarEvents = require('./helpers/deleteCalendarEvents.js');
+const googleSearch = require('./helpers/googleSearch.js');
 
 //DB
 const db = require('../../server/db/db.js');
