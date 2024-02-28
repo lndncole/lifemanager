@@ -1,6 +1,16 @@
 // ai/openai.js
 const OpenAI = require("openai");
 
+
+//server/routes/chatGPT/index.js
+const fetchCalendar = require('../../server/routes/chatGPT/fetchCalendar.js');
+const addCalendarEvents = require('../../server/routes/chatGPT/addCalendarEvents.js');
+const deleteCalendarEvents = require('../../server/routes/chatGPT/deleteCalendarEvents.js');
+const googleSearch = require('../../server/routes/chatGPT/googleSearch.js');
+
+//DB
+const db = require('../../server/db/db.js');
+
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
@@ -162,10 +172,12 @@ async function initChat(userObj) {
 }
 
 let runTries = 0;
-async function checkStatusAndReturnMessages(threadId, runId, res) {
+async function checkStatusAndReturnMessages(req, res, threadId, runId, googleApi) {
 
   const runCheck = await openai.beta.threads.runs.retrieve(threadId, runId);
   const runStatus = runCheck.status;
+
+  console.log("Run status: ", runStatus);
 
     if (runStatus === 'completed') {
       let messages = await openai.beta.threads.messages.list(threadId);
@@ -187,8 +199,68 @@ async function checkStatusAndReturnMessages(threadId, runId, res) {
       toolCallsObj.threadId = threadId;
       toolCallsObj.runId = runId;
 
+      async function executeGptFunction() {
+            
+        let functionResponseObjects = [];
+    
+        console.log("toolcalls:", toolCallsObj.toolCalls);
+    
+        const toolCalls = toolCallsObj.toolCalls.map(async (toolCall) => {
+            //Parse function args accordingly based on whether it's valid JSON or not
+            const functionDefinition = toolCall.function;
+            const functionArgs = JSON.parse(functionDefinition.arguments);
+            
+            // Ensure oauth2Client is correctly authenticated
+            const oauth2Client = googleApi.createOAuthClient();
+            oauth2Client.setCredentials(req.session.tokens);
+    
+            let gptFunctionObject = {
+                threadId: threadId,
+                runId: runId,
+                toolCallId: toolCall.id
+            };
+        
+            switch (functionDefinition.name) {
+                case "fetch-calendar":
+                    gptFunctionObject.functionResponse = await fetchCalendar(req, res, functionArgs, googleApi, oauth2Client);
+                    break;
+                case "add-calendar-events":
+                    gptFunctionObject.functionResponse = await addCalendarEvents(req, res, functionArgs, googleApi, oauth2Client);
+                    break;
+                case "delete-calendar-events":
+                    gptFunctionObject.functionResponse = await deleteCalendarEvents(req, res, functionArgs, googleApi, oauth2Client);
+                    break;
+                case "google-search":
+                    gptFunctionObject.functionResponse = await googleSearch(req, res, functionArgs, googleApi);
+                    break;
+                case "create-memories":
+                    gptFunctionObject.functionResponse = await db.createMemories(req, functionArgs);
+                    break;
+                default:
+                    console.log("Function definition name does not match any case.");
+                    break;
+            }                    
+    
+            functionResponseObjects.push(gptFunctionObject);
+    
+        });
+    
+        await Promise.all(toolCalls);
+    
+        try {
+            // Pass the extracted information to the chat GPT function
+            await resolveFunction(req, res, functionResponseObjects, googleApi);
+        } catch(e) {
+            console.error("Error processing Google search results with OpenAI API: ", e)
+            res.status(500).send("Error processing Google search results with OpenAI API.");
+        }
+    
+      }
+
+      executeGptFunction();
+
       runTries = 0;
-      return toolCallsObj;
+
     } else {
       //If we try for 3 minutes and it doesn't work, we need to cancel the run
       if(runTries == 180) {
@@ -202,16 +274,13 @@ async function checkStatusAndReturnMessages(threadId, runId, res) {
       }
       runTries++;
      
-      console.log("Run status: ", runStatus);
       // Wait for one second before checking the status again
       await new Promise(resolve => setTimeout(resolve, 1000));
-      return checkStatusAndReturnMessages(threadId, runId, res); // Recursively call the function
+      return checkStatusAndReturnMessages(req, res, threadId, runId, googleApi); // Recursively call the function
     }
 }
 
-async function startChat(req, res, conversation) {
-
-  console.log(res);
+async function startChat(req, res, conversation, googleApi) {
 
   const userObject = req.session.user;
 
@@ -225,14 +294,14 @@ async function startChat(req, res, conversation) {
       assistant_id: userObjectReference[userObject.email].assistant.id
     });
 
-    return await checkStatusAndReturnMessages(userObjectReference[userObject.email].thread.id, userObjectReference[userObject.email].run.id, res);
+    return await checkStatusAndReturnMessages(req, res, userObjectReference[userObject.email].thread.id, userObjectReference[userObject.email].run.id, googleApi);
   } catch (e) {
     console.error(e);
     return { error: true, message: e.message || "An error occurred with the Open AI API." };
   }
 }
 
-async function resolveFunction(gptFunctionObjects, res) {
+async function resolveFunction(req, res, gptFunctionObjects, googleApi) {
 
   const threadId = gptFunctionObjects[0].threadId;
   const runId = gptFunctionObjects[0].runId;
@@ -253,7 +322,7 @@ async function resolveFunction(gptFunctionObjects, res) {
       }
     );
 
-    await checkStatusAndReturnMessages(threadId, runId, res);
+    await checkStatusAndReturnMessages(req, res, threadId, runId, googleApi);
 
   } catch(e) {
     console.error("There was an error resolving the function call: ", e);

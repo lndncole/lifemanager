@@ -13,78 +13,8 @@ async function chat(req, res, chatGPTApi, googleApi) {
     console.log("user message from front end to GPT: ", userMessage);
 
     try {
-        const thread = await chatGPTApi.startChat(req, res, userMessage);
+        const thread = await chatGPTApi.startChat(req, res, userMessage, googleApi);
       
-        let functionCall;
-
-        if(thread && thread.toolCalls) {
-            functionCall = true;
-        } 
-
-        //If the response is a function call
-        if (functionCall) {
-
-            async function executeGptFunction() {
-            
-                let functionResponseObjects = [];
-
-                const toolCalls = thread.toolCalls.map(async (toolCall) => {
-                    //Parse function args accordingly based on whether it's valid JSON or not
-                    const functionDefinition = toolCall.function;
-                    const functionArgs = JSON.parse(functionDefinition.arguments);
-                    
-                    // Ensure oauth2Client is correctly authenticated
-                    const oauth2Client = googleApi.createOAuthClient();
-                    oauth2Client.setCredentials(req.session.tokens);
-
-                    let gptFunctionObject = {
-                        threadId: thread.threadId,
-                        runId: thread.runId,
-                        toolCallId: toolCall.id
-                    };
-                
-                    switch (functionDefinition.name) {
-                        case "fetch-calendar":
-                            gptFunctionObject.functionResponse = await fetchCalendar(req, res, functionArgs, googleApi, oauth2Client);
-                            break;
-                        case "add-calendar-events":
-                            gptFunctionObject.functionResponse = await addCalendarEvents(req, res, functionArgs, googleApi, oauth2Client);
-                            break;
-                        case "delete-calendar-events":
-                            gptFunctionObject.functionResponse = await deleteCalendarEvents(req, res, functionArgs, googleApi, oauth2Client);
-                            break;
-                        case "google-search":
-                            gptFunctionObject.functionResponse = await googleSearch(req, res, functionArgs, googleApi);
-                            break;
-                        case "create-memories":
-                            gptFunctionObject.functionResponse = await db.createMemories(req, functionArgs);
-                            break;
-                        default:
-                            console.log("Function definition name does not match any case.");
-                            break;
-                    }                    
-
-                    functionResponseObjects.push(gptFunctionObject);
-
-                });
-
-                await Promise.all(toolCalls);
-
-                if(functionResponseObjects.length) {
-                    try {
-                        // Pass the extracted information to the chat GPT function
-                        const gptResponse = await chatGPTApi.resolveFunction(functionResponseObjects, res);
-                    } catch(e) {
-                        console.error("Error processing Google search results with OpenAI API: ", e)
-                        res.status(500).send("Error processing Google search results with OpenAI API.");
-                    }
-                }
-            }
-
-            executeGptFunction();
-            
-        }
-
     } catch (e) {
         let errorMessage = e.message || "";
         if(errorMessage.includes("maximum context length")) {

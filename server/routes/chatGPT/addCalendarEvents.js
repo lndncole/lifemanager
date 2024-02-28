@@ -1,6 +1,6 @@
 module.exports = async function addCalendarEvents(req, res, functionArgs, googleApi, oauth2Client) {
 
-    const events = functionArgs;
+    const events = functionArgs.events;
 
     const eventAddResponses = [];
     
@@ -35,6 +35,8 @@ module.exports = async function addCalendarEvents(req, res, functionArgs, google
             res.status(500).send(`Error adding event: ${e.toString()}`);
         }
     }
+
+    console.log("eventAddResponses: ", eventAddResponses);
 
     return eventAddResponses;
 
