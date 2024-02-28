@@ -29,6 +29,7 @@ module.exports = async function fetchCalendar(req, res, functionArgs, googleApi,
             throw new Error('No Google calendar event information returned.');
         }
     } catch (e) {
+        gptFunctionObject.functionResponse.push({error: `Error getting calendar events: ${timeMin}`, summary: `${timeMin}... ${timeMax}...${timeZone}`});
         console.error("Error getting calendar data:", e);
         res.status(500).send("Error fetching calendar data");
     }

@@ -46,35 +46,20 @@ async function chat(req, res, chatGPTApi, googleApi) {
                     };
                 
                     if (functionDefinition.name === "fetch-calendar") {
-                        
                         gptFunctionObject.functionResponse = await fetchCalendar(req, res, functionArgs, googleApi, oauth2Client);
-    
-                        console.log("gptFunctionObject.functionResponse", gptFunctionObject.functionResponse);
-    
-                        if (gptFunctionObject.functionResponse) {
-                            functionResponseObjects.push(gptFunctionObject);
-                        }
-                        
+                        functionResponseObjects.push(gptFunctionObject);
                     } else if(functionDefinition.name === "add-calendar-events") {
-                        addCalendarEvents(req, res, thread, functionArgs, chatGPTApi, googleApi, oauth2Client);
+                        gptFunctionObject.functionResponse = await addCalendarEvents(req, res, thread, functionArgs, chatGPTApi, googleApi, oauth2Client);
+                        functionResponseObjects.push(gptFunctionObject);
                     } else if(functionDefinition.name === "delete-calendar-events") {
-                        deleteCalendarEvents(req, res, thread, functionArgs, chatGPTApi, googleApi, oauth2Client);
+                        gptFunctionObject.functionResponse = await deleteCalendarEvents(req, res, thread, functionArgs, chatGPTApi, googleApi, oauth2Client);
+                        functionResponseObjects.push(gptFunctionObject);
                     } else if(functionDefinition.name === "google-search") {
-                        googleSearch(req, res, thread, functionArgs, chatGPTApi, googleApi);
+                        gptFunctionObject.functionResponse = await googleSearch(req, res, thread, functionArgs, chatGPTApi, googleApi);
+                        functionResponseObjects.push(gptFunctionObject);
                     } else if(functionDefinition.name === "create-memories") {
-                        const memoriesCreationResponse = await db.createMemories(req, functionArgs);
-    
-                        console.log("memoriesCreationResponse: ", memoriesCreationResponse);
-    
-                        let gptFunctionObject = {
-                            functionResponse:[memoriesCreationResponse],
-                            threadId: thread.threadId,
-                            runId: thread.runId,
-                            toolCallId: toolCall.id
-                        };
-    
-                        const gptFunctionResolveResponse = await chatGPTApi.resolveFunction(gptFunctionObject, res);
-
+                        gptFunctionObject.functionResponse = await db.createMemories(req, functionArgs);
+                        functionResponseObjects.push(gptFunctionObject);
                     }
                 });
 
