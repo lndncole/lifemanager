@@ -11,6 +11,7 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import AuthenticatedRoute from './components/AuthenticatedRoute';
 import ChatGPT from './components/ChatGPT';
+import Welcome from './components/Welcome'
 
 //Pages
 import SignIn from './pages/SignIn';
@@ -43,7 +44,8 @@ const App = () => {
           <Navbar />
           <ChatGPTWrapper />
           <Routes>
-            <Route path="/" element={<SignIn />} />
+            <Route path="/" element={<Welcome />} />
+            <Route path="/sign-in" element={<SignIn />} />
             <Route path="/home" element={
               <AuthenticatedRoute>
                 <Home />
