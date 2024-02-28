@@ -13,12 +13,13 @@ import AuthenticatedRoute from './components/AuthenticatedRoute';
 import ChatGPT from './components/ChatGPT';
 
 //Pages
-import SignIn from './pages/SignIn';
+import Welcome from './pages/Welcome';
 import Home from './pages/Home';
 import About from './pages/About';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
 import Calendar from './pages/Calendar';
+import SignIn from './pages/SignIn';
 
 //Styles
 import './styles/global.css';
@@ -43,7 +44,7 @@ const App = () => {
           <Navbar />
           <ChatGPTWrapper />
           <Routes>
-            <Route path="/" element={<SignIn />} />
+            <Route path="/" element={<Welcome />} />
             <Route path="/home" element={
               <AuthenticatedRoute>
                 <Home />
@@ -54,6 +55,7 @@ const App = () => {
                 <Calendar />
               </AuthenticatedRoute>
             } />
+            <Route path="/sign-in" element={<SignIn />} />
             <Route path="/about" element={<About />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/terms-of-service" element={<TermsOfService />} />

@@ -24,6 +24,10 @@ export default function Navbar() {
         }
     };
 
+    const handleSignIn = async ()=> {
+        window.location.href = "/sign-in";
+    };
+
     return (
         <nav class="nav">
             <Link to="/home" class="logo">
@@ -33,14 +37,23 @@ export default function Navbar() {
                 <Link to="/about" class="nav-item">
                     about
                 </Link>
-                {isAuthenticated && (
-                    <>
-                        <span className='nav-item'> | </span>
-                        <a className="nav-item" onClick={handleSignOut}>
-                            sign out
-                        </a>
-                    </>
-                )}
+                {isAuthenticated ? 
+                    (
+                        <>
+                            <span className='nav-item'> | </span>
+                            <a className="nav-item" onClick={handleSignOut}>
+                                sign out
+                            </a>
+                        </>
+                    ) :
+                        (
+                            <>
+                                <span className='nav-item'> | </span>
+                                <a className="nav-item" onClick={handleSignIn}>
+                                    sign in
+                                </a>
+                            </>
+                        )}
             </div>
         </nav>
     );

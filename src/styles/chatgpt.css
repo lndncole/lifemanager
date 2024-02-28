@@ -19,7 +19,7 @@
 }
 .chat-container.open {
     height: calc(100% - 124px);
-    width: 100%;
+    width: 55%;
 }
 
 .chat-tab {
@@ -195,6 +195,12 @@
 .persona-option:hover {
     background-color: #f0f0f0;
 }
+
+@media (max-width: 1200px) {
+    .chat-container.open {
+        width: 65%;
+    }
+}
   
 
 @media (max-width: 992px) {
@@ -203,6 +209,7 @@
     }
     .chat-container.open {
         height: calc(100% - 184px);
+        width: 95%;
     }
     .chat-window.open {
         height: 100%;

@@ -1,54 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import SignInButton from '../components/SignInButton';
-import { gaEvents } from '../analytics/ga.js';
+//src/pages/About.jsx
+import React from 'react';
+import SingInButton from '../components/SignInButton';
 
-const SignIn = () => {
-  const navigate = useNavigate();
-  const { login } = useAuth();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  useEffect(() => {
-    const checkAuthStatus = async () => {
-      try {
-        const response = await fetch('/get-auth', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-
-        if (!response.ok) {
-          console.warn('Not Authenticated. Please Sign In.');
-        } else {
-          const userData = await response.json();
-          if (userData && userData.email) {
-            gaEvents.gaOauthLogin();
-            login(userData.email);
-            setIsAuthenticated(true);
-          }
-        }
-      } catch (error) {
-        console.error('Authentication error:', error);
-      }
-    };
-
-    checkAuthStatus();
-  }, []);  // Empty dependency array to run only on component mount
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate('/home');
-    }
-  }, [isAuthenticated, navigate]);
-
+const About = () => {
   return (
-    <div className="f-col full-screen">
+    <div class="f-col full-screen">
       <h1>lifeMNGR</h1>
-      <SignInButton />
+      <SingInButton />
     </div>
   );
 };
 
-export default SignIn;
+export default About;

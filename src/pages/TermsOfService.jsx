@@ -3,7 +3,7 @@ import React from 'react';
 const TermsOfService = () => {
   
   return (
-        <div class="f-col home-container">
+        <div class="f-col page">
             <h1>Terms of Service</h1>
             <h2>Introduction</h2>
             <p>

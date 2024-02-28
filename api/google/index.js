@@ -32,7 +32,8 @@ async function search(req) {
     });
     return searchRes.data;
   } catch(e) {
-    throw e;
+    console.error('Google search failed: ', e);
+    return `Google search failed: ${e}`;
   }
 }
 
@@ -54,9 +55,9 @@ async function addCalendarEvent(auth, eventDetails) {
   });
 
     return response;
-  } catch (error) {
-    console.error('Failed to add calendar event: ', error);
-    throw error; // Rethrow or handle as needed
+  } catch (e) {
+    console.error('Failed to add calendar event: ', e);
+    return `Failed to add calendar event: ${e}`;
   }
 }
 
@@ -75,9 +76,9 @@ async function deleteCalendarEvent(auth, eventDetails) {
   });
 
     return response;
-  } catch (error) {
-    console.error('Failed to add calendar event: ', error);
-    throw error; // Rethrow or handle as needed
+  } catch (e) {
+    console.error('Failed to delete calendar event: ', e);
+    return `Failed to delete calendar event: ${e}`; // Rethrow or handle as needed
   }
 }
 
@@ -131,9 +132,9 @@ async function getCalendar(oauth2Client, timeMin, timeMax, days, userTimeZone) {
     }
 
     return allEvents;
-  } catch (error) {
-    console.error('Error retrieving calendar events:', error);
-    throw error;
+  } catch (e) {
+    console.error('Failed to get calendar: ', e);
+    return `Failed to get calendar: ${e}`;
   }
 }
 

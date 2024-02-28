@@ -29,11 +29,13 @@ const ChatGPT = () => {
       backgroundImg: "unset"
     }
   });
+  const [user, setUser] = useState();
   //Global variables
   const lastMessageRef = useRef(null);
   const chatWindowRef = useRef(null);
   const personaWindowRef = useRef(null);
   const personaIconRef = useRef(null);
+  const chatMessagesRef = useRef(null);
 
   const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   const timeZoneMessage = `My timezone is ${userTimezone}. At the time of this message it is ${moment()}.`;
@@ -52,14 +54,15 @@ const ChatGPT = () => {
   
         if (requestUserDetailsResponse.ok) {
           const userResponse = await requestUserDetailsResponse.json();
+          setUser(userResponse);
 
-          let memoryString = '';
+          let memoryObjects = [];
           
           userResponse.memories.forEach((memory)=> {
-            memoryString += memory.summary + " ";
+            memoryObjects.push(JSON.stringify(memory));
           });
 
-          sendMessage(`${timeZoneMessage} For reference only, here are some things about me we've discussed in the past and the times we discussed them: ${memoryString}. Since we've already discussed the, there's no need to remember these things.`);
+          sendMessage(`${timeZoneMessage} Memories: ${memoryObjects}.`);
         } else {
           sendMessage(`${timeZoneMessage}`);
         }
@@ -74,7 +77,7 @@ const ChatGPT = () => {
   useEffect(() => {
     //For updating the chat box when the conversation updates
     if (lastMessageRef.current) {
-      lastMessageRef.current.scrollIntoView({ behavior: "smooth" });
+      scrollToBottom();
     }
   }, [conversation]);
 
@@ -185,8 +188,14 @@ const ChatGPT = () => {
       window.speechSynthesis.speak(textToVoice);
   }
 
+  const scrollToBottom = () => {
+    if (lastMessageRef.current) {
+      lastMessageRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   const simulateTypingEffect = (decodedResponse, personaChange = false) => {
-    const delay = 18; // milliseconds between characters
+    const delay = 12; // milliseconds between characters
     let index = 0; // Start with the first character
 
     if(personaChange) {
@@ -213,6 +222,8 @@ const ChatGPT = () => {
             return [...prevConversation, { role: 'assistant', content: decodedResponse[index - 1] }];
           }
         });
+
+        chatMessagesRef.current.scrollTop = chatMessagesRef.current.scrollHeight;
   
         setTimeout(typeNextChar, delay); // Schedule the next character
       } else {
@@ -295,7 +306,7 @@ const ChatGPT = () => {
         {isOpen && 
           <button className="close-chat" onClick={toggleChat}>X</button>
         }
-        <div className="chat-messages" style={{ backgroundImage: selectedPersona.style.backgroundImg }}>
+        <div className="chat-messages" ref={chatMessagesRef} style={{ backgroundImage: selectedPersona.style.backgroundImg }}>
           {conversation.map((msg, index) => {
             if(index !== 0 && !msg.name) {
               const messageClass = msg.role !== 'user' ? 'ai' : 'user';
