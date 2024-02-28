@@ -10,7 +10,7 @@ const google = require('./google.js');
 
 //Routes related to ChatGPT
 apiRouter.post('/chatGPT', async (req, res) => {
-  await chatGPTApi.startChat(req, res, googleApi);
+  await chatGPTApi.startChat(req, res);
 });
 
 //Routes related to Google Calendar fetching

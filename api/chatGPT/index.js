@@ -1,8 +1,9 @@
 // ai/openai.js
 const OpenAI = require("openai");
 
+const googleApi = require('../google/index.js');
 
-//server/routes/chatGPT/index.js
+//Google API Helper functions
 const fetchCalendar = require('./helpers/fetchCalendar.js');
 const addCalendarEvents = require('./helpers/addCalendarEvents.js');
 const deleteCalendarEvents = require('./helpers/deleteCalendarEvents.js');
@@ -166,7 +167,7 @@ async function initChat(userObj) {
 }
 
 let runTries = 0;
-async function checkStatusAndReturnMessages(req, res, threadId, runId, googleApi) {
+async function checkStatusAndReturnMessages(req, res, threadId, runId) {
 
   const runCheck = await openai.beta.threads.runs.retrieve(threadId, runId);
   const runStatus = runCheck.status;
@@ -245,7 +246,7 @@ async function checkStatusAndReturnMessages(req, res, threadId, runId, googleApi
     
         try {
             // Pass the extracted information to the chat GPT function
-            await resolveFunction(req, res, functionResponseObjects, googleApi);
+            await resolveFunction(req, res, functionResponseObjects);
         } catch(e) {
             console.error("Error processing Google search results with OpenAI API: ", e)
             res.status(500).send("Error processing Google search results with OpenAI API.");
@@ -272,11 +273,11 @@ async function checkStatusAndReturnMessages(req, res, threadId, runId, googleApi
      
       // Wait for one second before checking the status again
       await new Promise(resolve => setTimeout(resolve, 1000));
-      return checkStatusAndReturnMessages(req, res, threadId, runId, googleApi); // Recursively call the function
+      return checkStatusAndReturnMessages(req, res, threadId, runId); // Recursively call the function
     }
 }
 
-async function startChat(req, res, googleApi) {
+async function startChat(req, res) {
 
   const conversation = req.body;
 
@@ -292,14 +293,14 @@ async function startChat(req, res, googleApi) {
       assistant_id: userObjectReference[userObject.email].assistant.id
     });
 
-    return await checkStatusAndReturnMessages(req, res, userObjectReference[userObject.email].thread.id, userObjectReference[userObject.email].run.id, googleApi);
+    return await checkStatusAndReturnMessages(req, res, userObjectReference[userObject.email].thread.id, userObjectReference[userObject.email].run.id);
   } catch (e) {
     console.error(e);
     return { error: true, message: e.message || "An error occurred with the Open AI API." };
   }
 }
 
-async function resolveFunction(req, res, gptFunctionObjects, googleApi) {
+async function resolveFunction(req, res, gptFunctionObjects) {
 
   const threadId = gptFunctionObjects[0].threadId;
   const runId = gptFunctionObjects[0].runId;
@@ -320,7 +321,7 @@ async function resolveFunction(req, res, gptFunctionObjects, googleApi) {
       }
     );
 
-    await checkStatusAndReturnMessages(req, res, threadId, runId, googleApi);
+    await checkStatusAndReturnMessages(req, res, threadId, runId);
 
   } catch(e) {
     console.error("There was an error resolving the function call: ", e);
