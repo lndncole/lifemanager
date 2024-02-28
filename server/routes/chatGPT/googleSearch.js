@@ -1,7 +1,7 @@
 module.exports = async function googleSearch(req, res, functionArgs, googleApi) {
 
     const queryObject = {
-        q: JSON.parse(functionArgs).query
+        q: functionArgs.query
     };
 
     let googleSearchQueryResponse = [];

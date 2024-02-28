@@ -1,6 +1,4 @@
 module.exports = async function fetchCalendar(req, res, functionArgs, googleApi, oauth2Client) {
-
-    functionArgs = JSON.parse(functionArgs);
     // Format dates to RFC3339 if necessary
     const timeMin = new Date(functionArgs.timeMin).toISOString();
     const timeMax = new Date(functionArgs.timeMax).toISOString();

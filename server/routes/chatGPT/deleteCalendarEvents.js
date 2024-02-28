@@ -1,6 +1,6 @@
 module.exports = async function deleteCalendarEvents(req, res, functionArgs, googleApi, oauth2Client) {
         
-    const events = JSON.parse(functionArgs).events;
+    const events = functionArgs;
 
     const eventDeleteResponses = [];
 

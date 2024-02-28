@@ -31,7 +31,7 @@ async function chat(req, res, chatGPTApi, googleApi) {
                 const toolCalls = thread.toolCalls.map(async (toolCall) => {
                     //Parse function args accordingly based on whether it's valid JSON or not
                     const functionDefinition = toolCall.function;
-                    const functionArgs = functionDefinition.arguments;
+                    const functionArgs = JSON.parse(functionDefinition.arguments);
     
                     console.log("functionArgs: ", functionArgs);
                     
