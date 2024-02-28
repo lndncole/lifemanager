@@ -1,11 +1,4 @@
 //server/routes/chatGPT/index.js
-const fetchCalendar = require('../../../api/chatGPT/helpers/fetchCalendar.js');
-const addCalendarEvents = require('../../../api/chatGPT/helpers/addCalendarEvents.js');
-const deleteCalendarEvents = require('../../../api/chatGPT/helpers/deleteCalendarEvents.js');
-const googleSearch = require('../../../api/chatGPT/helpers/googleSearch.js');
-
-//DB
-const db = require('../../db/db.js');
 
 async function chat(req, res, chatGPTApi, googleApi) {
     const userMessage = req.body;

@@ -280,7 +280,9 @@ async function checkStatusAndReturnMessages(req, res, threadId, runId, googleApi
     }
 }
 
-async function startChat(req, res, conversation, googleApi) {
+async function startChat(req, res, googleApi) {
+
+  const conversation = req.body;
 
   const userObject = req.session.user;
 
