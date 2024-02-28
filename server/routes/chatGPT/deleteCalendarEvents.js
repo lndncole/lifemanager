@@ -1,8 +1,8 @@
-module.exports = async function deleteCalendarEvents(req, res, thread, functionArgs, chatGPTApi, googleApi, oauth2Client) {
-    
-    const eventDeleteResponses = [];
-    
+module.exports = async function deleteCalendarEvents(req, res, functionArgs, googleApi, oauth2Client) {
+        
     const events = JSON.parse(functionArgs).events;
+
+    const eventDeleteResponses = [];
 
     // Iterate through each event object and delete it from the calendar
     for (const event of events) {
@@ -23,8 +23,8 @@ module.exports = async function deleteCalendarEvents(req, res, thread, functionA
                 throw new Error('No data received from deleteCalendarEvents');
             }
         } catch (e) {
+            eventDeleteResponses.push({error: `Error deleting event: ${event}`, details: e.toString()});
             console.error(`Error deleting event: ${event}`, e);
-            gptFunctionObject.functionResponse.push({error: `Error deleting event: ${event}`, details: e.toString()});
             res.status(500).send("Error deleting calendar event.");
         }
     }

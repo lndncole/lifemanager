@@ -30,7 +30,7 @@ module.exports = async function addCalendarEvents(req, res, functionArgs, google
                 throw new Error('No data received from addCalendarEvent');
             }
         } catch (e) {
-            gptFunctionObject.functionResponse.push({error: `Error adding event: ${event.summary}`, details: e.toString()});
+            eventAddResponses.push({error: `Error adding event: ${event.summary}`, details: e.toString()});
             console.error(`Error adding event: ${event.summary}`, e);
             res.status(500).send(`Error adding event: ${e.toString()}`);
         }

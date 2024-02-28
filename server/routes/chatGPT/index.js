@@ -50,7 +50,7 @@ async function chat(req, res, chatGPTApi, googleApi) {
                     } else if(functionDefinition.name === "add-calendar-events") {
                         gptFunctionObject.functionResponse = await addCalendarEvents(req, res, functionArgs, googleApi, oauth2Client);
                     } else if(functionDefinition.name === "delete-calendar-events") {
-                        gptFunctionObject.functionResponse = await deleteCalendarEvents(req, res, thread, functionArgs, chatGPTApi, googleApi, oauth2Client);
+                        gptFunctionObject.functionResponse = await deleteCalendarEvents(req, res, functionArgs, googleApi, oauth2Client);
                     } else if(functionDefinition.name === "google-search") {
                         gptFunctionObject.functionResponse = await googleSearch(req, res, thread, functionArgs, chatGPTApi, googleApi);
                     } else if(functionDefinition.name === "create-memories") {
