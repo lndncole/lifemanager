@@ -1,6 +1,8 @@
 // ai/openai.js
+//OpenAI Api
 const OpenAI = require("openai");
 
+//Google API
 const googleApi = require('../google/index.js');
 
 //Google API Helper functions
