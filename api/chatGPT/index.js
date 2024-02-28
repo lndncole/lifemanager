@@ -229,15 +229,11 @@ async function startChat(req, res, conversation) {
     return await checkStatusAndReturnMessages(userObjectReference[userObject.email].thread.id, userObjectReference[userObject.email].run.id, res);
   } catch (e) {
     console.error(e);
-    return { error: true, message: e.message || "An error occurred withthe Open AI API." };
+    return { error: true, message: e.message || "An error occurred with the Open AI API." };
   }
 }
 
 async function resolveFunction(gptFunctionObjects, res) {
-
-  console.log("RESSSS: ", res);
-
-  console.log("gptFunctionObjects: ", gptFunctionObjects);
 
   const threadId = gptFunctionObjects[0].threadId;
   const runId = gptFunctionObjects[0].runId;

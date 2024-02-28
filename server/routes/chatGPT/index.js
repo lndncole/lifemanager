@@ -63,8 +63,6 @@ async function chat(req, res, chatGPTApi, googleApi) {
 
                 await Promise.all(toolCalls);
 
-                console.log("functionResponseObjects.length: ",  functionResponseObjects);
-
                 if(functionResponseObjects.length) {
                     try {
                         console.log(JSON.stringify("functionResponseObjects: ", functionResponseObjects));
