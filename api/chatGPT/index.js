@@ -188,7 +188,6 @@ async function checkStatusAndReturnMessages(threadId, runId, res) {
       toolCallsObj.runId = runId;
 
       runTries = 0;
-      console.log("toolCalls from api/chatGPT/index.j: ", toolCallsObj);
       return toolCallsObj;
     } else {
       //If we try for 3 minutes and it doesn't work, we need to cancel the run

@@ -32,8 +32,6 @@ async function chat(req, res, chatGPTApi, googleApi) {
                     //Parse function args accordingly based on whether it's valid JSON or not
                     const functionDefinition = toolCall.function;
                     const functionArgs = JSON.parse(functionDefinition.arguments);
-    
-                    console.log("functionArgs: ", functionArgs);
                     
                     // Ensure oauth2Client is correctly authenticated
                     const oauth2Client = googleApi.createOAuthClient();
@@ -45,17 +43,26 @@ async function chat(req, res, chatGPTApi, googleApi) {
                         toolCallId: toolCall.id
                     };
                 
-                    if (functionDefinition.name === "fetch-calendar") {
-                        gptFunctionObject.functionResponse = await fetchCalendar(req, res, functionArgs, googleApi, oauth2Client);
-                    } else if(functionDefinition.name === "add-calendar-events") {
-                        gptFunctionObject.functionResponse = await addCalendarEvents(req, res, functionArgs, googleApi, oauth2Client);
-                    } else if(functionDefinition.name === "delete-calendar-events") {
-                        gptFunctionObject.functionResponse = await deleteCalendarEvents(req, res, functionArgs, googleApi, oauth2Client);
-                    } else if(functionDefinition.name === "google-search") {
-                        gptFunctionObject.functionResponse = await googleSearch(req, res, functionArgs, googleApi);
-                    } else if(functionDefinition.name === "create-memories") {
-                        gptFunctionObject.functionResponse = await db.createMemories(req, functionArgs);
-                    }
+                    switch (functionDefinition.name) {
+                        case "fetch-calendar":
+                            gptFunctionObject.functionResponse = await fetchCalendar(req, res, functionArgs, googleApi, oauth2Client);
+                            break;
+                        case "add-calendar-events":
+                            gptFunctionObject.functionResponse = await addCalendarEvents(req, res, functionArgs, googleApi, oauth2Client);
+                            break;
+                        case "delete-calendar-events":
+                            gptFunctionObject.functionResponse = await deleteCalendarEvents(req, res, functionArgs, googleApi, oauth2Client);
+                            break;
+                        case "google-search":
+                            gptFunctionObject.functionResponse = await googleSearch(req, res, functionArgs, googleApi);
+                            break;
+                        case "create-memories":
+                            gptFunctionObject.functionResponse = await db.createMemories(req, functionArgs);
+                            break;
+                        default:
+                            console.log("Function definition name does not match any case.");
+                            break;
+                    }                    
 
                     functionResponseObjects.push(gptFunctionObject);
 
@@ -65,7 +72,6 @@ async function chat(req, res, chatGPTApi, googleApi) {
 
                 if(functionResponseObjects.length) {
                     try {
-                        console.log(JSON.stringify("functionResponseObjects: ", functionResponseObjects));
                         // Pass the extracted information to the chat GPT function
                         const gptResponse = await chatGPTApi.resolveFunction(functionResponseObjects, res);
                     } catch(e) {
