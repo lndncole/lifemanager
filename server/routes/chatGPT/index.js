@@ -68,8 +68,6 @@ async function chat(req, res, chatGPTApi, googleApi) {
                         console.log(JSON.stringify("functionResponseObjects: ", functionResponseObjects));
                         // Pass the extracted information to the chat GPT function
                         const gptResponse = await chatGPTApi.resolveFunction(functionResponseObjects, res);
-        
-                        res.end("done");
                     } catch(e) {
                         console.error("Error processing Google search results with OpenAI API: ", e)
                         res.status(500).send("Error processing Google search results with OpenAI API.");
