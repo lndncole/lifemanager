@@ -197,7 +197,7 @@ const ChatGPT = () => {
   };
 
   const simulateTypingEffect = (decodedResponse, personaChange = false) => {
-    const delay = 18; // milliseconds between characters
+    const delay = 12; // milliseconds between characters
     let index = 0; // Start with the first character
 
     if(personaChange) {
