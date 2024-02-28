@@ -206,8 +206,6 @@ async function checkStatusAndReturnMessages(req, res, threadId, runId) {
             //Parse function args accordingly based on whether it's valid JSON or not
             const functionDefinition = toolCall.function;
             const functionArgs = JSON.parse(functionDefinition.arguments);
-
-            console.log(functionArgs);
             
             // Ensure oauth2Client is correctly authenticated
             const oauth2Client = googleApi.createOAuthClient();
