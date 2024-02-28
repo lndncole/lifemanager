@@ -1,4 +1,4 @@
-module.exports = async function addCalendarEvents(req, res, thread, functionArgs, chatGPTApi, googleApi, oauth2Client) {
+module.exports = async function addCalendarEvents(req, res, functionArgs, googleApi, oauth2Client) {
 
     const events = JSON.parse(functionArgs).events;
 

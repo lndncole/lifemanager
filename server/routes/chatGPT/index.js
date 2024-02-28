@@ -47,20 +47,18 @@ async function chat(req, res, chatGPTApi, googleApi) {
                 
                     if (functionDefinition.name === "fetch-calendar") {
                         gptFunctionObject.functionResponse = await fetchCalendar(req, res, functionArgs, googleApi, oauth2Client);
-                        functionResponseObjects.push(gptFunctionObject);
                     } else if(functionDefinition.name === "add-calendar-events") {
-                        gptFunctionObject.functionResponse = await addCalendarEvents(req, res, thread, functionArgs, chatGPTApi, googleApi, oauth2Client);
-                        functionResponseObjects.push(gptFunctionObject);
+                        gptFunctionObject.functionResponse = await addCalendarEvents(req, res, functionArgs, googleApi, oauth2Client);
                     } else if(functionDefinition.name === "delete-calendar-events") {
                         gptFunctionObject.functionResponse = await deleteCalendarEvents(req, res, thread, functionArgs, chatGPTApi, googleApi, oauth2Client);
-                        functionResponseObjects.push(gptFunctionObject);
                     } else if(functionDefinition.name === "google-search") {
                         gptFunctionObject.functionResponse = await googleSearch(req, res, thread, functionArgs, chatGPTApi, googleApi);
-                        functionResponseObjects.push(gptFunctionObject);
                     } else if(functionDefinition.name === "create-memories") {
                         gptFunctionObject.functionResponse = await db.createMemories(req, functionArgs);
-                        functionResponseObjects.push(gptFunctionObject);
                     }
+
+                    functionResponseObjects.push(gptFunctionObject);
+
                 });
 
                 await Promise.all(toolCalls);
