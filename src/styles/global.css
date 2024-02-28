@@ -239,4 +239,8 @@ button:hover {
     .chat-spacer {
         padding-top: 8%;
     }
+    .gsi-material-button {
+        height: 60px;
+        font-size: 32px;
+    }
 }
