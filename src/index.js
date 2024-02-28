@@ -13,7 +13,7 @@ import AuthenticatedRoute from './components/AuthenticatedRoute';
 import ChatGPT from './components/ChatGPT';
 
 //Pages
-import SignIn from './pages/SignIn';
+import Welcome from './pages/Welcome';
 import Home from './pages/Home';
 import About from './pages/About';
 import PrivacyPolicy from './pages/PrivacyPolicy';
@@ -43,7 +43,7 @@ const App = () => {
           <Navbar />
           <ChatGPTWrapper />
           <Routes>
-            <Route path="/" element={<SignIn />} />
+            <Route path="/" element={<Welcome />} />
             <Route path="/home" element={
               <AuthenticatedRoute>
                 <Home />

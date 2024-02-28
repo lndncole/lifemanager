@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../contexts/AuthContext.js';
 import { useNavigate } from 'react-router-dom';
-import SignInButton from '../components/SignInButton';
+import SignInButton from '../components/SignInButton.js';
 import { gaEvents } from '../analytics/ga.js';
 
 const SignIn = () => {
