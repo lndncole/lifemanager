@@ -106,7 +106,7 @@ async function query(command, dbObject, userDataObject, updateObject) {
 
 async function createMemories(req, memoriesToAdd) {
 
-  const memoriesObject = JSON.parse(memoriesToAdd);
+  const memoriesObject = memoriesToAdd;
 
   console.log("memories to add: ", memoriesObject);
 

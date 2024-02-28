@@ -52,7 +52,6 @@ const ChatGPT = () => {
   
         if (requestUserDetailsResponse.ok) {
           const userResponse = await requestUserDetailsResponse.json();
-          console.log(userResponse);
 
           let memoryString = '';
           

@@ -162,12 +162,6 @@ async function initChat(userObj) {
     userObjectReference[userObj.email].assistant = await openai.beta.assistants.create(conversationObject);
 
     userObjectReference[userObj.email].thread = await openai.beta.threads.create();
-
-    userObjectReference[userObj.email].runsList = await openai.beta.threads.runs.list(
-      userObjectReference[userObj.email].thread.id
-    );
-  
-    console.log("runs list: ", userObjectReference[userObj.email].runsList);
   }
 }
 
@@ -209,6 +203,8 @@ async function checkStatusAndReturnMessages(req, res, threadId, runId, googleApi
             //Parse function args accordingly based on whether it's valid JSON or not
             const functionDefinition = toolCall.function;
             const functionArgs = JSON.parse(functionDefinition.arguments);
+
+            console.log(functionArgs);
             
             // Ensure oauth2Client is correctly authenticated
             const oauth2Client = googleApi.createOAuthClient();
