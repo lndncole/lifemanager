@@ -54,17 +54,15 @@ const ChatGPT = () => {
   
         if (requestUserDetailsResponse.ok) {
           const userResponse = await requestUserDetailsResponse.json();
-          const user = setUser(()=> {return userResponse});
+          setUser(userResponse);
 
-          console.log(user);
-
-          let memoryString = [];
+          let memoryObjects = [];
           
           userResponse.memories.forEach((memory)=> {
-            memoryString.push(JSON.stringify(memory));
+            memoryObjects.push(JSON.stringify(memory));
           });
 
-          sendMessage(`${timeZoneMessage} Memories: ${memoryString}.`);
+          sendMessage(`${timeZoneMessage} Memories: ${memoryObjects}.`);
         } else {
           sendMessage(`${timeZoneMessage}`);
         }
