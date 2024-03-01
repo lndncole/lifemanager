@@ -163,7 +163,7 @@ const ChatGPT = () => {
       togglePersonaPopup(); // Close the popup
     
       // Now send a message to GPT to update persona
-      sendMessage(`It's time to update your persona. Here is your new persona: ${newPersonaSetting.personaSetting}.`, true);
+      sendMessage(`It's time to update your persona. Assume the identity of this new persona: ${newPersonaSetting.personaSetting}.`, true);
     }
     
   };
