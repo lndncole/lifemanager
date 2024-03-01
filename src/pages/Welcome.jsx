@@ -52,8 +52,6 @@ const SignIn = () => {
         <h1>Welcome to LifeMNGR</h1>
         <br></br>
         <br></br>
-        <h2>Create an account by logging in with Google:</h2>
-        <br></br>
         <button><Link to="/sign-in">Sign Up</Link></button>
         <br></br>
         <br></br>
