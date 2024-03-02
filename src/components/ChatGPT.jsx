@@ -28,29 +28,56 @@ const ChatGPT = () => {
     style: {
       backgroundImg: "unset"
     }
-  }); // Default persona
+  });
+  const [user, setUser] = useState();
   //Global variables
   const lastMessageRef = useRef(null);
   const chatWindowRef = useRef(null);
   const personaWindowRef = useRef(null);
   const personaIconRef = useRef(null);
+  const chatMessagesRef = useRef(null);
 
   const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-  const timeZoneMessge = `My timezone is ${userTimezone}. At the time of this message it is ${moment()}.`;
+  const timeZoneMessage = `My timezone is ${userTimezone}. At the time of this message it is ${moment()}.`;
 
   //Text to voice class
   const textToVoice = new SpeechSynthesisUtterance();
 
-  useEffect(() => {
-    sendMessage(timeZoneMessge);
-    // send a message to the GPT right away indicating timeZone and persona choice
-  }, []);
+  useEffect(async () => {
+    const fetchUserAuthStatus = async () => {
+      try {
+        
+        const requestUserDetailsResponse = await fetch("/get-auth", {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        });
+  
+        if (requestUserDetailsResponse.ok) {
+          const userResponse = await requestUserDetailsResponse.json();
+          setUser(userResponse);
 
+          let memoryObjects = [];
+          
+          userResponse.memories.forEach((memory)=> {
+            memoryObjects.push(JSON.stringify(memory));
+          });
+
+          sendMessage(`${timeZoneMessage} Memories: ${memoryObjects}.`);
+        } else {
+          sendMessage(`${timeZoneMessage}`);
+        }
+      } catch (e) {
+        console.error("Error fetching user authentication status:", e);
+      }
+    };
+  
+    fetchUserAuthStatus();
+  }, []);
 
   useEffect(() => {
     //For updating the chat box when the conversation updates
     if (lastMessageRef.current) {
-      lastMessageRef.current.scrollIntoView({ behavior: "smooth" });
+      scrollToBottom();
     }
   }, [conversation]);
 
@@ -136,7 +163,7 @@ const ChatGPT = () => {
       togglePersonaPopup(); // Close the popup
     
       // Now send a message to GPT to update persona
-      sendMessage(`It's time to update your persona. Here is your new persona: ${newPersonaSetting.personaSetting}.`, true);
+      sendMessage(`It's time to update your persona. Assume the identity of this new persona: ${newPersonaSetting.personaSetting}.`, true);
     }
     
   };
@@ -161,8 +188,14 @@ const ChatGPT = () => {
       window.speechSynthesis.speak(textToVoice);
   }
 
+  const scrollToBottom = () => {
+    if (lastMessageRef.current) {
+      lastMessageRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   const simulateTypingEffect = (decodedResponse, personaChange = false) => {
-    const delay = 18; // milliseconds between characters
+    const delay = 12; // milliseconds between characters
     let index = 0; // Start with the first character
 
     if(personaChange) {
@@ -189,6 +222,8 @@ const ChatGPT = () => {
             return [...prevConversation, { role: 'assistant', content: decodedResponse[index - 1] }];
           }
         });
+
+        chatMessagesRef.current.scrollTop = chatMessagesRef.current.scrollHeight;
   
         setTimeout(typeNextChar, delay); // Schedule the next character
       } else {
@@ -271,7 +306,7 @@ const ChatGPT = () => {
         {isOpen && 
           <button className="close-chat" onClick={toggleChat}>X</button>
         }
-        <div className="chat-messages" style={{ backgroundImage: selectedPersona.style.backgroundImg }}>
+        <div className="chat-messages" ref={chatMessagesRef} style={{ backgroundImage: selectedPersona.style.backgroundImg }}>
           {conversation.map((msg, index) => {
             if(index !== 0 && !msg.name) {
               const messageClass = msg.role !== 'user' ? 'ai' : 'user';
