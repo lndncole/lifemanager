@@ -38,7 +38,7 @@ async function query(command, dbObject, userDataObject, updateObject) {
     const collection = db.collection(collectionString);
 
     //userDataObject is expected to be an object here with property of email, at the very least
-    //Exmaple of what a userDataObject looks like
+    //Example of what a userDataObject looks like
     //  const testData = {
     //   name: 'John Smith',
     //   email: 'john.smith@gmail.com',

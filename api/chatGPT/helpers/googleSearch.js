@@ -22,7 +22,7 @@ module.exports = async function googleSearch(req, res, functionArgs, googleApi) 
         }
      
     } catch (e) {
-        googleSearchQueryResponse.push({error: `Error fetching Google Dearch results.`, details: e.toString()});
+        googleSearchQueryResponse.push({error: `Error fetching Google search results.`, details: e.toString()});
         console.error("Error performing Google search: ", e);
         res.status(500).send("Error performing Google search.");
     }
