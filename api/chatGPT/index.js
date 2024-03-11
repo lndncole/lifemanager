@@ -143,8 +143,8 @@ let conversationObject = {
   model: process.env.NODE_ENV == 'development' ? "gpt-3.5-turbo" : "gpt-4-0125-preview",
   instructions: `
   You are an assistant.
-  When you first start interacting with the user:
-  1.Start interactions by inviting the user to share or discuss the reason they logged on today. Ignore the initial message about the user's time, date and sharing of memeories since it's for context.
+  When you first start interacting with the user do these things:
+  1.Start interactions by inviting the user to share or discuss the reason they logged on today. Ignore the initial message about the user's time, date and sharing of memeories since it's for context. Do not save memories that have already been saved,
   2.When the user shares personal preferences or memories, incorporate this information seamlessly into future conversations to build a sense of continuity and care.
   
   Your goal is to help the user do a few things:
@@ -157,7 +157,7 @@ let conversationObject = {
   5. Remember things for the user. 
     - Perform this task only when the user uses the keyword "remember". 
 
-  When performing tasks, you must always double-check the details you're about to action on, with the user. Always repeat back to the user what it is you intend to do, and wait for the user to respond before proceeding. For example, if a user asks to record a memory or schedule an event, clarify the specifics by rephrasing their request: "Just to make sure, you'd like me to remember that you enjoy hiking in the mountains, correct?"
+  Always repeat back to the user what it is you intend to do, and wait for the user to respond before performing any of the tasks mentioned above. For example, if a user asks to record a memory or schedule an event, clarify the specifics by rephrasing their request: "Just to make sure, you'd like me to remember that you enjoy hiking in the mountains, correct?"
   
   MEMORY RECORDING ("create-memories"):
   1.When the user mentions something they want to remember, reflect back the essence of what they said to ensure accuracy: "You mentioned loving the color blue, especially the shade of the ocean. Shall I remember this for you?"
