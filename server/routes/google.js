@@ -66,22 +66,29 @@ async function handleAuthenticationCallback(req, res, googleApi, db) {
             if (userInfo) {
 
                 try {
-                    const userDbEntry = await db.query('add', 
-                        {
-                            db: 'users', 
-                            collection: 'user_info'
-                        }, 
-                        {
-                            email: userInfo.email, 
-                            name: userInfo.name, 
-                            googlePicture: userInfo.picture, 
-                            lastLoginTime: new Date()
-                        }, 
-                        null
-                    );
+                    // const userDbEntry = await db.query('add', 
+                    //     {
+                    //         db: 'users', 
+                    //         collection: 'user_info'
+                    //     }, 
+                    //     {
+                    //         email: userInfo.email, 
+                    //         name: userInfo.name, 
+                    //         googlePicture: userInfo.picture, 
+                    //         lastLoginTime: new Date()
+                    //     }, 
+                    //     null
+                    // );
 
                     //Set the user info based on the response from the DB entry
-                    req.session.user = userDbEntry.value;
+                    req.session.user = {
+                        email: 'lifecoachlandon@gmail.com', 
+                        name: 'Landon', 
+                        googlePicture: 'null', 
+                        lastLoginTime: new Date()
+                    };
+                    
+                    // userDbEntry.value;
                     
                 } catch(e) {
                     console.error('No response from Mongo DB after trying to add user: ', e);

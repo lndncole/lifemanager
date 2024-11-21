@@ -62,7 +62,7 @@ const tools = [
                 start: { type: "string", format: "date-time", description: "Start date/time for the event" },
                 end: { type: "string", format: "date-time", description: "End date/time for the event" },
                 description: { type: "string", description: "A detailed description of the event" },
-                timeZone: { type: "string", description: "The user's time zone as a Timezone ID" }
+                timeZone: { type: "string", description: "The user's time zone as a Timezone ID. For example: 'America/New_York'" }
               },
               required: ["summary", "start", "end", "timeZone"]
             }
@@ -340,8 +340,12 @@ async function resolveFunction(req, res, gptFunctionObjects) {
         tool_outputs: toolOutputs,
       }
     );
+    
 
+ 
     await checkStatusAndReturnMessages(req, res, threadId, runId);
+
+    
 
   } catch(e) {
     console.error("There was an error resolving the function call: ", e);
