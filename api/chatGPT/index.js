@@ -140,7 +140,7 @@ const tools = [
 
 let conversationObject = {
   name: "lifeMNGR",
-  model: process.env.NODE_ENV == 'development' ? "gpt-3.5-turbo" : "gpt-4-turbo",
+  model: process.env.NODE_ENV == 'development' ? "gpt-4-turbo" : "gpt-4-turbo",
   instructions: `
   You are an assistant.
   When you first start interacting with the user:
